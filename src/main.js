@@ -45,7 +45,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v1.2</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v1.3</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <button class="header-action" onclick="window.navigate('settings')">Data & Exports</button>
@@ -352,7 +352,10 @@ function initScanner() {
       Html5QrcodeSupportedFormats.UPC_E,
       Html5QrcodeSupportedFormats.CODE_128,
       Html5QrcodeSupportedFormats.CODE_39
-    ]
+    ],
+    experimentalFeatures: {
+      useBarCodeDetectorIfSupported: true
+    }
   };
   
   state.html5QrCode.start(
@@ -458,7 +461,10 @@ window.startInlineScan = () => {
       Html5QrcodeSupportedFormats.UPC_E,
       Html5QrcodeSupportedFormats.CODE_128,
       Html5QrcodeSupportedFormats.CODE_39
-    ]
+    ],
+    experimentalFeatures: {
+      useBarCodeDetectorIfSupported: true
+    }
   };
   
   state.html5QrCode.start(
