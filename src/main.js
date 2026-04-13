@@ -205,7 +205,11 @@ function renderMedications() {
       </div>
       <div class="form-group">
         <label>Barcode (Optional)</label>
-        <input type="text" id="med-barcode" placeholder="Scan or enter barcode">
+        <div style="display: flex; gap: 8px;">
+          <input type="text" id="med-barcode" placeholder="Scan or enter barcode" style="margin-bottom:0; flex: 1;">
+          <button class="btn btn-secondary" style="width: auto; padding: 0 16px;" onclick="window.startInlineScan()">📷 Scan</button>
+        </div>
+        <div id="inline-reader" style="margin-top: 12px; border-radius: 12px; overflow: hidden; display: none; border: 1px solid var(--accent-color);"></div>
       </div>
       <button class="btn" onclick="window.saveMed()">Save Medication</button>
       <button class="btn btn-secondary" style="margin-top:12px;" onclick="document.getElementById('add-med-panel').style.display='none'">Cancel</button>
@@ -416,6 +420,31 @@ window.deleteMed = async (id) => {
     await API.deleteMedication(id);
     window.navigate('medications');
   }
+};
+
+window.startInlineScan = () => {
+  const el = document.getElementById('inline-reader');
+  el.style.display = 'block';
+  
+  if (state.html5QrCode) {
+    try { state.html5QrCode.stop(); } catch(e){}
+  }
+  
+  state.html5QrCode = new Html5Qrcode("inline-reader");
+  const config = { fps: 10, qrbox: { width: 250, height: 100 }, aspectRatio: 1.0 };
+  
+  state.html5QrCode.start(
+    { facingMode: "environment" }, 
+    config,
+    async (decodedText) => {
+      document.getElementById('med-barcode').value = decodedText;
+      await state.html5QrCode.stop();
+      el.style.display = 'none';
+    },
+    (errorMessage) => {}
+  ).catch(err => {
+    el.innerHTML = `<div style="color:red; padding: 10px; font-size: 14px;">Camera access denied.</div>`;
+  });
 };
 
 window.saveLog = async () => {
