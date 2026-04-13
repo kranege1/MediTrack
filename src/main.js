@@ -10,7 +10,105 @@ const state = {
   plans: [],
   fdaTimeout: null,
   pendingAdverseEvents: null,
-  pendingImageUrl: null
+  pendingImageUrl: null,
+  lang: localStorage.getItem('medilang') || 'en'
+};
+
+// === i18n ===
+const i18n = {
+  en: {
+    dataExports:'Data & Exports', home:'Home', meds:'Meds', logAction:'Log Action', plans:'Plans',
+    dueToday:'Due Today', noPlans:'No scheduled plans. Set one up in the Plans tab!',
+    loggedActivity:'Logged Activity', noLogsToday:'No medications logged yet today.',
+    recentMetrics:'Recent Metrics', noMetrics:'No metrics logged yet.',
+    scheduled:'Scheduled', completed:'✓ Completed', dueTodayBadge:'• Due Today', taken:'taken', weight:'Weight',
+    addMedication:'Add Medication', nameLbl:'Name', defaultDose:'Default Dose', unitLbl:'Unit', formatLbl:'Format',
+    saveMedication:'Save Medication', cancel:'Cancel', yourMedications:'Your Medications',
+    noMedsFound:'No medications found. Add one to start!', delete:'Delete', addBtn:'+ Add',
+    viewSideEffects:'⚠️ View Side Effects', translateAdverse:'🌐 Translate to German',
+    createSchedule:'Create Schedule', selectMed:'Select Medication', timeOfDay:'Time of Day',
+    dose:'Dose', savePlan:'Save Plan', yourSchedule:'Your Schedule',
+    noSchedule:'No daily schedule set.', remove:'Remove', newPlan:'+ New',
+    takes:'Takes', at:'at', appleCalendar:'+ Apple Calendar', chooseOption:'-- Choose --',
+    addMedFirst:'Add a medication first.',
+    logIntake:'Log Medication Intake', addMedFirst2:'Please add a medication first.',
+    amountTaken:'Amount Taken', quantity:'Quantity', recordIntake:'Record Intake',
+    logMetric:'Log Body Metric', metricType:'Metric Type', bodyWeight:'Body Weight (kg)',
+    bloodPressure:'Blood Pressure (mmHg)', valueLbl:'Value', saveMetric:'Save Metric',
+    dataManagement:'Data Management',
+    dataNote:'Your data is completely private and stored locally. If you delete the app or clear your browser data, everything will be lost. Export your data regularly!',
+    exportData:'Export Data (Backup)', restoreData:'Restore Data', importRestore:'Import / Restore',
+    nameAndDose:'Name and dose required', selectAndAmount:'Select medication and provide amount',
+    enterIngredient:'Enter an active ingredient name first.', medAndTime:'Medication and time required',
+    queryingFDA:'Querying FDA database...', noBrandTrying:'No brand match — trying active ingredient...',
+    searchingWiki:'Searching Wikipedia for active ingredients...',
+    genericMatch:'Generic match', viaWiki:'📚 Via Wikipedia', doses:'Doses',
+    notFoundFDA:'Not found in FDA, Wikipedia, or generic databases.',
+    saveAsTypedBtn:'Save "{n}" as typed', linkIngredient:'Optional: link active ingredient to pull FDA data',
+    ingredientPlaceholder:'e.g. Rosuvastatin', fetchBtn:'Fetch',
+    adverseLabel:'⚠️ Main Adverse Events:', adverseVia:'⚠️ Main Adverse Events (via {ing}):',
+    notFoundFDAShort:'Not found in FDA either.',
+    deleteMedConfirm:'Delete this medication?', loggedSuccess:'Logged successfully!',
+    removeScheduleConfirm:'Remove this schedule?', valueRequired:'Value required',
+    selectFile:'Select a file first.', restoredSuccess:'Data restored successfully!',
+    importError:'Error reading backup file.', lookupFailed:'Lookup failed. Check your connection.',
+    wikiIngredientFound:'Wikipedia identified active ingredient: {ing}', translating:'Translating...',
+    unknown:'Unknown', units:'units', pillUnit:'pill(s)', kg:'kg',
+    pillFormat:'Pill', liquidFormat:'Liquid', injectionFormat:'Injection', inhalerFormat:'Inhaler'
+  },
+  de: {
+    dataExports:'Daten & Export', home:'Start', meds:'Medikamente', logAction:'Einnahme', plans:'Pläne',
+    dueToday:'Heute fällig', noPlans:'Keine Pläne vorhanden. Erstelle einen Plan!',
+    loggedActivity:'Heutige Aktivität', noLogsToday:'Noch keine Einnahme heute.',
+    recentMetrics:'Letzte Messwerte', noMetrics:'Noch keine Messwerte eingetragen.',
+    scheduled:'Geplant', completed:'✓ Eingenommen', dueTodayBadge:'• Heute fällig', taken:'eingenommen', weight:'Gewicht',
+    addMedication:'Medikament hinzufügen', nameLbl:'Name', defaultDose:'Standarddosis', unitLbl:'Einheit', formatLbl:'Format',
+    saveMedication:'Medikament speichern', cancel:'Abbrechen', yourMedications:'Ihre Medikamente',
+    noMedsFound:'Keine Medikamente gefunden. Fügen Sie eines hinzu!', delete:'Löschen', addBtn:'+ Hinzufügen',
+    viewSideEffects:'⚠️ Nebenwirkungen', translateAdverse:'🌐 Auf Deutsch übersetzen',
+    createSchedule:'Plan erstellen', selectMed:'Medikament wählen', timeOfDay:'Uhrzeit',
+    dose:'Dosis', savePlan:'Plan speichern', yourSchedule:'Ihr Tagesplan',
+    noSchedule:'Kein Tagesplan erstellt.', remove:'Entfernen', newPlan:'+ Neu',
+    takes:'Nimmt', at:'um', appleCalendar:'+ Apple Kalender', chooseOption:'-- Bitte wählen --',
+    addMedFirst:'Zuerst ein Medikament hinzufügen.',
+    logIntake:'Einnahme erfassen', addMedFirst2:'Bitte zuerst ein Medikament hinzufügen.',
+    amountTaken:'Eingenommene Menge', quantity:'Menge', recordIntake:'Einnahme speichern',
+    logMetric:'Körpermesswert erfassen', metricType:'Messtyp', bodyWeight:'Körpergewicht (kg)',
+    bloodPressure:'Blutdruck (mmHg)', valueLbl:'Wert', saveMetric:'Messwert speichern',
+    dataManagement:'Datenverwaltung',
+    dataNote:'Ihre Daten sind vollständig privat und lokal gespeichert. Beim Löschen der App gehen alle Daten verloren. Exportieren Sie Ihre Daten regelmäßig!',
+    exportData:'Daten exportieren (Sicherung)', restoreData:'Daten wiederherstellen', importRestore:'Importieren / Wiederherstellen',
+    nameAndDose:'Name und Dosis erforderlich', selectAndAmount:'Bitte Medikament und Menge angeben',
+    enterIngredient:'Bitte zuerst einen Wirkstoffnamen eingeben.', medAndTime:'Medication and time required',
+    queryingFDA:'FDA-Datenbank wird abgefragt...', noBrandTrying:'Kein Markenname — suche nach Wirkstoff...',
+    searchingWiki:'Wikipedia wird nach Wirkstoffen durchsucht...',
+    genericMatch:'Wirkstoff-Treffer', viaWiki:'📚 Via Wikipedia', doses:'Dosen',
+    notFoundFDA:'Nicht in FDA, Wikipedia oder Wirkstoffdatenbank gefunden.',
+    saveAsTypedBtn:'\u201e{n}\u201c so speichern', linkIngredient:'Optional: Wirkstoff eingeben für FDA-Daten',
+    ingredientPlaceholder:'z.B. Rosuvastatin', fetchBtn:'Abrufen',
+    adverseLabel:'⚠️ Hauptnebenwirkungen:', adverseVia:'⚠️ Hauptnebenwirkungen (via {ing}):',
+    notFoundFDAShort:'Auch in FDA nicht gefunden.',
+    deleteMedConfirm:'Medikament löschen?', loggedSuccess:'Erfolgreich eingetragen!',
+    removeScheduleConfirm:'Tagesplan entfernen?', valueRequired:'Wert erforderlich',
+    selectFile:'Bitte zuerst eine Datei wählen.', restoredSuccess:'Daten erfolgreich wiederhergestellt!',
+    importError:'Fehler beim Lesen der Sicherungsdatei.', lookupFailed:'Suche fehlgeschlagen. Verbindung prüfen.',
+    wikiIngredientFound:'Wikipedia hat Wirkstoff gefunden: {ing}', translating:'Übersetze...',
+    unknown:'Unbekannt', units:'Einheiten', pillUnit:'Pille(n)', kg:'kg',
+    pillFormat:'Pille', liquidFormat:'Flüssigkeit', injectionFormat:'Injektion', inhalerFormat:'Inhalator'
+  }
+};
+const t = (key) => (i18n[state.lang] || i18n.en)[key] || key;
+const _advTransCache = new Map(); // session cache for translated adverse events
+
+// Automatic translation helper
+window._autoTranslateAdverse = async (text) => {
+  if (state.lang !== 'de' || !text) return text;
+  try {
+    const encoded = encodeURIComponent(text.substring(0, 450));
+    const r = await fetch(`https://api.mymemory.translated.net/get?q=${encoded}&langpair=en|de`);
+    const d = await r.json();
+    return d.responseData ? d.responseData.translatedText : text;
+  } catch(e) { return text; }
 };
 
 // --- DOM ---
@@ -36,10 +134,16 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.0</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.1</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
-      <button class="header-action" onclick="window.navigate('settings')">Data & Exports</button>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <div style="display:flex; border:1px solid rgba(255,255,255,0.15); border-radius:8px; overflow:hidden; font-size:12px; font-weight:700;">
+          <button onclick="window.toggleLang('en')" style="padding:5px 10px; background:${state.lang==='en'?'var(--accent-color)':'transparent'}; color:${state.lang==='en'?'#000':'#94a3b8'}; border:none; cursor:pointer;">EN</button>
+          <button onclick="window.toggleLang('de')" style="padding:5px 10px; background:${state.lang==='de'?'var(--accent-color)':'transparent'}; color:${state.lang==='de'?'#000':'#94a3b8'}; border:none; cursor:pointer;">DE</button>
+        </div>
+        <button class="header-action" onclick="window.navigate('settings')">${t('dataExports')}</button>
+      </div>
     </div>
     
     <div id="view-container" class="page">
@@ -49,19 +153,19 @@ function render() {
     <div class="bottom-nav">
       <div class="nav-item ${state.currentView === 'dashboard' ? 'active' : ''}" onclick="window.navigate('dashboard')">
         <svg class="nav-icon" viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
-        Home
+        ${t('home')}
       </div>
       <div class="nav-item ${state.currentView === 'medications' ? 'active' : ''}" onclick="window.navigate('medications')">
         <svg class="nav-icon" viewBox="0 0 24 24"><path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1z"/></svg>
-        Meds
+        ${t('meds')}
       </div>
       <div class="nav-item ${state.currentView === 'log' ? 'active' : ''}" onclick="window.navigate('log')">
         <svg class="nav-icon" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
-        Log Action
+        ${t('logAction')}
       </div>
       <div class="nav-item ${state.currentView === 'plans' ? 'active' : ''}" onclick="window.navigate('plans')">
         <svg class="nav-icon" viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
-        Plans
+        ${t('plans')}
       </div>
     </div>
   `;
@@ -88,57 +192,57 @@ function renderDashboard() {
   const latestWeight = state.metrics.filter(m => m.type === 'weight').sort((a,b) => b.timestamp - a.timestamp)[0];
 
   let scheduleHtml = state.plans.length > 0 ? state.plans.map(p => {
-     const med = state.medications.find(m => m.id === p.medicationId) || {name: 'Unknown'};
+     const med = state.medications.find(m => m.id === p.medicationId) || {name: t('unknown')};
      const isCompleted = todaysLogs.some(l => l.medicationId === p.medicationId);
      const statusColor = isCompleted ? 'var(--accent-color)' : '#ef4444';
-     const statusText = isCompleted ? '✓ Completed' : '• Due Today';
+     const statusText = isCompleted ? t('completed') : t('dueTodayBadge');
      const opacity = isCompleted ? '0.6' : '1';
      return `<div class="card" style="border-left: 4px solid ${statusColor}; opacity: ${opacity}; margin-bottom: 8px;">
                <div>
                  <div class="card-title">${med.name}</div>
-                 <div class="card-subtitle">Scheduled: ${p.timeOfDay} | ${p.dose} ${med.unit || 'units'}</div>
+                 <div class="card-subtitle">${t('scheduled')}: ${p.timeOfDay} | ${p.dose} ${med.unit || t('units')}</div>
                </div>
                <div style="color: ${statusColor}; font-size: 13px; font-weight: 600;">${statusText}</div>
              </div>`;
-  }).join('') : `<div class="empty-state">No scheduled plans. Set one up in the Plans tab!</div>`;
+  }).join('') : `<div class="empty-state">${t('noPlans')}</div>`;
 
   let logsHtml = todaysLogs.length ? todaysLogs.map(l => {
-    const med = state.medications.find(m => m.id === l.medicationId) || {name: 'Unknown'};
+    const med = state.medications.find(m => m.id === l.medicationId) || {name: t('unknown')};
     return `<div class="card">
               <div>
                 <div class="card-title">${med.name}</div>
-                <div class="card-subtitle">${l.amount_taken} ${med.unit || 'units'} taken</div>
+                <div class="card-subtitle">${l.amount_taken} ${med.unit || t('units')} ${t('taken')}</div>
               </div>
               <div class="text-secondary" style="font-size: 14px;">${new Date(l.timestamp).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div>
             </div>`;
-  }).join('') : `<div class="empty-state">No medications logged yet today.</div>`;
+  }).join('') : `<div class="empty-state">${t('noLogsToday')}</div>`;
 
   return `
     <div class="glass-panel">
-      <div class="text-h2">Due Today</div>
+      <div class="text-h2">${t('dueToday')}</div>
       <div class="card-list">
         ${scheduleHtml}
       </div>
     </div>
 
     <div class="glass-panel">
-      <div class="text-h2">Logged Activity</div>
+      <div class="text-h2">${t('loggedActivity')}</div>
       <div class="card-list">
         ${logsHtml}
       </div>
     </div>
     
     <div class="glass-panel">
-      <div class="text-h2">Recent Metrics</div>
+      <div class="text-h2">${t('recentMetrics')}</div>
       ${latestWeight ? `
         <div class="card">
           <div>
-            <div class="card-title">Weight</div>
+            <div class="card-title">${t('weight')}</div>
             <div class="card-subtitle">${new Date(latestWeight.timestamp).toLocaleDateString()}</div>
           </div>
-          <div class="text-h2" style="margin:0; color: var(--accent-color);">${latestWeight.value} kg</div>
+          <div class="text-h2" style="margin:0; color: var(--accent-color);">${latestWeight.value} ${t('kg')}</div>
         </div>
-      ` : `<div class="empty-state">No metrics logged yet.</div>`}
+      ` : `<div class="empty-state">${t('noMetrics')}</div>`}
     </div>
   `;
 }
@@ -159,62 +263,63 @@ function renderMedications() {
         ${avatar}
         <div style="flex:1; min-width:0;">
           <div class="card-title">${m.name}</div>
-          <div class="card-subtitle">Default: ${m.dose} ${m.unit} | Format: ${m.format}</div>
+          <div class="card-subtitle">${t('scheduled')}: ${m.dose} ${m.unit} | ${t('formatLbl')}: ${m.format}</div>
           ${m.adverse_events ? `
               <div style="margin-top: 8px;">
-                 <button class="btn btn-secondary" style="font-size: 11px; padding: 4px 8px; width: auto; background: rgba(239, 68, 68, 0.1); color: #ef4444; border-color: rgba(239, 68, 68, 0.3);" onclick="document.getElementById('adv-${m.id}').style.display = document.getElementById('adv-${m.id}').style.display === 'none' ? 'block' : 'none'">⚠️ View Side Effects</button>
+                 <button class="btn btn-secondary" style="font-size: 11px; padding: 4px 8px; width: auto; background: rgba(239, 68, 68, 0.1); color: #ef4444; border-color: rgba(239, 68, 68, 0.3);" onclick="document.getElementById('adv-${m.id}').style.display = document.getElementById('adv-${m.id}').style.display === 'none' ? 'block' : 'none'">${t('viewSideEffects')}</button>
+                 ${state.lang === 'de' ? `<button onclick="window.translateAdverse('${m.id}', '${m.adverse_events.replace(/'/g, ' ').replace(/"/g, ' ')}')" style="font-size:11px; padding: 4px 8px; background:rgba(99,102,241,0.15); color:#a5b4fc; border:1px solid rgba(99,102,241,0.4); border-radius:6px; cursor:pointer; margin-left:6px;">${t('translateAdverse')}</button>` : ''}
                  <div id="adv-${m.id}" style="display:none; margin-top: 6px; font-size: 11px; color: #f87171; background: rgba(0,0,0,0.2); border: 1px solid rgba(239, 68, 68, 0.2); padding: 8px; border-radius: 6px; line-height: 1.4;">${m.adverse_events}</div>
               </div>
           ` : ''}
         </div>
       </div>
-      <button class="btn btn-danger" style="padding: 8px 12px; width: auto; flex-shrink:0;" onclick="window.deleteMed('${m.id}')">Delete</button>
+      <button class="btn btn-danger" style="padding: 8px 12px; width: auto; flex-shrink:0;" onclick="window.deleteMed('${m.id}')">${t('delete')}</button>
     </div>`;
   }).join('');
 
-  if (!state.medications.length) listHtml = `<div class="empty-state">No medications found. Log one to start!</div>`;
+  if (!state.medications.length) listHtml = `<div class="empty-state">${t('noMedsFound')}</div>`;
 
   return `
     <div class="glass-panel" id="add-med-panel" style="display: none;">
-      <div class="text-h2">Add Medication</div>
+      <div class="text-h2">${t('addMedication')}</div>
       <div class="form-group" style="position: relative;">
-        <label>Name</label>
+        <label>${t('nameLbl')}</label>
         <input type="text" id="med-name" placeholder="E.g., Aspirin" autocomplete="off" oninput="window.searchFDA(this.value)">
         <div id="fda-dropdown" style="position: absolute; top: 100%; left: 0; right: 0; background: #0f172a; border: 1px solid var(--accent-color); border-radius: 8px; z-index: 50; display: none; max-height: 200px; overflow-y: auto; overflow-x: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.5);"></div>
         <div id="med-fda-adverse" style="display:none; margin-top: 8px; font-size: 11px; color: #f87171; background: rgba(0,0,0,0.2); border: 1px solid rgba(239, 68, 68, 0.2); padding: 8px; border-radius: 6px; line-height: 1.4;"></div>
       </div>
       <div style="display: flex; gap: 12px;">
         <div class="form-group" style="flex:1;">
-          <label>Default Dose</label>
+          <label>${t('defaultDose')}</label>
           <input type="text" id="med-dose" placeholder="E.g., 500">
         </div>
         <div class="form-group" style="flex:1;">
-          <label>Unit</label>
+          <label>${t('unitLbl')}</label>
           <select id="med-unit">
              <option value="mg">mg</option>
              <option value="ml">ml</option>
-             <option value="pills">pill(s)</option>
-             <option value="units">units</option>
+             <option value="pills">${t('pillUnit')}</option>
+             <option value="units">${t('units')}</option>
           </select>
         </div>
       </div>
       <div class="form-group">
-        <label>Format</label>
+        <label>${t('formatLbl')}</label>
         <select id="med-format">
-           <option value="Pill">Pill</option>
-           <option value="Liquid">Liquid</option>
-           <option value="Injection">Injection</option>
-           <option value="Inhaler">Inhaler</option>
+           <option value="Pill">${t('pillFormat')}</option>
+           <option value="Liquid">${t('liquidFormat')}</option>
+           <option value="Injection">${t('injectionFormat')}</option>
+           <option value="Inhaler">${t('inhalerFormat')}</option>
         </select>
       </div>
-      <button class="btn" onclick="window.saveMed()">Save Medication</button>
-      <button class="btn btn-secondary" style="margin-top:12px;" onclick="document.getElementById('add-med-panel').style.display='none'">Cancel</button>
+      <button class="btn" onclick="window.saveMed()">${t('saveMedication')}</button>
+      <button class="btn btn-secondary" style="margin-top:12px;" onclick="document.getElementById('add-med-panel').style.display='none'">${t('cancel')}</button>
     </div>
 
     <div class="glass-panel">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-        <div class="text-h2" style="margin: 0;">Your Medications</div>
-        <button class="btn" style="width: auto; padding: 8px 16px; font-size: 14px;" onclick="document.getElementById('add-med-panel').style.display='block'">+ Add</button>
+        <div class="text-h2" style="margin: 0;">${t('yourMedications')}</div>
+        <button class="btn" style="width: auto; padding: 8px 16px; font-size: 14px;" onclick="document.getElementById('add-med-panel').style.display='block'">${t('addBtn')}</button>
       </div>
       <div class="card-list">
         ${listHtml}
@@ -228,49 +333,49 @@ function renderPlans() {
   const medOptions = state.medications.map(m => `<option value="${m.id}" data-dose="${m.dose}">${m.name}</option>`).join('');
 
   let listHtml = state.plans.map(p => {
-    const med = state.medications.find(m => m.id === p.medicationId) || {name: 'Unknown'};
+    const med = state.medications.find(m => m.id === p.medicationId) || {name: t('unknown')};
     return `<div class="card" style="align-items: flex-start;">
       <div>
         <div class="card-title">${med.name}</div>
-        <div class="card-subtitle">Takes ${p.dose} ${med.unit || 'units'} at ${p.timeOfDay}</div>
-        <button class="btn btn-secondary" style="padding: 6px 10px; width: auto; font-size: 11px; margin-top: 8px; border-color: #64748b; color: #cbd5e1" onclick="window.downloadICS('${p.id}')">+ Apple Calendar</button>
+        <div class="card-subtitle">${t('takes')} ${p.dose} ${med.unit || t('units')} ${t('at')} ${p.timeOfDay}</div>
+        <button class="btn btn-secondary" style="padding: 6px 10px; width: auto; font-size: 11px; margin-top: 8px; border-color: #64748b; color: #cbd5e1" onclick="window.downloadICS('${p.id}')">${t('appleCalendar')}</button>
       </div>
-      <button class="btn btn-danger" style="padding: 8px 12px; width: auto;" onclick="window.deletePlan('${p.id}')">Remove</button>
+      <button class="btn btn-danger" style="padding: 8px 12px; width: auto;" onclick="window.deletePlan('${p.id}')">${t('remove')}</button>
     </div>`;
   }).join('');
 
-  if (!state.plans.length) listHtml = `<div class="empty-state">No daily schedule set.</div>`;
+  if (!state.plans.length) listHtml = `<div class="empty-state">${t('noSchedule')}</div>`;
 
   return `
     <div class="glass-panel" id="add-plan-panel" style="display: none;">
-      <div class="text-h2">Create Schedule</div>
-      ${state.medications.length === 0 ? `<div class="empty-state">Add a medication first.</div>` : `
+      <div class="text-h2">${t('createSchedule')}</div>
+      ${state.medications.length === 0 ? `<div class="empty-state">${t('addMedFirst')}</div>` : `
       <div class="form-group">
-        <label>Select Medication</label>
+        <label>${t('selectMed')}</label>
         <select id="plan-med" onchange="document.getElementById('plan-dose').value = this.options[this.selectedIndex].getAttribute('data-dose')">
-           <option value="" disabled selected>-- Choose --</option>
+           <option value="" disabled selected>${t('chooseOption')}</option>
            ${medOptions}
         </select>
       </div>
       <div style="display: flex; gap: 12px;">
         <div class="form-group" style="flex:1;">
-          <label>Time of Day</label>
+          <label>${t('timeOfDay')}</label>
           <input type="time" id="plan-time" required>
         </div>
         <div class="form-group" style="flex:1;">
-          <label>Dose</label>
+          <label>${t('dose')}</label>
           <input type="number" id="plan-dose">
         </div>
       </div>
-      <button class="btn" onclick="window.savePlan()">Save Plan</button>
-      <button class="btn btn-secondary" style="margin-top:12px;" onclick="document.getElementById('add-plan-panel').style.display='none'">Cancel</button>
+      <button class="btn" onclick="window.savePlan()">${t('savePlan')}</button>
+      <button class="btn btn-secondary" style="margin-top:12px;" onclick="document.getElementById('add-plan-panel').style.display='none'">${t('cancel')}</button>
       `}
     </div>
 
     <div class="glass-panel">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-        <div class="text-h2" style="margin: 0;">Your Schedule</div>
-        <button class="btn" style="width: auto; padding: 8px 16px; font-size: 14px;" onclick="document.getElementById('add-plan-panel').style.display='block'">+ New</button>
+        <div class="text-h2" style="margin: 0;">${t('yourSchedule')}</div>
+        <button class="btn" style="width: auto; padding: 8px 16px; font-size: 14px;" onclick="document.getElementById('add-plan-panel').style.display='block'">${t('newPlan')}</button>
       </div>
       <div class="card-list">
         ${listHtml}
@@ -285,37 +390,37 @@ function renderLog() {
   
   return `
     <div class="glass-panel">
-      <div class="text-h2">Log Medication Intake</div>
-      ${state.medications.length === 0 ? `<div class="empty-state">Please add a medication first.</div>` : `
+      <div class="text-h2">${t('logIntake')}</div>
+      ${state.medications.length === 0 ? `<div class="empty-state">${t('addMedFirst2')}</div>` : `
         <div class="form-group">
-          <label>Select Medication</label>
+          <label>${t('selectMed')}</label>
           <select id="log-med" onchange="document.getElementById('log-amount').value = this.options[this.selectedIndex].getAttribute('data-dose')">
-             <option value="" disabled selected>-- Choose --</option>
+             <option value="" disabled selected>${t('chooseOption')}</option>
              ${medOptions}
           </select>
         </div>
         <div class="form-group">
-          <label>Amount Taken</label>
-          <input type="number" id="log-amount" placeholder="Quantity">
+          <label>${t('amountTaken')}</label>
+          <input type="number" id="log-amount" placeholder="${t('quantity')}">
         </div>
-        <button class="btn" onclick="window.saveLog()">Record Intake</button>
+        <button class="btn" onclick="window.saveLog()">${t('recordIntake')}</button>
       `}
     </div>
 
     <div class="glass-panel">
-      <div class="text-h2">Log Body Metric</div>
+      <div class="text-h2">${t('logMetric')}</div>
       <div class="form-group">
-        <label>Metric Type</label>
+        <label>${t('metricType')}</label>
         <select id="metric-type">
-           <option value="weight">Body Weight (kg)</option>
-           <option value="bp">Blood Pressure (mmHg)</option>
+           <option value="weight">${t('bodyWeight')}</option>
+           <option value="bp">${t('bloodPressure')}</option>
         </select>
       </div>
       <div class="form-group">
-        <label>Value</label>
+        <label>${t('valueLbl')}</label>
         <input type="text" id="metric-value" placeholder="e.g., 75.5 or 120/80">
       </div>
-      <button class="btn" onclick="window.saveMetric()">Save Metric</button>
+      <button class="btn" onclick="window.saveMetric()">${t('saveMetric')}</button>
     </div>
   `;
 }
@@ -325,16 +430,16 @@ function renderLog() {
 function renderSettings() {
   return `
     <div class="glass-panel">
-      <div class="text-h2">Data Management</div>
-      <p class="text-body" style="margin-bottom: 20px;">Your data is completely private and stored locally. **If you delete the app or clear your browser data, everything will be lost.** Export your data regularly!</p>
+      <div class="text-h2">${t('dataManagement')}</div>
+      <p class="text-body" style="margin-bottom: 20px;">${t('dataNote')}</p>
       
-      <button class="btn" style="margin-bottom: 16px;" onclick="window.exportData()">Export Data (Backup)</button>
+      <button class="btn" style="margin-bottom: 16px;" onclick="window.exportData()">${t('exportData')}</button>
       
       <div style="border-top: 1px solid var(--glass-border); margin: 20px 0;"></div>
       
-      <div class="text-h2">Restore Data</div>
+      <div class="text-h2">${t('restoreData')}</div>
       <input type="file" id="import-file" accept=".json" style="margin-bottom: 12px;">
-      <button class="btn btn-secondary" onclick="window.importData()">Import / Restore</button>
+      <button class="btn btn-secondary" onclick="window.importData()">${t('importRestore')}</button>
       <div id="settings-msg" style="margin-top: 12px; color: var(--accent-color);"></div>
     </div>
   `;
@@ -348,7 +453,7 @@ window.saveMed = async () => {
   const unit = document.getElementById('med-unit').value;
   const format = document.getElementById('med-format').value;
   
-  if (!name || !dose) return alert("Name and dose required");
+  if (!name || !dose) return alert(t('nameAndDose'));
   
   // Fetch Wikipedia image if not already set
   if (!state.pendingImageUrl) {
@@ -362,7 +467,7 @@ window.saveMed = async () => {
 };
 
 window.deleteMed = async (id) => {
-  if(confirm("Delete this medication?")) {
+  if(confirm(t('deleteMedConfirm'))) {
     await API.deleteMedication(id);
     window.navigate('medications');
   }
@@ -373,7 +478,7 @@ window.saveLog = async () => {
   const medicationId = document.getElementById('log-med').value;
   const amount = document.getElementById('log-amount').value;
   
-  if (!medicationId || !amount) return alert("Select medication and provide amount");
+  if (!medicationId || !amount) return alert(t('selectAndAmount'));
   
   await API.addLog({ medicationId, amount_taken: amount });
   window.navigate('dashboard');
@@ -381,7 +486,7 @@ window.saveLog = async () => {
 
 window.quickLog = async (medId, amount) => {
   await API.addLog({ medicationId: medId, amount_taken: amount });
-  alert("Logged successfully!");
+  alert(t('loggedSuccess'));
   window.navigate('dashboard');
 }
 
@@ -391,14 +496,14 @@ window.savePlan = async () => {
   const timeOfDay = document.getElementById('plan-time').value;
   const dose = document.getElementById('plan-dose').value;
   
-  if (!medicationId || !timeOfDay) return alert("Medication and time required");
+  if (!medicationId || !timeOfDay) return alert(t('medAndTime'));
   
   await API.addPlan({ medicationId, timeOfDay, dose });
   window.navigate('plans');
 };
 
 window.deletePlan = async (id) => {
-  if(confirm("Remove this schedule?")) {
+  if(confirm(t('removeScheduleConfirm'))) {
     await API.deletePlan(id);
     window.navigate('plans');
   }
@@ -414,7 +519,7 @@ window.searchFDA = (query) => {
       return;
   }
   
-  dropdown.innerHTML = `<div style="padding: 12px; font-size: 13px; color: var(--accent-color);">Querying FDA database...</div>`;
+  dropdown.innerHTML = `<div style="padding: 12px; font-size: 13px; color: var(--accent-color);">${t('queryingFDA')}</div>`;
   dropdown.style.display = 'block';
 
   state.fdaTimeout = setTimeout(async () => {
@@ -428,7 +533,7 @@ window.searchFDA = (query) => {
       }
 
       // === PASS 2: FDA generic / active ingredient name ===
-      dropdown.innerHTML = `<div style="padding: 12px; font-size: 13px; color: var(--accent-color);">No brand match — trying active ingredient...</div>`;
+      dropdown.innerHTML = `<div style="padding: 12px; font-size: 13px; color: var(--accent-color);">${t('noBrandTrying')}</div>`;
       const res2 = await fetch(`https://api.fda.gov/drug/label.json?search=openfda.generic_name:"${encodeURIComponent(query)}*"&limit=5`);
       const data2 = await res2.json();
       if (data2.results && data2.results.length > 0) {
@@ -437,7 +542,7 @@ window.searchFDA = (query) => {
       }
 
       // === PASS 3: Wikipedia ingredient extraction — then re-query FDA ===
-      dropdown.innerHTML = `<div style="padding: 12px; font-size: 13px; color: var(--accent-color);">Searching Wikipedia for active ingredients...</div>`;
+      dropdown.innerHTML = `<div style="padding: 12px; font-size: 13px; color: var(--accent-color);">${t('searchingWiki')}</div>`;
       const ingredients = await window._wikiExtractIngredients(query);
 
       if (ingredients.length === 0) {
@@ -461,15 +566,44 @@ window.searchFDA = (query) => {
       if (wikiResults.length > 0) {
         dropdown.innerHTML =
           `<div style="padding: 8px 12px; font-size: 11px; color: #a5b4fc; background: rgba(99,102,241,0.1); border-bottom: 1px solid rgba(99,102,241,0.2);">` +
-          `📚 Wikipedia identified active ingredient: <strong>${matchedIngredient}</strong></div>` +
+          `${t('wikiIngredientFound').replace('{ing}', `<strong>${matchedIngredient}</strong>`)}</div>` +
           window._fdaResultsHTML(wikiResults, 'wiki');
       } else {
         dropdown.innerHTML = window._notFoundHTML(query);
       }
     } catch(e) {
-        dropdown.innerHTML = `<div style="padding: 12px; font-size: 13px; color: #94a3b8;">Lookup failed. Check your connection.</div>`;
+        dropdown.innerHTML = `<div style="padding: 12px; font-size: 13px; color: #94a3b8;">${t('lookupFailed')}</div>`;
     }
   }, 500);
+};
+
+window.toggleLang = (lang) => {
+  state.lang = lang;
+  localStorage.setItem('medilang', lang);
+  render();
+};
+
+// Translate adverse events text via MyMemory API (free, no key, CORS-safe)
+window.translateAdverse = async (medId, text) => {
+  const el = document.getElementById('adv-' + medId);
+  if (!el) return;
+  if (_advTransCache.has(medId)) {
+    el.innerHTML = _advTransCache.get(medId);
+    el.style.display = 'block';
+    return;
+  }
+  el.style.display = 'block';
+  el.innerHTML = 'Übersetze...';
+  try {
+    const encoded = encodeURIComponent(text.substring(0, 450));
+    const r = await fetch(`https://api.mymemory.translated.net/get?q=${encoded}&langpair=en|de`);
+    const d = await r.json();
+    const translated = d.responseData ? d.responseData.translatedText : text;
+    _advTransCache.set(medId, translated);
+    el.innerHTML = translated;
+  } catch(e) {
+    el.innerHTML = text;
+  }
 };
 
 // Pass 3 helper: query Wikipedia and extract pharmaceutical ingredient names
@@ -538,7 +672,7 @@ window._fdaResultsHTML = (results, matchType) => {
     }
 
     const badges = {
-      'generic': `<span style="font-size: 10px; background: rgba(99,102,241,0.2); color: #a5b4fc; border: 1px solid rgba(99,102,241,0.4); border-radius: 4px; padding: 1px 5px; margin-left: 6px;">Generic match</span>`,
+      'generic': `<span style="font-size: 10px; background: rgba(99,102,241,0.2); color: #a5b4fc; border: 1px solid rgba(99,102,241,0.4); border-radius: 4px; padding: 1px 5px; margin-left: 6px;">${t('genericMatch')}</span>`,
       'wiki':    `<span style="font-size: 10px; background: rgba(16,185,129,0.2); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.4); border-radius: 4px; padding: 1px 5px; margin-left: 6px;">📚 Via Wikipedia</span>`,
       'brand':   ''
     };
@@ -549,7 +683,7 @@ window._fdaResultsHTML = (results, matchType) => {
                  onmouseover="this.style.background='rgba(255,255,255,0.05)'"
                  onmouseout="this.style.background='transparent'">
                <div style="font-weight: bold; color: white;">${brand}${badge}</div>
-               <div style="font-size: 11px; color: #cbd5e1; margin-top: 2px;">${generic}${doseStr ? ' | Doses: ' + doseStr + ' ' + doseUnit : ''}</div>
+               <div style="font-size: 11px; color: #cbd5e1; margin-top: 2px;">${generic}${doseStr ? ' | ' + t('doses') + ': ' + doseStr + ' ' + doseUnit : ''}</div>
              </div>`;
   }).join('');
 };
@@ -572,7 +706,16 @@ window.selectFDA = (brand, adverseEvents, doseStr, doseUnit) => {
   if (adverseEvents && adverseEvents !== 'undefined' && adverseEvents.trim() !== '') {
       state.pendingAdverseEvents = adverseEvents;
       adverseEl.style.display = 'block';
-      adverseEl.innerHTML = `<strong>⚠️ Main Adverse Events:</strong><br>${adverseEvents}`;
+      adverseEl.innerHTML = `<strong>${t('adverseLabel')}</strong><br>${adverseEvents}`;
+
+      // Auto-translate if DE
+      if (state.lang === 'de') {
+        adverseEl.innerHTML = `<strong>${t('adverseLabel')}</strong><br>${t('translating')}`;
+        window._autoTranslateAdverse(adverseEvents).then(trans => {
+           state.pendingAdverseEvents = trans;
+           adverseEl.innerHTML = `<strong>${t('adverseLabel')}</strong><br>${trans}`;
+        });
+      }
   } else {
       state.pendingAdverseEvents = null;
       adverseEl.style.display = 'none';
@@ -587,12 +730,12 @@ window._notFoundHTML = (query) => {
   const safeQuery = query.replace(/'/g, ' ').replace(/"/g, ' ');
   return `
     <div style="padding: 14px;">
-      <div style="font-size: 12px; color: #94a3b8; margin-bottom: 10px;">⚠️ Not found in FDA, Wikipedia, or generic databases.</div>
-      <button onclick="window.saveAsTyped('${safeQuery}')" style="width:100%; padding:9px 12px; background: rgba(99,102,241,0.15); color: #a5b4fc; border: 1px solid rgba(99,102,241,0.4); border-radius: 8px; font-size: 13px; font-weight: 600; cursor:pointer; margin-bottom: 10px;">💊 Save &ldquo;${safeQuery}&rdquo; as typed</button>
-      <div style="font-size: 11px; color: #64748b; margin-bottom: 6px;">Optional: link active ingredient to pull FDA data</div>
+      <div style="font-size: 12px; color: #94a3b8; margin-bottom: 10px;">⚠️ ${t('notFoundFDA')}</div>
+      <button onclick="window.saveAsTyped('${safeQuery}')" style="width:100%; padding:9px 12px; background: rgba(99,102,241,0.15); color: #a5b4fc; border: 1px solid rgba(99,102,241,0.4); border-radius: 8px; font-size: 13px; font-weight: 600; cursor:pointer; margin-bottom: 10px;">${t('saveAsTypedBtn').replace('{n}', safeQuery)}</button>
+      <div style="font-size: 11px; color: #64748b; margin-bottom: 6px;">${t('linkIngredient')}</div>
       <div style="display:flex; gap:6px;">
-        <input id="fda-ingredient-input" type="text" placeholder="e.g. Rosuvastatin" style="flex:1; padding:7px 10px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); border-radius:6px; color:white; font-size:12px;">
-        <button onclick="window.fetchFDAIngredient('${safeQuery}')" style="padding:7px 12px; background:var(--accent-color); color:#000; border:none; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer;">Fetch</button>
+        <input id="fda-ingredient-input" type="text" placeholder="${t('ingredientPlaceholder')}" style="flex:1; padding:7px 10px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); border-radius:6px; color:white; font-size:12px;">
+        <button onclick="window.fetchFDAIngredient('${safeQuery}')" style="padding:7px 12px; background:var(--accent-color); color:#000; border:none; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer;">${t('fetchBtn')}</button>
       </div>
     </div>`;
 };
@@ -609,10 +752,10 @@ window.saveAsTyped = (name) => {
 // Fetch FDA data for a manually entered ingredient, keep the brand name
 window.fetchFDAIngredient = async (brandName) => {
   const ing = (document.getElementById('fda-ingredient-input') || {}).value;
-  if (!ing || ing.trim().length < 3) return alert('Enter an active ingredient name first.');
+  if (!ing || ing.trim().length < 3) return alert(t('enterIngredient'));
   const res = await fetch(`https://api.fda.gov/drug/label.json?search=openfda.generic_name:"${encodeURIComponent(ing.trim())}*"&limit=1`);
   const data = await res.json();
-  if (!data.results || !data.results.length) return alert(`"${ing}" not found in FDA either.`);
+  if (!data.results || !data.results.length) return alert(`"${ing}" — ${t('notFoundFDAShort')}`);
   const r = data.results[0];
   let adverseRaw = '';
   if (r.adverse_reactions && r.adverse_reactions.length > 0) {
@@ -630,7 +773,6 @@ window.fetchFDAIngredient = async (brandName) => {
     const uc = {}; doseMatches.forEach(m => { const u = m[2].toLowerCase(); uc[u] = (uc[u]||0)+1; });
     doseUnit = Object.entries(uc).sort((a,b) => b[1]-a[1])[0][0];
   }
-  // Set brand name (not the generic), link adverse events + dose
   document.getElementById('med-name').value = brandName;
   document.getElementById('fda-dropdown').style.display = 'none';
   if (doseStr) {
@@ -641,9 +783,19 @@ window.fetchFDAIngredient = async (brandName) => {
   }
   const adverseEl = document.getElementById('med-fda-adverse');
   if (adverseText.trim()) {
-    state.pendingAdverseEvents = adverseText;
-    adverseEl.style.display = 'block';
-    adverseEl.innerHTML = `<strong>⚠️ Main Adverse Events (via ${ing}):</strong><br>${adverseText}`;
+      state.pendingAdverseEvents = adverseText;
+      adverseEl.style.display = 'block';
+      adverseEl.innerHTML = `<strong>${t('adverseVia').replace('{ing}', ing)}</strong><br>${adverseText}`;
+      
+      // Auto-translate if DE
+      if (state.lang === 'de') {
+        const origHtml = adverseEl.innerHTML;
+        adverseEl.innerHTML = `<strong>${t('adverseVia').replace('{ing}', ing)}</strong><br>${t('translating')}`;
+        window._autoTranslateAdverse(adverseText).then(trans => {
+           state.pendingAdverseEvents = trans;
+           adverseEl.innerHTML = `<strong>${t('adverseVia').replace('{ing}', ing)}</strong><br>${trans}`;
+        });
+      }
   }
   state.pendingImageUrl = null;
   window._fetchDrugImage(brandName).then(url => { state.pendingImageUrl = url; });
@@ -705,7 +857,7 @@ window.saveMetric = async () => {
   const type = document.getElementById('metric-type').value;
   const value = document.getElementById('metric-value').value;
   
-  if (!value) return alert("Value required");
+  if (!value) return alert(t('valueRequired'));
   
   await API.addMetric({ type, value });
   window.navigate('dashboard');
@@ -726,17 +878,17 @@ window.exportData = async () => {
 
 window.importData = async () => {
   const fileInput = document.getElementById('import-file');
-  if(!fileInput.files.length) return alert("Select a file first.");
+  if(!fileInput.files.length) return alert(t('selectFile'));
   
   const file = fileInput.files[0];
   const text = await file.text();
   
   try {
     await API.importData(text);
-    document.getElementById('settings-msg').innerText = "Data restored successfully!";
+    document.getElementById('settings-msg').innerText = t('restoredSuccess');
     setTimeout(() => window.navigate('dashboard'), 1500);
   } catch(e) {
-    alert("Error reading backup file.");
+    alert(t('importError'));
   }
 };
 
