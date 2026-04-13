@@ -45,7 +45,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v3.2</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v3.3</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <button class="header-action" onclick="window.navigate('settings')">Data & Exports</button>
@@ -357,11 +357,7 @@ function initScanner() {
   };
   
   state.html5QrCode.start(
-    { 
-      facingMode: "environment",
-      width: { ideal: 1920 },
-      height: { ideal: 1080 }
-    }, 
+    { facingMode: "environment" }, 
     config,
     async (decodedText, decodedResult) => {
       // stop on success
@@ -469,11 +465,7 @@ window.startInlineScan = () => {
   };
   
   state.html5QrCode.start(
-    { 
-      facingMode: "environment",
-      width: { ideal: 1920 },
-      height: { ideal: 1080 }
-    }, 
+    { facingMode: "environment" }, 
     config,
     async (decodedText) => {
       document.getElementById('med-barcode').value = decodedText;
