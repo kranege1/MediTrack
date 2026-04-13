@@ -1,4 +1,4 @@
-const CACHE_NAME = 'medicatrack-v1';
+const CACHE_NAME = 'medicatrack-v1.2';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -9,20 +9,32 @@ const urlsToCache = [
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => {
-        return cache.addAll(urlsToCache);
-      })
+      .then(cache => cache.addAll(urlsToCache))
   );
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(keys => {
+      return Promise.all(keys.map(key => {
+        if (key !== CACHE_NAME) return caches.delete(key);
+      }));
+    })
+  );
+  self.clients.claim();
 });
 
 self.addEventListener('fetch', event => {
+  // Network First Strategy
   event.respondWith(
-    caches.match(event.request)
+    fetch(event.request)
       .then(response => {
-        if (response) {
-          return response;
-        }
-        return fetch(event.request);
+        // Cache the latest version if successful
+        const resClone = response.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(event.request, resClone));
+        return response;
       })
+      .catch(() => caches.match(event.request))
   );
 });
