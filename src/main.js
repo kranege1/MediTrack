@@ -1,6 +1,6 @@
 import './style.css';
 import { API } from './db.js';
-import Tesseract from 'tesseract.js';
+import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode';
 
 // --- App State ---
 const state = {
@@ -9,7 +9,7 @@ const state = {
   logs: [],
   metrics: [],
   plans: [],
-  ocrStream: null
+  html5QrCode: null
 };
 
 // --- DOM ---
@@ -25,9 +25,8 @@ async function loadData() {
 
 window.navigate = async (view) => {
   // Cleanup
-  if (state.ocrStream) {
-      state.ocrStream.getTracks().forEach(track => track.stop());
-      state.ocrStream = null;
+  if (state.html5QrCode && state.currentView === 'scanner') {
+      try { await state.html5QrCode.stop(); } catch(e) {}
   }
   
   if (view !== 'settings') {
@@ -46,7 +45,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v2.1</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v3.0</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <button class="header-action" onclick="window.navigate('settings')">Data & Exports</button>
@@ -204,6 +203,14 @@ function renderMedications() {
            <option value="Inhaler">Inhaler</option>
         </select>
       </div>
+      <div class="form-group">
+        <label>Barcode (Optional)</label>
+        <div style="display: flex; gap: 8px;">
+          <input type="text" id="med-barcode" placeholder="Scan or enter barcode" style="margin-bottom:0; flex: 1;">
+          <button class="btn btn-secondary" style="width: auto; padding: 0 16px;" onclick="window.startInlineScan()">📷 Scan</button>
+        </div>
+        <div id="inline-reader" style="margin-top: 12px; border-radius: 12px; overflow: hidden; display: none; border: 1px solid var(--accent-color);"></div>
+      </div>
       <button class="btn" onclick="window.saveMed()">Save Medication</button>
       <button class="btn btn-secondary" style="margin-top:12px;" onclick="document.getElementById('add-med-panel').style.display='none'">Cancel</button>
     </div>
@@ -321,32 +328,74 @@ function renderLog() {
 function renderScanner() {
   return `
     <div class="glass-panel">
-      <div class="text-h2">Scan Medicine Package</div>
-      <p class="text-body" style="margin-bottom: 20px;">Point the camera at the bold text on your medicine box and tap capture.</p>
+      <div class="text-h2">Scan Drug Package</div>
+      <p class="text-body" style="margin-bottom: 20px;">Use your camera to scan EAN or UPC barcodes from your medication packaging.</p>
       
-      <div style="position: relative; width: 100%; border-radius: 12px; overflow: hidden; background: #000; display: flex; justify-content: center; align-items: center; min-height: 250px;">
-         <video id="ocr-video" autoplay playsinline style="width: 100%; max-height: 50vh; object-fit: cover;"></video>
-      </div>
-      
-      <div id="ocr-result" style="margin-top: 20px;">
-         <button class="btn" onclick="window.captureAndRead()" style="padding: 16px; font-size: 18px;">📸 Capture Text</button>
-      </div>
+      <div id="reader"></div>
+      <div id="scan-result" style="margin-top: 20px;"></div>
     </div>
   `;
 }
 
 function initScanner() {
-  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
-    .then(stream => {
-      state.ocrStream = stream;
-      const video = document.getElementById('ocr-video');
-      if(video) video.srcObject = stream;
-    })
-    .catch(err => {
-      document.getElementById('ocr-result').innerHTML = `<div style="color:red;">Error accessing camera. Please ensure permissions are granted.</div>`;
-    });
-  }
+  state.html5QrCode = new Html5Qrcode("reader");
+  const config = { 
+    fps: 10, 
+    qrbox: { width: 250, height: 250 }, 
+    aspectRatio: 1.0,
+    formatsToSupport: [
+      Html5QrcodeSupportedFormats.DATA_MATRIX,
+      Html5QrcodeSupportedFormats.QR_CODE,
+      Html5QrcodeSupportedFormats.EAN_13,
+      Html5QrcodeSupportedFormats.EAN_8,
+      Html5QrcodeSupportedFormats.UPC_A,
+      Html5QrcodeSupportedFormats.UPC_E,
+      Html5QrcodeSupportedFormats.CODE_128,
+      Html5QrcodeSupportedFormats.CODE_39
+    ],
+    experimentalFeatures: {
+      useBarCodeDetectorIfSupported: true
+    }
+  };
+  
+  state.html5QrCode.start(
+    { facingMode: "environment" }, 
+    config,
+    async (decodedText, decodedResult) => {
+      // stop on success
+      await state.html5QrCode.stop();
+      
+      const el = document.getElementById("scan-result");
+      const matchedMed = await API.getMedicationByBarcode(decodedText);
+      
+      if (matchedMed) {
+        el.innerHTML = `
+          <div class="card" style="border-color: var(--accent-color);">
+            <div>
+              <div class="card-title">Found: ${matchedMed.name}</div>
+              <div class="card-subtitle">Barcode: ${decodedText}</div>
+            </div>
+            <button class="btn" onclick="window.quickLog('${matchedMed.id}', '${matchedMed.dose}')" style="width: auto; padding: 8px 16px;">Quick Log</button>
+          </div>
+        `;
+      } else {
+        el.innerHTML = `
+          <div class="card">
+            <div>
+              <div class="card-title">Unknown Drug</div>
+              <div class="card-subtitle">Barcode: ${decodedText}</div>
+            </div>
+            <button class="btn" onclick="window.addFromScan('${decodedText}')" style="width: auto; padding: 8px 16px;">Add New</button>
+          </div>
+        `;
+      }
+    },
+    (errorMessage) => {
+      // parse errors are normal, ignore.
+    }
+  ).catch(err => {
+    document.getElementById("scan-result").innerHTML = `<div style="color:red;">Error accessing camera. Please ensure permissions are granted.</div>`;
+  });
 }
 
 // 5. Settings / Export
@@ -390,55 +439,46 @@ window.deleteMed = async (id) => {
   }
 };
 
-window.captureAndRead = async () => {
-  const video = document.getElementById('ocr-video');
-  const resultDiv = document.getElementById('ocr-result');
+window.startInlineScan = () => {
+  const el = document.getElementById('inline-reader');
+  el.style.display = 'block';
   
-  if (!video || !state.ocrStream) return;
-  
-  const canvas = document.createElement('canvas');
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
-  const ctx = canvas.getContext('2d');
-  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-  
-  resultDiv.innerHTML = `
-    <div style="display:flex; flex-direction:column; align-items:center; gap: 12px; margin-top: 20px;">
-       <div class="loader" style="border: 4px solid var(--glass-bg); border-top: 4px solid var(--accent-color); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite;"></div>
-       <div style="color: var(--accent-color); font-weight: bold; text-align: center;">Loading AI & Reading Text...</div>
-       <div style="font-size: 13px; color: #94a3b8; text-align: center;">(This may take ~10 seconds the very first time to load)</div>
-    </div>
-    <style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
-  `;
-  
-  try {
-    const result = await Tesseract.recognize(canvas, 'eng+deu', {
-      logger: m => console.log(m)
-    });
-    
-    // Stop camera
-    state.ocrStream.getTracks().forEach(track => track.stop());
-    state.ocrStream = null;
-    
-    let text = result.data.text.trim();
-    if (!text) throw new Error("No characters found");
-    
-    text = text.replace(/[\n\r]+/g, ' ').replace(/[^a-zA-Z0-9 \.\-\/üäöÜÄÖß]/g, '').replace(/ +/g, ' ').slice(0, 50).trim();
-    
-    resultDiv.innerHTML = `
-      <div class="card" style="border-color: var(--accent-color);">
-        <div>
-          <div class="card-title">Analyzed Text:</div>
-          <div class="card-subtitle" style="font-size: 16px; font-weight: 600; color: white; margin-top:4px;">"${text}"</div>
-        </div>
-      </div>
-      <button class="btn" onclick="window.addFromScanText('${text}')" style="margin-top: 12px;">Use this Text</button>
-      <button class="btn btn-secondary" onclick="window.navigate('scanner')" style="margin-top: 12px;">Scan Again</button>
-    `;
-  } catch (err) {
-    resultDiv.innerHTML = `<div style="color:#ef4444; padding: 12px; border: 1px solid #ef4444; border-radius: 8px;">Text not recognized. Please move closer and ensure good lighting.</div>
-         <button class="btn" style="margin-top: 12px;" onclick="window.navigate('scanner')">Try Again</button>`;
+  if (state.html5QrCode) {
+    try { state.html5QrCode.stop(); } catch(e){}
   }
+  
+  state.html5QrCode = new Html5Qrcode("inline-reader");
+  const config = { 
+    fps: 10, 
+    qrbox: { width: 220, height: 220 }, 
+    aspectRatio: 1.0,
+    formatsToSupport: [
+      Html5QrcodeSupportedFormats.DATA_MATRIX,
+      Html5QrcodeSupportedFormats.QR_CODE,
+      Html5QrcodeSupportedFormats.EAN_13,
+      Html5QrcodeSupportedFormats.EAN_8,
+      Html5QrcodeSupportedFormats.UPC_A,
+      Html5QrcodeSupportedFormats.UPC_E,
+      Html5QrcodeSupportedFormats.CODE_128,
+      Html5QrcodeSupportedFormats.CODE_39
+    ],
+    experimentalFeatures: {
+      useBarCodeDetectorIfSupported: true
+    }
+  };
+  
+  state.html5QrCode.start(
+    { facingMode: "environment" }, 
+    config,
+    async (decodedText) => {
+      document.getElementById('med-barcode').value = decodedText;
+      await state.html5QrCode.stop();
+      el.style.display = 'none';
+    },
+    (errorMessage) => {}
+  ).catch(err => {
+    el.innerHTML = `<div style="color:red; padding: 10px; font-size: 14px;">Camera access denied.</div>`;
+  });
 };
 
 window.saveLog = async () => {
@@ -457,41 +497,11 @@ window.quickLog = async (medId, amount) => {
   window.navigate('dashboard');
 }
 
-window.addFromScanText = (text) => {
+window.addFromScan = (barcode) => {
   window.navigate('medications');
-  
-  let name = text;
-  let dose = '';
-  let unit = 'mg';
-  
-  // Try to find a pattern like "400 mg" or "400mg" or "10 ml"
-  const match = text.match(/(\\d+[\\.,]?\\d*)\\s*(mg|ml|g|mcg|ug)/i);
-  if (match) {
-    dose = match[1].replace(',', '.');
-    let foundUnit = match[2].toLowerCase();
-    if (['mg', 'ml'].includes(foundUnit)) {
-       unit = foundUnit;
-    } else {
-       unit = 'units';
-    }
-    name = text.replace(match[0], '').trim();
-  } else {
-    // Just find a standalone number that might be the dose
-    const numMatch = text.match(/\\b(\\d+)\\b/);
-    if (numMatch) {
-       dose = numMatch[1];
-       name = text.replace(numMatch[0], '').trim();
-    }
-  }
-
-  // Final text cleanup
-  name = name.replace(/^[-\\.,\\s]+|[-\\.,\\s]+$/g, '').trim();
-
   setTimeout(() => {
-    document.getElementById('add-med-panel').style.display = 'block';
-    document.getElementById('med-name').value = name;
-    if (dose) document.getElementById('med-dose').value = dose;
-    document.getElementById('med-unit').value = unit;
+    document.getElementById('add-med-panel').style.display='block';
+    document.getElementById('med-barcode').value = barcode;
   }, 100);
 }
 
