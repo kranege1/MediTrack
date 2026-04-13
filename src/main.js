@@ -1,6 +1,5 @@
 import './style.css';
 import { API } from './db.js';
-import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode';
 
 // --- App State ---
 const state = {
@@ -9,7 +8,6 @@ const state = {
   logs: [],
   metrics: [],
   plans: [],
-  html5QrCode: null,
   fdaTimeout: null,
   pendingAdverseEvents: null
 };
@@ -26,28 +24,18 @@ async function loadData() {
 }
 
 window.navigate = async (view) => {
-  // Cleanup
-  if (state.html5QrCode && state.currentView === 'scanner') {
-      try { await state.html5QrCode.stop(); } catch(e) {}
-  }
-  
   if (view !== 'settings') {
      state.currentView = view;
   }
   await loadData();
   render();
-  
-  // Post-render attachments
-  if (view === 'scanner') {
-    initScanner();
-  }
 };
 
 function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v3.6</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v3.7</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <button class="header-action" onclick="window.navigate('settings')">Data & Exports</button>
@@ -74,10 +62,6 @@ function render() {
         <svg class="nav-icon" viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
         Plans
       </div>
-      <div class="nav-item ${state.currentView === 'scanner' ? 'active' : ''}" onclick="window.navigate('scanner')">
-        <svg class="nav-icon" viewBox="0 0 24 24"><path d="M3 5v4h2V5h4V3H5c-1.1 0-2 .9-2 2zm2 10H3v4c0 1.1.9 2 2 2h4v-2H5v-4zm14 4h-4v2h4c1.1 0 2-.9 2-2v-4h-2v4zm0-16h-4v2h4v4h2V5c0-1.1-.9-2-2-2z"/></svg>
-        Scan
-      </div>
     </div>
   `;
 }
@@ -88,7 +72,6 @@ function getViewHTML() {
     case 'medications': return renderMedications();
     case 'plans': return renderPlans();
     case 'log': return renderLog();
-    case 'scanner': return renderScanner();
     case 'settings': return renderSettings();
     default: return renderDashboard();
   }
@@ -186,12 +169,13 @@ function renderMedications() {
       <div class="form-group" style="position: relative;">
         <label>Name</label>
         <input type="text" id="med-name" placeholder="E.g., Aspirin" autocomplete="off" oninput="window.searchFDA(this.value)">
-        <div id="fda-dropdown" style="position: absolute; top: 100%; left: 0; right: 0; background: var(--card-bg); border: 1px solid var(--accent-color); border-radius: 8px; z-index: 50; display: none; max-height: 200px; overflow-y: auto;"></div>
+        <div id="fda-dropdown" style="position: absolute; top: 100%; left: 0; right: 0; background: #0f172a; border: 1px solid var(--accent-color); border-radius: 8px; z-index: 50; display: none; max-height: 200px; overflow-y: auto; overflow-x: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.5);"></div>
+        <div id="med-fda-adverse" style="display:none; margin-top: 8px; font-size: 11px; color: #f87171; background: rgba(0,0,0,0.2); border: 1px solid rgba(239, 68, 68, 0.2); padding: 8px; border-radius: 6px; line-height: 1.4;"></div>
       </div>
       <div style="display: flex; gap: 12px;">
         <div class="form-group" style="flex:1;">
           <label>Default Dose</label>
-          <input type="number" id="med-dose" placeholder="E.g., 500">
+          <input type="text" id="med-dose" placeholder="E.g., 500">
         </div>
         <div class="form-group" style="flex:1;">
           <label>Unit</label>
@@ -211,14 +195,6 @@ function renderMedications() {
            <option value="Injection">Injection</option>
            <option value="Inhaler">Inhaler</option>
         </select>
-      </div>
-      <div class="form-group">
-        <label>Barcode (Optional)</label>
-        <div style="display: flex; gap: 8px;">
-          <input type="text" id="med-barcode" placeholder="Scan or enter barcode" style="margin-bottom:0; flex: 1;">
-          <button class="btn btn-secondary" style="width: auto; padding: 0 16px;" onclick="window.startInlineScan()">📷 Scan</button>
-        </div>
-        <div id="inline-reader" style="margin-top: 12px; border-radius: 12px; overflow: hidden; display: none; border: 1px solid var(--accent-color);"></div>
       </div>
       <button class="btn" onclick="window.saveMed()">Save Medication</button>
       <button class="btn btn-secondary" style="margin-top:12px;" onclick="document.getElementById('add-med-panel').style.display='none'">Cancel</button>
@@ -333,77 +309,6 @@ function renderLog() {
   `;
 }
 
-// 4. Scanner
-function renderScanner() {
-  return `
-    <div class="glass-panel">
-      <div class="text-h2">Scan Medicine Package</div>
-      <p class="text-body" style="margin-bottom: 20px;">Use your camera to scan EAN or UPC barcodes from your medication packaging.</p>
-      
-      <div id="reader"></div>
-      <div id="scan-result" style="margin-top: 20px;"></div>
-
-      <div style="border-top: 1px solid var(--glass-border); margin: 24px 0;"></div>
-      
-      <div class="text-h2" style="font-size: 18px;">Manual Entry</div>
-      <p class="text-body" style="font-size: 13px; margin-bottom: 12px;">If the barcode is dotted or blurry, manually enter the Product Code (PC) digits printed on the box.</p>
-      <div style="display: flex; gap: 8px;">
-         <input type="text" id="manual-barcode" placeholder="e.g., 09088884954238" style="margin-bottom: 0; flex: 1;">
-         <button class="btn" style="width: auto; padding: 0 16px;" onclick="window.triggerSearch()">Lookup</button>
-      </div>
-    </div>
-  `;
-}
-
-function initScanner() {
-  state.html5QrCode = new Html5Qrcode("reader");
-  const config = { 
-    fps: 10, 
-    experimentalFeatures: {
-      useBarCodeDetectorIfSupported: true
-    }
-  };
-  
-  state.html5QrCode.start(
-    { facingMode: "environment" }, 
-    config,
-    async (decodedText, decodedResult) => {
-      // stop on success
-      await state.html5QrCode.stop();
-      
-      const el = document.getElementById("scan-result");
-      const matchedMed = await API.getMedicationByBarcode(decodedText);
-      
-      if (matchedMed) {
-        el.innerHTML = `
-          <div class="card" style="border-color: var(--accent-color);">
-            <div>
-              <div class="card-title">Found: ${matchedMed.name}</div>
-              <div class="card-subtitle">Barcode: ${decodedText}</div>
-            </div>
-            <button class="btn" onclick="window.quickLog('${matchedMed.id}', '${matchedMed.dose}')" style="width: auto; padding: 8px 16px;">Quick Log</button>
-          </div>
-        `;
-      } else {
-        el.innerHTML = `
-          <div class="card">
-            <div style="display:flex; flex-direction:column; align-items:center; width:100%; gap: 8px; padding: 8px 0;">
-               <div class="loader" style="border: 3px solid var(--glass-bg); border-top: 3px solid var(--accent-color); border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite;"></div>
-               <div style="color: var(--accent-color); font-weight: bold; font-size: 13px;">Querying Internet Database...</div>
-            </div>
-            <style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
-          </div>
-        `;
-        window.searchOnlineDB(decodedText);
-      }
-    },
-    (errorMessage) => {
-      // parse errors are normal, ignore.
-    }
-  ).catch(err => {
-    document.getElementById("scan-result").innerHTML = `<div style="color:red;">Error accessing camera. Please ensure permissions are granted.</div>`;
-  });
-}
 
 // 5. Settings / Export
 function renderSettings() {
@@ -431,11 +336,10 @@ window.saveMed = async () => {
   const dose = document.getElementById('med-dose').value;
   const unit = document.getElementById('med-unit').value;
   const format = document.getElementById('med-format').value;
-  const barcode = document.getElementById('med-barcode').value;
   
   if (!name || !dose) return alert("Name and dose required");
   
-  await API.addMedication({ name, dose, unit, format, barcode, adverse_events: state.pendingAdverseEvents });
+  await API.addMedication({ name, dose, unit, format, adverse_events: state.pendingAdverseEvents });
   state.pendingAdverseEvents = null;
   window.navigate('medications');
 };
@@ -447,35 +351,6 @@ window.deleteMed = async (id) => {
   }
 };
 
-window.startInlineScan = () => {
-  const el = document.getElementById('inline-reader');
-  el.style.display = 'block';
-  
-  if (state.html5QrCode) {
-    try { state.html5QrCode.stop(); } catch(e){}
-  }
-  
-  state.html5QrCode = new Html5Qrcode("inline-reader");
-  const config = { 
-    fps: 10,
-    experimentalFeatures: {
-      useBarCodeDetectorIfSupported: true
-    }
-  };
-  
-  state.html5QrCode.start(
-    { facingMode: "environment" }, 
-    config,
-    async (decodedText) => {
-      document.getElementById('med-barcode').value = decodedText;
-      await state.html5QrCode.stop();
-      el.style.display = 'none';
-    },
-    (errorMessage) => {}
-  ).catch(err => {
-    el.innerHTML = `<div style="color:red; padding: 10px; font-size: 14px;">Camera access denied.</div>`;
-  });
-};
 
 window.saveLog = async () => {
   const medicationId = document.getElementById('log-med').value;
@@ -493,97 +368,6 @@ window.quickLog = async (medId, amount) => {
   window.navigate('dashboard');
 }
 
-window.addFromScan = (barcode) => {
-  window.navigate('medications');
-  setTimeout(() => {
-    document.getElementById('add-med-panel').style.display='block';
-    document.getElementById('med-barcode').value = barcode;
-  }, 100);
-}
-
-window.triggerSearch = () => {
-    const val = document.getElementById('manual-barcode').value.replace(/[^0-9A-Za-z]/g, '');
-    if (!val) return alert("Please enter the Product Code digits first!");
-    
-    // show loader immediately
-    const el = document.getElementById("scan-result");
-    el.innerHTML = `
-      <div class="card">
-        <div style="display:flex; flex-direction:column; align-items:center; width:100%; gap: 8px; padding: 8px 0;">
-           <div class="loader" style="border: 3px solid var(--glass-bg); border-top: 3px solid var(--accent-color); border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite;"></div>
-           <div style="color: var(--accent-color); font-weight: bold; font-size: 13px;">Querying Internet Database...</div>
-        </div>
-        <style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
-      </div>
-    `;
-    window.searchOnlineDB(val);
-};
-
-window.searchOnlineDB = async (barcode) => {
-  const el = document.getElementById("scan-result");
-  try {
-    const res = await fetch(`https://api.upcitemdb.com/prod/trial/lookup?upc=${barcode}`);
-    const data = await res.json();
-    
-    if (data.items && data.items.length > 0) {
-      const title = data.items[0].title;
-      el.innerHTML = `
-          <div class="card" style="border-color: var(--accent-color);">
-            <div>
-              <div class="card-title">Online Match:</div>
-              <div class="card-subtitle" style="font-size: 14px; color: white;">${title}</div>
-            </div>
-            <button class="btn" onclick="window.addFromTitle('${title.replace(/'/g, "\\'")}', '${barcode}')" style="width: auto; padding: 8px 16px;">Auto Fill</button>
-          </div>
-        `;
-    } else {
-      throw new Error("Not found");
-    }
-  } catch (err) {
-      el.innerHTML = `
-          <div class="card">
-            <div>
-              <div class="card-title">Unknown Drug</div>
-              <div class="card-subtitle">Local + Online DB check failed</div>
-            </div>
-            <button class="btn" onclick="window.addFromScan('${barcode}')" style="width: auto; padding: 8px 16px;">Manual Add</button>
-          </div>
-        `;
-  }
-};
-
-window.addFromTitle = (title, barcode) => {
-  window.navigate('medications');
-  
-  let name = title;
-  let dose = '';
-  let unit = 'mg';
-  
-  const match = title.match(/(\d+[\.,]?\d*)\s*(mg|ml|g|mcg|ug)/i);
-  if (match) {
-    dose = match[1].replace(',', '.');
-    let foundUnit = match[2].toLowerCase();
-    if (['mg', 'ml'].includes(foundUnit)) unit = foundUnit;
-    else unit = 'units';
-    name = title.replace(match[0], '').trim();
-  } else {
-    const numMatch = title.match(/\b(\d+)\b/);
-    if (numMatch) {
-       dose = numMatch[1];
-       name = title.replace(numMatch[0], '').trim();
-    }
-  }
-
-  name = name.replace(/^[-\.,\s]+|[-\.,\s]+$/g, '').trim();
-
-  setTimeout(() => {
-    document.getElementById('add-med-panel').style.display='block';
-    document.getElementById('med-name').value = name;
-    if (dose) document.getElementById('med-dose').value = dose;
-    document.getElementById('med-unit').value = unit;
-    document.getElementById('med-barcode').value = barcode;
-  }, 100);
-}
 
 window.savePlan = async () => {
   const medicationId = document.getElementById('plan-med').value;
@@ -631,16 +415,23 @@ window.searchFDA = (query) => {
            let adverseRaw = '';
            if (r.adverse_reactions && r.adverse_reactions.length > 0) {
              adverseRaw = r.adverse_reactions[0];
-             // filter out the initial section name usually present
              adverseRaw = adverseRaw.replace(/^[0-9]+(\.[0-9]+)?\s*ADVERSE REACTIONS\s*/i, '');
            }
-           let adverseText = adverseRaw.replace(/'/g, ' ').replace(/"/g, ' ');
+           let adverseText = adverseRaw.replace(/'/g, ' ').replace(/"/g, ' ').replace(/\n/g, ' ');
            if (adverseText.length > 250) adverseText = adverseText.substring(0, 250) + '...';
+
+           let doseStr = '';
+           let doseBlob = (r.dosage_and_administration || []).join(' ') + ' ' + (r.active_ingredient || []).join(' ');
+           let doseMatches = [...doseBlob.matchAll(/\b(\d+(?:\.\d+)?)\s*(mg|ml|mcg|ug|g)\b/ig)];
+           if (doseMatches.length > 0) {
+              let uniqueDoses = [...new Set(doseMatches.map(m => m[1]))];
+              doseStr = uniqueDoses.slice(0, 4).sort((a,b) => parseFloat(a) - parseFloat(b)).join(', ');
+           }
            
            return `<div style="padding: 12px; border-bottom: 1px solid var(--glass-border); cursor: pointer; transition: background 0.2s;" 
-                        onclick="window.selectFDA('${brand}', '${adverseText}')" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">
+                        onclick="window.selectFDA('${brand}', '${adverseText}', '${doseStr}')" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">
                      <div style="font-weight: bold; color: white;">${brand}</div>
-                     <div style="font-size: 11px; color: #cbd5e1; margin-top: 2px;">${generic}</div>
+                     <div style="font-size: 11px; color: #cbd5e1; margin-top: 2px;">${generic} ${doseStr ? '| Doses: ' + doseStr : ''}</div>
                    </div>`;
         }).join('');
       } else {
@@ -652,13 +443,22 @@ window.searchFDA = (query) => {
   }, 500);
 };
 
-window.selectFDA = (brand, adverseEvents) => {
+window.selectFDA = (brand, adverseEvents, doseStr) => {
   document.getElementById('med-name').value = brand;
   document.getElementById('fda-dropdown').style.display = 'none';
+  
+  if (doseStr && doseStr !== 'undefined' && doseStr.trim() !== '') {
+      document.getElementById('med-dose').value = doseStr;
+  }
+  
+  const adverseEl = document.getElementById('med-fda-adverse');
   if (adverseEvents && adverseEvents !== 'undefined' && adverseEvents.trim() !== '') {
       state.pendingAdverseEvents = adverseEvents;
+      adverseEl.style.display = 'block';
+      adverseEl.innerHTML = `<strong>⚠️ Main Adverse Events:</strong><br>${adverseEvents}`;
   } else {
       state.pendingAdverseEvents = null;
+      adverseEl.style.display = 'none';
   }
 };
 
