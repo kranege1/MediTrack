@@ -45,7 +45,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v3.0</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v3.1</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <button class="header-action" onclick="window.navigate('settings')">Data & Exports</button>
@@ -381,13 +381,14 @@ function initScanner() {
       } else {
         el.innerHTML = `
           <div class="card">
-            <div>
-              <div class="card-title">Unknown Drug</div>
-              <div class="card-subtitle">Barcode: ${decodedText}</div>
+            <div style="display:flex; flex-direction:column; align-items:center; width:100%; gap: 8px; padding: 8px 0;">
+               <div class="loader" style="border: 3px solid var(--glass-bg); border-top: 3px solid var(--accent-color); border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite;"></div>
+               <div style="color: var(--accent-color); font-weight: bold; font-size: 13px;">Querying Internet Database...</div>
             </div>
-            <button class="btn" onclick="window.addFromScan('${decodedText}')" style="width: auto; padding: 8px 16px;">Add New</button>
+            <style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
           </div>
         `;
+        window.searchOnlineDB(decodedText);
       }
     },
     (errorMessage) => {
@@ -501,6 +502,72 @@ window.addFromScan = (barcode) => {
   window.navigate('medications');
   setTimeout(() => {
     document.getElementById('add-med-panel').style.display='block';
+    document.getElementById('med-barcode').value = barcode;
+  }, 100);
+}
+
+window.searchOnlineDB = async (barcode) => {
+  const el = document.getElementById("scan-result");
+  try {
+    const res = await fetch(`https://api.upcitemdb.com/prod/trial/lookup?upc=${barcode}`);
+    const data = await res.json();
+    
+    if (data.items && data.items.length > 0) {
+      const title = data.items[0].title;
+      el.innerHTML = `
+          <div class="card" style="border-color: var(--accent-color);">
+            <div>
+              <div class="card-title">Online Match:</div>
+              <div class="card-subtitle" style="font-size: 14px; color: white;">${title}</div>
+            </div>
+            <button class="btn" onclick="window.addFromTitle('${title.replace(/'/g, "\\'")}', '${barcode}')" style="width: auto; padding: 8px 16px;">Auto Fill</button>
+          </div>
+        `;
+    } else {
+      throw new Error("Not found");
+    }
+  } catch (err) {
+      el.innerHTML = `
+          <div class="card">
+            <div>
+              <div class="card-title">Unknown Drug</div>
+              <div class="card-subtitle">Local + Online DB check failed</div>
+            </div>
+            <button class="btn" onclick="window.addFromScan('${barcode}')" style="width: auto; padding: 8px 16px;">Manual Add</button>
+          </div>
+        `;
+  }
+};
+
+window.addFromTitle = (title, barcode) => {
+  window.navigate('medications');
+  
+  let name = title;
+  let dose = '';
+  let unit = 'mg';
+  
+  const match = title.match(/(\d+[\.,]?\d*)\s*(mg|ml|g|mcg|ug)/i);
+  if (match) {
+    dose = match[1].replace(',', '.');
+    let foundUnit = match[2].toLowerCase();
+    if (['mg', 'ml'].includes(foundUnit)) unit = foundUnit;
+    else unit = 'units';
+    name = title.replace(match[0], '').trim();
+  } else {
+    const numMatch = title.match(/\b(\d+)\b/);
+    if (numMatch) {
+       dose = numMatch[1];
+       name = title.replace(numMatch[0], '').trim();
+    }
+  }
+
+  name = name.replace(/^[-\.,\s]+|[-\.,\s]+$/g, '').trim();
+
+  setTimeout(() => {
+    document.getElementById('add-med-panel').style.display='block';
+    document.getElementById('med-name').value = name;
+    if (dose) document.getElementById('med-dose').value = dose;
+    document.getElementById('med-unit').value = unit;
     document.getElementById('med-barcode').value = barcode;
   }, 100);
 }
