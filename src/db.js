@@ -1,7 +1,7 @@
 import { openDB } from 'idb';
 
 const DB_NAME = 'medicatrack_db';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 let dbPromise;
 
@@ -22,6 +22,10 @@ export function initDB() {
           const metricsStore = db.createObjectStore('metrics', { keyPath: 'id' });
           metricsStore.createIndex('by_type', 'type');
           metricsStore.createIndex('by_date', 'timestamp');
+        }
+        if (!db.objectStoreNames.contains('plans')) {
+          const planStore = db.createObjectStore('plans', { keyPath: 'id' });
+          planStore.createIndex('by_med_id', 'medicationId');
         }
       },
     });
@@ -84,25 +88,43 @@ export const API = {
     return metric;
   },
 
+  // --- Plans ---
+  async getPlans() {
+    const db = await initDB();
+    return db.getAll('plans');
+  },
+  async addPlan(plan) {
+    const db = await initDB();
+    plan.id = plan.id || crypto.randomUUID();
+    await db.put('plans', plan);
+    return plan;
+  },
+  async deletePlan(id) {
+    const db = await initDB();
+    await db.delete('plans', id);
+  },
+
   // --- Backup/Restore ---
   async exportData() {
     const db = await initDB();
     const data = {
       medications: await db.getAll('medications'),
       logs: await db.getAll('logs'),
-      metrics: await db.getAll('metrics')
+      metrics: await db.getAll('metrics'),
+      plans: await db.getAll('plans')
     };
     return JSON.stringify(data);
   },
   async importData(jsonString) {
     const data = JSON.parse(jsonString);
     const db = await initDB();
-    const tx = db.transaction(['medications', 'logs', 'metrics'], 'readwrite');
+    const tx = db.transaction(['medications', 'logs', 'metrics', 'plans'], 'readwrite');
     
     // clear existing data
     await tx.objectStore('medications').clear();
     await tx.objectStore('logs').clear();
     await tx.objectStore('metrics').clear();
+    await tx.objectStore('plans').clear();
 
     // insert new data
     for (const med of data.medications || []) {
@@ -113,6 +135,9 @@ export const API = {
     }
     for (const metric of data.metrics || []) {
       await tx.objectStore('metrics').put(metric);
+    }
+    for (const plan of data.plans || []) {
+      await tx.objectStore('plans').put(plan);
     }
     await tx.done;
   }

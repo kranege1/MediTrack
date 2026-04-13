@@ -8,6 +8,7 @@ const state = {
   medications: [],
   logs: [],
   metrics: [],
+  plans: [],
   html5QrCode: null
 };
 
@@ -19,6 +20,7 @@ async function loadData() {
   state.medications = await API.getMedications();
   state.logs = await API.getLogs();
   state.metrics = await API.getMetrics();
+  state.plans = await API.getPlans();
 }
 
 window.navigate = async (view) => {
@@ -66,9 +68,13 @@ function render() {
         <svg class="nav-icon" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
         Log Action
       </div>
+      <div class="nav-item ${state.currentView === 'plans' ? 'active' : ''}" onclick="window.navigate('plans')">
+        <svg class="nav-icon" viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
+        Plans
+      </div>
       <div class="nav-item ${state.currentView === 'scanner' ? 'active' : ''}" onclick="window.navigate('scanner')">
         <svg class="nav-icon" viewBox="0 0 24 24"><path d="M3 5v4h2V5h4V3H5c-1.1 0-2 .9-2 2zm2 10H3v4c0 1.1.9 2 2 2h4v-2H5v-4zm14 4h-4v2h4c1.1 0 2-.9 2-2v-4h-2v4zm0-16h-4v2h4v4h2V5c0-1.1-.9-2-2-2z"/></svg>
-        Scan Box
+        Scan
       </div>
     </div>
   `;
@@ -78,6 +84,7 @@ function getViewHTML() {
   switch(state.currentView) {
     case 'dashboard': return renderDashboard();
     case 'medications': return renderMedications();
+    case 'plans': return renderPlans();
     case 'log': return renderLog();
     case 'scanner': return renderScanner();
     case 'settings': return renderSettings();
@@ -94,6 +101,21 @@ function renderDashboard() {
   const todaysLogs = state.logs.filter(l => new Date(l.timestamp).setHours(0,0,0,0) === today).reverse();
   const latestWeight = state.metrics.filter(m => m.type === 'weight').sort((a,b) => b.timestamp - a.timestamp)[0];
 
+  let scheduleHtml = state.plans.length > 0 ? state.plans.map(p => {
+     const med = state.medications.find(m => m.id === p.medicationId) || {name: 'Unknown'};
+     const isCompleted = todaysLogs.some(l => l.medicationId === p.medicationId);
+     const statusColor = isCompleted ? 'var(--accent-color)' : '#ef4444';
+     const statusText = isCompleted ? '✓ Completed' : '• Due Today';
+     const opacity = isCompleted ? '0.6' : '1';
+     return `<div class="card" style="border-left: 4px solid ${statusColor}; opacity: ${opacity}; margin-bottom: 8px;">
+               <div>
+                 <div class="card-title">${med.name}</div>
+                 <div class="card-subtitle">Scheduled: ${p.timeOfDay} | ${p.dose} ${med.unit || 'units'}</div>
+               </div>
+               <div style="color: ${statusColor}; font-size: 13px; font-weight: 600;">${statusText}</div>
+             </div>`;
+  }).join('') : `<div class="empty-state">No scheduled plans. Set one up in the Plans tab!</div>`;
+
   let logsHtml = todaysLogs.length ? todaysLogs.map(l => {
     const med = state.medications.find(m => m.id === l.medicationId) || {name: 'Unknown'};
     return `<div class="card">
@@ -103,11 +125,18 @@ function renderDashboard() {
               </div>
               <div class="text-secondary" style="font-size: 14px;">${new Date(l.timestamp).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div>
             </div>`;
-  }).join('') : `<div class="empty-state">No medications logged today.</div>`;
+  }).join('') : `<div class="empty-state">No medications logged yet today.</div>`;
 
   return `
     <div class="glass-panel">
-      <div class="text-h2">Today's Summary</div>
+      <div class="text-h2">Due Today</div>
+      <div class="card-list">
+        ${scheduleHtml}
+      </div>
+    </div>
+
+    <div class="glass-panel">
+      <div class="text-h2">Logged Activity</div>
       <div class="card-list">
         ${logsHtml}
       </div>
@@ -186,6 +215,62 @@ function renderMedications() {
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
         <div class="text-h2" style="margin: 0;">Your Medications</div>
         <button class="btn" style="width: auto; padding: 8px 16px; font-size: 14px;" onclick="document.getElementById('add-med-panel').style.display='block'">+ Add</button>
+      </div>
+      <div class="card-list">
+        ${listHtml}
+      </div>
+    </div>
+  `;
+}
+
+// 2.5 Plans
+function renderPlans() {
+  const medOptions = state.medications.map(m => `<option value="${m.id}" data-dose="${m.dose}">${m.name}</option>`).join('');
+
+  let listHtml = state.plans.map(p => {
+    const med = state.medications.find(m => m.id === p.medicationId) || {name: 'Unknown'};
+    return `<div class="card" style="align-items: flex-start;">
+      <div>
+        <div class="card-title">${med.name}</div>
+        <div class="card-subtitle">Takes ${p.dose} ${med.unit || 'units'} at ${p.timeOfDay}</div>
+        <button class="btn btn-secondary" style="padding: 6px 10px; width: auto; font-size: 11px; margin-top: 8px; border-color: #64748b; color: #cbd5e1" onclick="window.downloadICS('${p.id}')">+ Apple Calendar</button>
+      </div>
+      <button class="btn btn-danger" style="padding: 8px 12px; width: auto;" onclick="window.deletePlan('${p.id}')">Remove</button>
+    </div>`;
+  }).join('');
+
+  if (!state.plans.length) listHtml = `<div class="empty-state">No daily schedule set.</div>`;
+
+  return `
+    <div class="glass-panel" id="add-plan-panel" style="display: none;">
+      <div class="text-h2">Create Schedule</div>
+      ${state.medications.length === 0 ? `<div class="empty-state">Add a medication first.</div>` : `
+      <div class="form-group">
+        <label>Select Medication</label>
+        <select id="plan-med" onchange="document.getElementById('plan-dose').value = this.options[this.selectedIndex].getAttribute('data-dose')">
+           <option value="" disabled selected>-- Choose --</option>
+           ${medOptions}
+        </select>
+      </div>
+      <div style="display: flex; gap: 12px;">
+        <div class="form-group" style="flex:1;">
+          <label>Time of Day</label>
+          <input type="time" id="plan-time" required>
+        </div>
+        <div class="form-group" style="flex:1;">
+          <label>Dose</label>
+          <input type="number" id="plan-dose">
+        </div>
+      </div>
+      <button class="btn" onclick="window.savePlan()">Save Plan</button>
+      <button class="btn btn-secondary" style="margin-top:12px;" onclick="document.getElementById('add-plan-panel').style.display='none'">Cancel</button>
+      `}
+    </div>
+
+    <div class="glass-panel">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <div class="text-h2" style="margin: 0;">Your Schedule</div>
+        <button class="btn" style="width: auto; padding: 8px 16px; font-size: 14px;" onclick="document.getElementById('add-plan-panel').style.display='block'">+ New</button>
       </div>
       <div class="card-list">
         ${listHtml}
@@ -356,6 +441,61 @@ window.addFromScan = (barcode) => {
     document.getElementById('med-barcode').value = barcode;
   }, 100);
 }
+
+window.savePlan = async () => {
+  const medicationId = document.getElementById('plan-med').value;
+  const timeOfDay = document.getElementById('plan-time').value;
+  const dose = document.getElementById('plan-dose').value;
+  
+  if (!medicationId || !timeOfDay) return alert("Medication and time required");
+  
+  await API.addPlan({ medicationId, timeOfDay, dose });
+  window.navigate('plans');
+};
+
+window.deletePlan = async (id) => {
+  if(confirm("Remove this schedule?")) {
+    await API.deletePlan(id);
+    window.navigate('plans');
+  }
+};
+
+window.downloadICS = (id) => {
+  const plan = state.plans.find(p => p.id === id);
+  const med = state.medications.find(m => m.id === plan.medicationId);
+  if (!plan || !med) return;
+
+  const now = new Date();
+  const timeParts = plan.timeOfDay.split(':');
+  
+  const dtStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), parseInt(timeParts[0]), parseInt(timeParts[1]));
+  
+  const pad = n => n<10 ? '0'+n : n;
+  const dtString = `${dtStart.getFullYear()}${pad(dtStart.getMonth()+1)}${pad(dtStart.getDate())}T${pad(dtStart.getHours())}${pad(dtStart.getMinutes())}00`;
+  
+  const icsStr = `BEGIN:VCALENDAR
+VERSION:2.0
+BEGIN:VEVENT
+SUMMARY:MedicaTrack: Take ${med.name}
+DESCRIPTION:Time to take ${plan.dose} ${med.unit || 'units'} of ${med.name}.
+DTSTART:${dtString}
+RRULE:FREQ=DAILY
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:MedicaTrack Reminder
+TRIGGER:-PT0M
+END:VALARM
+END:VEVENT
+END:VCALENDAR`;
+
+  const blob = new Blob([icsStr], { type: 'text/calendar;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `reminder_${med.name}.ics`;
+  a.click();
+  URL.revokeObjectURL(url);
+};
 
 window.saveMetric = async () => {
   const type = document.getElementById('metric-type').value;
