@@ -45,7 +45,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v3.1</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v3.2</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <button class="header-action" onclick="window.navigate('settings')">Data & Exports</button>
@@ -340,9 +340,7 @@ function renderScanner() {
 function initScanner() {
   state.html5QrCode = new Html5Qrcode("reader");
   const config = { 
-    fps: 10, 
-    qrbox: { width: 250, height: 250 }, 
-    aspectRatio: 1.0,
+    fps: 15, 
     formatsToSupport: [
       Html5QrcodeSupportedFormats.DATA_MATRIX,
       Html5QrcodeSupportedFormats.QR_CODE,
@@ -359,7 +357,11 @@ function initScanner() {
   };
   
   state.html5QrCode.start(
-    { facingMode: "environment" }, 
+    { 
+      facingMode: "environment",
+      width: { ideal: 1920 },
+      height: { ideal: 1080 }
+    }, 
     config,
     async (decodedText, decodedResult) => {
       // stop on success
@@ -450,9 +452,7 @@ window.startInlineScan = () => {
   
   state.html5QrCode = new Html5Qrcode("inline-reader");
   const config = { 
-    fps: 10, 
-    qrbox: { width: 220, height: 220 }, 
-    aspectRatio: 1.0,
+    fps: 15,
     formatsToSupport: [
       Html5QrcodeSupportedFormats.DATA_MATRIX,
       Html5QrcodeSupportedFormats.QR_CODE,
@@ -469,7 +469,11 @@ window.startInlineScan = () => {
   };
   
   state.html5QrCode.start(
-    { facingMode: "environment" }, 
+    { 
+      facingMode: "environment",
+      width: { ideal: 1920 },
+      height: { ideal: 1080 }
+    }, 
     config,
     async (decodedText) => {
       document.getElementById('med-barcode').value = decodedText;
