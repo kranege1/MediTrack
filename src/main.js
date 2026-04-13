@@ -45,7 +45,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v3.4</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v3.5</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <button class="header-action" onclick="window.navigate('settings')">Data & Exports</button>
@@ -328,11 +328,20 @@ function renderLog() {
 function renderScanner() {
   return `
     <div class="glass-panel">
-      <div class="text-h2">Scan Drug Package</div>
+      <div class="text-h2">Scan Medicine Package</div>
       <p class="text-body" style="margin-bottom: 20px;">Use your camera to scan EAN or UPC barcodes from your medication packaging.</p>
       
       <div id="reader"></div>
       <div id="scan-result" style="margin-top: 20px;"></div>
+
+      <div style="border-top: 1px solid var(--glass-border); margin: 24px 0;"></div>
+      
+      <div class="text-h2" style="font-size: 18px;">Manual Entry</div>
+      <p class="text-body" style="font-size: 13px; margin-bottom: 12px;">If the barcode is dotted or blurry, manually enter the Product Code (PC) digits printed on the box.</p>
+      <div style="display: flex; gap: 8px;">
+         <input type="text" id="manual-barcode" placeholder="e.g., 09088884954238" style="margin-bottom: 0; flex: 1;">
+         <button class="btn" style="width: auto; padding: 0 16px;" onclick="window.triggerSearch()">Lookup</button>
+      </div>
     </div>
   `;
 }
@@ -481,6 +490,24 @@ window.addFromScan = (barcode) => {
     document.getElementById('med-barcode').value = barcode;
   }, 100);
 }
+
+window.triggerSearch = () => {
+    const val = document.getElementById('manual-barcode').value.replace(/[^0-9A-Za-z]/g, '');
+    if (!val) return alert("Please enter the Product Code digits first!");
+    
+    // show loader immediately
+    const el = document.getElementById("scan-result");
+    el.innerHTML = `
+      <div class="card">
+        <div style="display:flex; flex-direction:column; align-items:center; width:100%; gap: 8px; padding: 8px 0;">
+           <div class="loader" style="border: 3px solid var(--glass-bg); border-top: 3px solid var(--accent-color); border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite;"></div>
+           <div style="color: var(--accent-color); font-weight: bold; font-size: 13px;">Querying Internet Database...</div>
+        </div>
+        <style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
+      </div>
+    `;
+    window.searchOnlineDB(val);
+};
 
 window.searchOnlineDB = async (barcode) => {
   const el = document.getElementById("scan-result");
