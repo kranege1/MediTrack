@@ -9,7 +9,8 @@ const state = {
   metrics: [],
   plans: [],
   fdaTimeout: null,
-  pendingAdverseEvents: null
+  pendingAdverseEvents: null,
+  pendingImageUrl: null
 };
 
 // --- DOM ---
@@ -35,7 +36,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v3.9</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.0</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <button class="header-action" onclick="window.navigate('settings')">Data & Exports</button>
@@ -144,22 +145,32 @@ function renderDashboard() {
 
 // 2. Medications
 function renderMedications() {
-  let listHtml = state.medications.map(m => `
-    <div class="card">
-      <div>
-        <div class="card-title">${m.name}</div>
-        <div class="card-subtitle">Default: ${m.dose} ${m.unit} | Format: ${m.format}</div>
-        ${m.barcode ? `<div class="card-subtitle" style="font-size: 11px; margin-top:4px;">Barcode: ${m.barcode}</div>` : ''}
-        ${m.adverse_events ? `
-            <div style="margin-top: 8px;">
-               <button class="btn btn-secondary" style="font-size: 11px; padding: 4px 8px; width: auto; background: rgba(239, 68, 68, 0.1); color: #ef4444; border-color: rgba(239, 68, 68, 0.3);" onclick="document.getElementById('adv-${m.id}').style.display = document.getElementById('adv-${m.id}').style.display === 'none' ? 'block' : 'none'">⚠️ View Side Effects</button>
-               <div id="adv-${m.id}" style="display:none; margin-top: 6px; font-size: 11px; color: #f87171; background: rgba(0,0,0,0.2); border: 1px solid rgba(239, 68, 68, 0.2); padding: 8px; border-radius: 6px; line-height: 1.4;">${m.adverse_events}</div>
-            </div>
-        ` : ''}
+  let listHtml = state.medications.map(m => {
+    // Build avatar: real image or coloured initial pill
+    const initials = m.name.substring(0, 2).toUpperCase();
+    const hue = [...m.name].reduce((h, c) => h + c.charCodeAt(0), 0) % 360;
+    const avatar = m.image_url
+      ? `<img src="${m.image_url}" alt="${m.name}" style="width:52px; height:52px; border-radius:10px; object-fit:contain; background:#fff; flex-shrink:0; border:1px solid rgba(255,255,255,0.1);" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+         <div style="display:none; width:52px; height:52px; border-radius:10px; background:hsl(${hue},55%,35%); align-items:center; justify-content:center; font-size:16px; font-weight:700; color:white; flex-shrink:0;">${initials}</div>`
+      : `<div style="width:52px; height:52px; border-radius:10px; background:hsl(${hue},55%,35%); display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:700; color:white; flex-shrink:0;">${initials}</div>`;
+    return `
+    <div class="card" style="align-items: flex-start; gap: 12px;">
+      <div style="display:flex; gap:12px; align-items:flex-start; flex:1; min-width:0;">
+        ${avatar}
+        <div style="flex:1; min-width:0;">
+          <div class="card-title">${m.name}</div>
+          <div class="card-subtitle">Default: ${m.dose} ${m.unit} | Format: ${m.format}</div>
+          ${m.adverse_events ? `
+              <div style="margin-top: 8px;">
+                 <button class="btn btn-secondary" style="font-size: 11px; padding: 4px 8px; width: auto; background: rgba(239, 68, 68, 0.1); color: #ef4444; border-color: rgba(239, 68, 68, 0.3);" onclick="document.getElementById('adv-${m.id}').style.display = document.getElementById('adv-${m.id}').style.display === 'none' ? 'block' : 'none'">⚠️ View Side Effects</button>
+                 <div id="adv-${m.id}" style="display:none; margin-top: 6px; font-size: 11px; color: #f87171; background: rgba(0,0,0,0.2); border: 1px solid rgba(239, 68, 68, 0.2); padding: 8px; border-radius: 6px; line-height: 1.4;">${m.adverse_events}</div>
+              </div>
+          ` : ''}
+        </div>
       </div>
-      <button class="btn btn-danger" style="padding: 8px 12px; width: auto;" onclick="window.deleteMed('${m.id}')">Delete</button>
-    </div>
-  `).join('');
+      <button class="btn btn-danger" style="padding: 8px 12px; width: auto; flex-shrink:0;" onclick="window.deleteMed('${m.id}')">Delete</button>
+    </div>`;
+  }).join('');
 
   if (!state.medications.length) listHtml = `<div class="empty-state">No medications found. Log one to start!</div>`;
 
@@ -339,8 +350,14 @@ window.saveMed = async () => {
   
   if (!name || !dose) return alert("Name and dose required");
   
-  await API.addMedication({ name, dose, unit, format, adverse_events: state.pendingAdverseEvents });
+  // Fetch Wikipedia image if not already set
+  if (!state.pendingImageUrl) {
+    state.pendingImageUrl = await window._fetchDrugImage(name);
+  }
+  
+  await API.addMedication({ name, dose, unit, format, adverse_events: state.pendingAdverseEvents, image_url: state.pendingImageUrl });
   state.pendingAdverseEvents = null;
+  state.pendingImageUrl = null;
   window.navigate('medications');
 };
 
@@ -424,7 +441,7 @@ window.searchFDA = (query) => {
       const ingredients = await window._wikiExtractIngredients(query);
 
       if (ingredients.length === 0) {
-        dropdown.innerHTML = `<div style="padding: 12px; font-size: 13px; color: #94a3b8;">Not found in FDA or Wikipedia.<br><span style="font-size: 11px;">Try typing the active ingredient name directly (e.g., Rosuvastatin).</span></div>`;
+        dropdown.innerHTML = window._notFoundHTML(query);
         return;
       }
 
@@ -447,7 +464,7 @@ window.searchFDA = (query) => {
           `📚 Wikipedia identified active ingredient: <strong>${matchedIngredient}</strong></div>` +
           window._fdaResultsHTML(wikiResults, 'wiki');
       } else {
-        dropdown.innerHTML = `<div style="padding: 12px; font-size: 13px; color: #94a3b8;">Not found in FDA or Wikipedia.<br><span style="font-size: 11px;">Try typing the active ingredient name directly (e.g., Rosuvastatin).</span></div>`;
+        dropdown.innerHTML = window._notFoundHTML(query);
       }
     } catch(e) {
         dropdown.innerHTML = `<div style="padding: 12px; font-size: 13px; color: #94a3b8;">Lookup failed. Check your connection.</div>`;
@@ -544,7 +561,6 @@ window.selectFDA = (brand, adverseEvents, doseStr, doseUnit) => {
   
   if (doseStr && doseStr !== 'undefined' && doseStr.trim() !== '') {
       document.getElementById('med-dose').value = doseStr;
-      // Also update the unit dropdown if we detected the unit
       if (doseUnit && doseUnit !== 'undefined') {
         const unitSelect = document.getElementById('med-unit');
         const match = [...unitSelect.options].find(o => o.value === doseUnit);
@@ -561,6 +577,91 @@ window.selectFDA = (brand, adverseEvents, doseStr, doseUnit) => {
       state.pendingAdverseEvents = null;
       adverseEl.style.display = 'none';
   }
+  // Kick off background image fetch
+  state.pendingImageUrl = null;
+  window._fetchDrugImage(brand).then(url => { state.pendingImageUrl = url; });
+};
+
+// Build the "not found" fallback panel in the dropdown
+window._notFoundHTML = (query) => {
+  const safeQuery = query.replace(/'/g, ' ').replace(/"/g, ' ');
+  return `
+    <div style="padding: 14px;">
+      <div style="font-size: 12px; color: #94a3b8; margin-bottom: 10px;">⚠️ Not found in FDA, Wikipedia, or generic databases.</div>
+      <button onclick="window.saveAsTyped('${safeQuery}')" style="width:100%; padding:9px 12px; background: rgba(99,102,241,0.15); color: #a5b4fc; border: 1px solid rgba(99,102,241,0.4); border-radius: 8px; font-size: 13px; font-weight: 600; cursor:pointer; margin-bottom: 10px;">💊 Save &ldquo;${safeQuery}&rdquo; as typed</button>
+      <div style="font-size: 11px; color: #64748b; margin-bottom: 6px;">Optional: link active ingredient to pull FDA data</div>
+      <div style="display:flex; gap:6px;">
+        <input id="fda-ingredient-input" type="text" placeholder="e.g. Rosuvastatin" style="flex:1; padding:7px 10px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); border-radius:6px; color:white; font-size:12px;">
+        <button onclick="window.fetchFDAIngredient('${safeQuery}')" style="padding:7px 12px; background:var(--accent-color); color:#000; border:none; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer;">Fetch</button>
+      </div>
+    </div>`;
+};
+
+// "Save as typed" — close dropdown, set name, fetch image
+window.saveAsTyped = (name) => {
+  document.getElementById('med-name').value = name;
+  document.getElementById('fda-dropdown').style.display = 'none';
+  state.pendingAdverseEvents = null;
+  state.pendingImageUrl = null;
+  window._fetchDrugImage(name).then(url => { state.pendingImageUrl = url; });
+};
+
+// Fetch FDA data for a manually entered ingredient, keep the brand name
+window.fetchFDAIngredient = async (brandName) => {
+  const ing = (document.getElementById('fda-ingredient-input') || {}).value;
+  if (!ing || ing.trim().length < 3) return alert('Enter an active ingredient name first.');
+  const res = await fetch(`https://api.fda.gov/drug/label.json?search=openfda.generic_name:"${encodeURIComponent(ing.trim())}*"&limit=1`);
+  const data = await res.json();
+  if (!data.results || !data.results.length) return alert(`"${ing}" not found in FDA either.`);
+  const r = data.results[0];
+  let adverseRaw = '';
+  if (r.adverse_reactions && r.adverse_reactions.length > 0) {
+    adverseRaw = r.adverse_reactions[0].replace(/^[0-9]+(\.[0-9]+)?\s*ADVERSE REACTIONS\s*/i, '');
+  }
+  let adverseText = adverseRaw.replace(/'/g, ' ').replace(/"/g, ' ').replace(/\n/g, ' ');
+  if (adverseText.length > 250) adverseText = adverseText.substring(0, 250) + '...';
+  let doseStr = '';
+  let doseUnit = 'mg';
+  let doseBlob = (r.dosage_and_administration || []).join(' ') + ' ' + (r.active_ingredient || []).join(' ');
+  let doseMatches = [...doseBlob.matchAll(/\b(\d+(?:\.\d+)?)\s*(mg|ml|mcg|ug|g)\b/ig)];
+  if (doseMatches.length > 0) {
+    let uniqueDoses = [...new Set(doseMatches.map(m => m[1]))];
+    doseStr = uniqueDoses.slice(0, 4).sort((a, b) => parseFloat(a) - parseFloat(b)).join(', ');
+    const uc = {}; doseMatches.forEach(m => { const u = m[2].toLowerCase(); uc[u] = (uc[u]||0)+1; });
+    doseUnit = Object.entries(uc).sort((a,b) => b[1]-a[1])[0][0];
+  }
+  // Set brand name (not the generic), link adverse events + dose
+  document.getElementById('med-name').value = brandName;
+  document.getElementById('fda-dropdown').style.display = 'none';
+  if (doseStr) {
+    document.getElementById('med-dose').value = doseStr;
+    const unitSelect = document.getElementById('med-unit');
+    const m = [...unitSelect.options].find(o => o.value === doseUnit);
+    if (m) unitSelect.value = doseUnit;
+  }
+  const adverseEl = document.getElementById('med-fda-adverse');
+  if (adverseText.trim()) {
+    state.pendingAdverseEvents = adverseText;
+    adverseEl.style.display = 'block';
+    adverseEl.innerHTML = `<strong>⚠️ Main Adverse Events (via ${ing}):</strong><br>${adverseText}`;
+  }
+  state.pendingImageUrl = null;
+  window._fetchDrugImage(brandName).then(url => { state.pendingImageUrl = url; });
+};
+
+// Fetch Wikipedia thumbnail for a drug name
+window._fetchDrugImage = async (name) => {
+  try {
+    const s = await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(name + ' drug')}&format=json&origin=*&srlimit=1`);
+    const sd = await s.json();
+    if (!sd.query.search.length) return null;
+    const title = sd.query.search[0].title;
+    const i = await fetch(`https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&titles=${encodeURIComponent(title)}&format=json&origin=*&pithumbsize=120`);
+    const id = await i.json();
+    const pages = id.query.pages;
+    const page = pages[Object.keys(pages)[0]];
+    return (page && page.thumbnail) ? page.thumbnail.source : null;
+  } catch(e) { return null; }
 };
 
 window.downloadICS = (id) => {
