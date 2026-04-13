@@ -35,7 +35,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v3.7</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v3.8</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <button class="header-action" onclick="window.navigate('settings')">Data & Exports</button>
@@ -397,58 +397,89 @@ window.searchFDA = (query) => {
       return;
   }
   
-  dropdown.innerHTML = `<div style="padding: 12px; font-size: 13px; color: var(--accent-color);">Querying United States FDA API...</div>`;
+  dropdown.innerHTML = `<div style="padding: 12px; font-size: 13px; color: var(--accent-color);">Querying FDA database...</div>`;
   dropdown.style.display = 'block';
 
   state.fdaTimeout = setTimeout(async () => {
     try {
-      const res = await fetch(`https://api.fda.gov/drug/label.json?search=openfda.brand_name:"${encodeURIComponent(query)}*"&limit=5`);
-      const data = await res.json();
+      // === PASS 1: Search by brand name ===
+      const res1 = await fetch(`https://api.fda.gov/drug/label.json?search=openfda.brand_name:"${encodeURIComponent(query)}*"&limit=5`);
+      const data1 = await res1.json();
       
-      if (data.results && data.results.length > 0) {
-        dropdown.innerHTML = data.results.map(r => {
-           let brand = 'Unknown Brand';
-           let generic = '';
-           if (r.openfda && r.openfda.brand_name) brand = r.openfda.brand_name[0];
-           if (r.openfda && r.openfda.generic_name) generic = r.openfda.generic_name[0];
-           
-           let adverseRaw = '';
-           if (r.adverse_reactions && r.adverse_reactions.length > 0) {
-             adverseRaw = r.adverse_reactions[0];
-             adverseRaw = adverseRaw.replace(/^[0-9]+(\.[0-9]+)?\s*ADVERSE REACTIONS\s*/i, '');
-           }
-           let adverseText = adverseRaw.replace(/'/g, ' ').replace(/"/g, ' ').replace(/\n/g, ' ');
-           if (adverseText.length > 250) adverseText = adverseText.substring(0, 250) + '...';
-
-           let doseStr = '';
-           let doseBlob = (r.dosage_and_administration || []).join(' ') + ' ' + (r.active_ingredient || []).join(' ');
-           let doseMatches = [...doseBlob.matchAll(/\b(\d+(?:\.\d+)?)\s*(mg|ml|mcg|ug|g)\b/ig)];
-           if (doseMatches.length > 0) {
-              let uniqueDoses = [...new Set(doseMatches.map(m => m[1]))];
-              doseStr = uniqueDoses.slice(0, 4).sort((a,b) => parseFloat(a) - parseFloat(b)).join(', ');
-           }
-           
-           return `<div style="padding: 12px; border-bottom: 1px solid var(--glass-border); cursor: pointer; transition: background 0.2s;" 
-                        onclick="window.selectFDA('${brand}', '${adverseText}', '${doseStr}')" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">
-                     <div style="font-weight: bold; color: white;">${brand}</div>
-                     <div style="font-size: 11px; color: #cbd5e1; margin-top: 2px;">${generic} ${doseStr ? '| Doses: ' + doseStr : ''}</div>
-                   </div>`;
-        }).join('');
+      if (data1.results && data1.results.length > 0) {
+        dropdown.innerHTML = window._fdaResultsHTML(data1.results, false);
       } else {
-        dropdown.innerHTML = `<div style="padding: 12px; font-size: 13px; color: #94a3b8;">No direct FDA matches found.</div>`;
+        // === PASS 2: Fallback — search by generic / active ingredient name ===
+        dropdown.innerHTML = `<div style="padding: 12px; font-size: 13px; color: var(--accent-color);">No brand match — searching by active ingredient...</div>`;
+        const res2 = await fetch(`https://api.fda.gov/drug/label.json?search=openfda.generic_name:"${encodeURIComponent(query)}*"&limit=5`);
+        const data2 = await res2.json();
+        
+        if (data2.results && data2.results.length > 0) {
+          dropdown.innerHTML = window._fdaResultsHTML(data2.results, true);
+        } else {
+          dropdown.innerHTML = `<div style="padding: 12px; font-size: 13px; color: #94a3b8;">No FDA matches found for brand or generic name.</div>`;
+        }
       }
     } catch(e) {
-        dropdown.innerHTML = `<div style="padding: 12px; font-size: 13px; color: #94a3b8;">No matches.</div>`;
+        dropdown.innerHTML = `<div style="padding: 12px; font-size: 13px; color: #94a3b8;">FDA lookup failed. Check your connection.</div>`;
     }
   }, 500);
 };
 
-window.selectFDA = (brand, adverseEvents, doseStr) => {
+// Helper: renders FDA drug results into dropdown rows
+window._fdaResultsHTML = (results, isGenericFallback) => {
+  return results.map(r => {
+    let brand = 'Unknown Brand';
+    let generic = '';
+    if (r.openfda && r.openfda.brand_name) brand = r.openfda.brand_name[0];
+    if (r.openfda && r.openfda.generic_name) generic = r.openfda.generic_name[0];
+
+    let adverseRaw = '';
+    if (r.adverse_reactions && r.adverse_reactions.length > 0) {
+      adverseRaw = r.adverse_reactions[0];
+      adverseRaw = adverseRaw.replace(/^[0-9]+(\.[0-9]+)?\s*ADVERSE REACTIONS\s*/i, '');
+    }
+    let adverseText = adverseRaw.replace(/'/g, ' ').replace(/"/g, ' ').replace(/\n/g, ' ');
+    if (adverseText.length > 250) adverseText = adverseText.substring(0, 250) + '...';
+
+    let doseStr = '';
+    let doseUnit = 'mg';
+    let doseBlob = (r.dosage_and_administration || []).join(' ') + ' ' + (r.active_ingredient || []).join(' ');
+    let doseMatches = [...doseBlob.matchAll(/\b(\d+(?:\.\d+)?)\s*(mg|ml|mcg|ug|g)\b/ig)];
+    if (doseMatches.length > 0) {
+       let uniqueDoses = [...new Set(doseMatches.map(m => m[1]))];
+       doseStr = uniqueDoses.slice(0, 4).sort((a, b) => parseFloat(a) - parseFloat(b)).join(', ');
+       const unitCounts = {};
+       doseMatches.forEach(m => { const u = m[2].toLowerCase(); unitCounts[u] = (unitCounts[u] || 0) + 1; });
+       doseUnit = Object.entries(unitCounts).sort((a, b) => b[1] - a[1])[0][0];
+    }
+
+    const badge = isGenericFallback
+      ? `<span style="font-size: 10px; background: rgba(99,102,241,0.2); color: #a5b4fc; border: 1px solid rgba(99,102,241,0.4); border-radius: 4px; padding: 1px 5px; margin-left: 6px;">Generic match</span>`
+      : '';
+
+    return `<div style="padding: 12px; border-bottom: 1px solid var(--glass-border); cursor: pointer; transition: background 0.2s;"
+                 onclick="window.selectFDA('${brand}', '${adverseText}', '${doseStr}', '${doseUnit}')"
+                 onmouseover="this.style.background='rgba(255,255,255,0.05)'"
+                 onmouseout="this.style.background='transparent'">
+               <div style="font-weight: bold; color: white;">${brand}${badge}</div>
+               <div style="font-size: 11px; color: #cbd5e1; margin-top: 2px;">${generic}${doseStr ? ' | Doses: ' + doseStr + ' ' + doseUnit : ''}</div>
+             </div>`;
+  }).join('');
+};
+
+window.selectFDA = (brand, adverseEvents, doseStr, doseUnit) => {
   document.getElementById('med-name').value = brand;
   document.getElementById('fda-dropdown').style.display = 'none';
   
   if (doseStr && doseStr !== 'undefined' && doseStr.trim() !== '') {
       document.getElementById('med-dose').value = doseStr;
+      // Also update the unit dropdown if we detected the unit
+      if (doseUnit && doseUnit !== 'undefined') {
+        const unitSelect = document.getElementById('med-unit');
+        const match = [...unitSelect.options].find(o => o.value === doseUnit);
+        if (match) unitSelect.value = doseUnit;
+      }
   }
   
   const adverseEl = document.getElementById('med-fda-adverse');
