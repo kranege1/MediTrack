@@ -35,7 +35,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v3.8</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v3.9</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <button class="header-action" onclick="window.navigate('settings')">Data & Exports</button>
@@ -402,32 +402,98 @@ window.searchFDA = (query) => {
 
   state.fdaTimeout = setTimeout(async () => {
     try {
-      // === PASS 1: Search by brand name ===
+      // === PASS 1: FDA brand name ===
       const res1 = await fetch(`https://api.fda.gov/drug/label.json?search=openfda.brand_name:"${encodeURIComponent(query)}*"&limit=5`);
       const data1 = await res1.json();
-      
       if (data1.results && data1.results.length > 0) {
-        dropdown.innerHTML = window._fdaResultsHTML(data1.results, false);
-      } else {
-        // === PASS 2: Fallback — search by generic / active ingredient name ===
-        dropdown.innerHTML = `<div style="padding: 12px; font-size: 13px; color: var(--accent-color);">No brand match — searching by active ingredient...</div>`;
-        const res2 = await fetch(`https://api.fda.gov/drug/label.json?search=openfda.generic_name:"${encodeURIComponent(query)}*"&limit=5`);
-        const data2 = await res2.json();
-        
-        if (data2.results && data2.results.length > 0) {
-          dropdown.innerHTML = window._fdaResultsHTML(data2.results, true);
-        } else {
-          dropdown.innerHTML = `<div style="padding: 12px; font-size: 13px; color: #94a3b8;">No FDA matches found for brand or generic name.</div>`;
+        dropdown.innerHTML = window._fdaResultsHTML(data1.results, 'brand');
+        return;
+      }
+
+      // === PASS 2: FDA generic / active ingredient name ===
+      dropdown.innerHTML = `<div style="padding: 12px; font-size: 13px; color: var(--accent-color);">No brand match — trying active ingredient...</div>`;
+      const res2 = await fetch(`https://api.fda.gov/drug/label.json?search=openfda.generic_name:"${encodeURIComponent(query)}*"&limit=5`);
+      const data2 = await res2.json();
+      if (data2.results && data2.results.length > 0) {
+        dropdown.innerHTML = window._fdaResultsHTML(data2.results, 'generic');
+        return;
+      }
+
+      // === PASS 3: Wikipedia ingredient extraction — then re-query FDA ===
+      dropdown.innerHTML = `<div style="padding: 12px; font-size: 13px; color: var(--accent-color);">Searching Wikipedia for active ingredients...</div>`;
+      const ingredients = await window._wikiExtractIngredients(query);
+
+      if (ingredients.length === 0) {
+        dropdown.innerHTML = `<div style="padding: 12px; font-size: 13px; color: #94a3b8;">Not found in FDA or Wikipedia.<br><span style="font-size: 11px;">Try typing the active ingredient name directly (e.g., Rosuvastatin).</span></div>`;
+        return;
+      }
+
+      // Try each extracted ingredient against FDA until we get results
+      let wikiResults = [];
+      let matchedIngredient = '';
+      for (const ing of ingredients) {
+        const res3 = await fetch(`https://api.fda.gov/drug/label.json?search=openfda.generic_name:"${encodeURIComponent(ing)}*"&limit=5`);
+        const data3 = await res3.json();
+        if (data3.results && data3.results.length > 0) {
+          wikiResults = data3.results;
+          matchedIngredient = ing;
+          break;
         }
       }
+
+      if (wikiResults.length > 0) {
+        dropdown.innerHTML =
+          `<div style="padding: 8px 12px; font-size: 11px; color: #a5b4fc; background: rgba(99,102,241,0.1); border-bottom: 1px solid rgba(99,102,241,0.2);">` +
+          `📚 Wikipedia identified active ingredient: <strong>${matchedIngredient}</strong></div>` +
+          window._fdaResultsHTML(wikiResults, 'wiki');
+      } else {
+        dropdown.innerHTML = `<div style="padding: 12px; font-size: 13px; color: #94a3b8;">Not found in FDA or Wikipedia.<br><span style="font-size: 11px;">Try typing the active ingredient name directly (e.g., Rosuvastatin).</span></div>`;
+      }
     } catch(e) {
-        dropdown.innerHTML = `<div style="padding: 12px; font-size: 13px; color: #94a3b8;">FDA lookup failed. Check your connection.</div>`;
+        dropdown.innerHTML = `<div style="padding: 12px; font-size: 13px; color: #94a3b8;">Lookup failed. Check your connection.</div>`;
     }
   }, 500);
 };
 
-// Helper: renders FDA drug results into dropdown rows
-window._fdaResultsHTML = (results, isGenericFallback) => {
+// Pass 3 helper: query Wikipedia and extract pharmaceutical ingredient names
+window._wikiExtractIngredients = async (query) => {
+  try {
+    // Step 1: find the Wikipedia article
+    const searchRes = await fetch(
+      `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query + ' drug')}&format=json&origin=*&srlimit=3`
+    );
+    const searchData = await searchRes.json();
+    if (!searchData.query.search.length) return [];
+
+    // Step 2: fetch the article intro text
+    const title = searchData.query.search[0].title;
+    const extractRes = await fetch(
+      `https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exintro=1&titles=${encodeURIComponent(title)}&format=json&origin=*&exsentences=10&explaintext=1`
+    );
+    const extractData = await extractRes.json();
+    const pages = extractData.query.pages;
+    const page = pages[Object.keys(pages)[0]];
+    if (!page || !page.extract) return [];
+
+    const text = page.extract;
+
+    // Step 3: extract names using common pharmaceutical suffixes
+    const pharmaRx = /\b([A-Z][a-z]{2,}(?:statin|pril|sartan|olol|xaban|tidine|mide|prazole|zine|mycin|cycline|cillin|mab|nib|zumab|ximab|tide|zide|fenac|profen|codone|phine|methasone|sone|lone|dine|pine|azole|oxide|amine|bine|vir|lukast|dronate|setron|gliptin|gliflozin|tide|tide|urea|fibrate|ezetimibe|mibe))\b/g;
+    const matches = [...text.matchAll(pharmaRx)];
+    const extracted = [...new Set(matches.map(m => m[1]))];
+
+    // Also scan for explicit active ingredient mentions
+    const activeRx = /active ingredient[s]?[^.]{0,80}?(\b[A-Z][a-z]{4,}\b)/gi;
+    const activeMatches = [...text.matchAll(activeRx)];
+    activeMatches.forEach(m => { if (m[1]) extracted.unshift(m[1]); });
+
+    return [...new Set(extracted)].slice(0, 5);
+  } catch(e) {
+    return [];
+  }
+};
+
+window._fdaResultsHTML = (results, matchType) => {
   return results.map(r => {
     let brand = 'Unknown Brand';
     let generic = '';
@@ -454,9 +520,12 @@ window._fdaResultsHTML = (results, isGenericFallback) => {
        doseUnit = Object.entries(unitCounts).sort((a, b) => b[1] - a[1])[0][0];
     }
 
-    const badge = isGenericFallback
-      ? `<span style="font-size: 10px; background: rgba(99,102,241,0.2); color: #a5b4fc; border: 1px solid rgba(99,102,241,0.4); border-radius: 4px; padding: 1px 5px; margin-left: 6px;">Generic match</span>`
-      : '';
+    const badges = {
+      'generic': `<span style="font-size: 10px; background: rgba(99,102,241,0.2); color: #a5b4fc; border: 1px solid rgba(99,102,241,0.4); border-radius: 4px; padding: 1px 5px; margin-left: 6px;">Generic match</span>`,
+      'wiki':    `<span style="font-size: 10px; background: rgba(16,185,129,0.2); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.4); border-radius: 4px; padding: 1px 5px; margin-left: 6px;">📚 Via Wikipedia</span>`,
+      'brand':   ''
+    };
+    const badge = badges[matchType] || '';
 
     return `<div style="padding: 12px; border-bottom: 1px solid var(--glass-border); cursor: pointer; transition: background 0.2s;"
                  onclick="window.selectFDA('${brand}', '${adverseText}', '${doseStr}', '${doseUnit}')"
@@ -467,6 +536,7 @@ window._fdaResultsHTML = (results, isGenericFallback) => {
              </div>`;
   }).join('');
 };
+
 
 window.selectFDA = (brand, adverseEvents, doseStr, doseUnit) => {
   document.getElementById('med-name').value = brand;
