@@ -46,7 +46,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v2.0</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v2.1</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <button class="header-action" onclick="window.navigate('settings')">Data & Exports</button>
@@ -459,9 +459,39 @@ window.quickLog = async (medId, amount) => {
 
 window.addFromScanText = (text) => {
   window.navigate('medications');
+  
+  let name = text;
+  let dose = '';
+  let unit = 'mg';
+  
+  // Try to find a pattern like "400 mg" or "400mg" or "10 ml"
+  const match = text.match(/(\\d+[\\.,]?\\d*)\\s*(mg|ml|g|mcg|ug)/i);
+  if (match) {
+    dose = match[1].replace(',', '.');
+    let foundUnit = match[2].toLowerCase();
+    if (['mg', 'ml'].includes(foundUnit)) {
+       unit = foundUnit;
+    } else {
+       unit = 'units';
+    }
+    name = text.replace(match[0], '').trim();
+  } else {
+    // Just find a standalone number that might be the dose
+    const numMatch = text.match(/\\b(\\d+)\\b/);
+    if (numMatch) {
+       dose = numMatch[1];
+       name = text.replace(numMatch[0], '').trim();
+    }
+  }
+
+  // Final text cleanup
+  name = name.replace(/^[-\\.,\\s]+|[-\\.,\\s]+$/g, '').trim();
+
   setTimeout(() => {
-    document.getElementById('add-med-panel').style.display='block';
-    document.getElementById('med-name').value = text;
+    document.getElementById('add-med-panel').style.display = 'block';
+    document.getElementById('med-name').value = name;
+    if (dose) document.getElementById('med-dose').value = dose;
+    document.getElementById('med-unit').value = unit;
   }, 100);
 }
 
