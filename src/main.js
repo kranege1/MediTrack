@@ -10,9 +10,10 @@ const state = {
   plans: [],
   fdaTimeout: null,
   pendingAdverseEvents: null,
-  pendingImageUrl: null,
+  editingMedId: null,
   lang: localStorage.getItem('medilang') || 'en'
 };
+const _wikiSummaryCache = new Map();
 
 // === i18n ===
 const i18n = {
@@ -54,7 +55,9 @@ const i18n = {
     importError:'Error reading backup file.', lookupFailed:'Lookup failed. Check your connection.',
     wikiIngredientFound:'Wikipedia identified active ingredient: {ing}', translating:'Translating...',
     unknown:'Unknown', units:'units', pillUnit:'pill(s)', kg:'kg',
-    pillFormat:'Pill', liquidFormat:'Liquid', injectionFormat:'Injection', inhalerFormat:'Inhaler'
+    pillFormat:'Pill', liquidFormat:'Liquid', injectionFormat:'Injection', inhalerFormat:'Inhaler',
+    detailsBtn:'Details', editBtn:'Edit', updateMedication:'Edit Medication',
+    wikiSummary:'Wikipedia Summary', readMore:'Full Article'
   },
   de: {
     dataExports:'Daten & Export', home:'Start', meds:'Medikamente', logAction:'Einnahme', plans:'Pläne',
@@ -94,7 +97,9 @@ const i18n = {
     importError:'Fehler beim Lesen der Sicherungsdatei.', lookupFailed:'Suche fehlgeschlagen. Verbindung prüfen.',
     wikiIngredientFound:'Wikipedia hat Wirkstoff gefunden: {ing}', translating:'Übersetze...',
     unknown:'Unbekannt', units:'Einheiten', pillUnit:'Pille(n)', kg:'kg',
-    pillFormat:'Pille', liquidFormat:'Flüssigkeit', injectionFormat:'Injektion', inhalerFormat:'Inhalator'
+    pillFormat:'Pille', liquidFormat:'Flüssigkeit', injectionFormat:'Injektion', inhalerFormat:'Inhalator',
+    detailsBtn:'Details', editBtn:'Bearbeiten', updateMedication:'Medikament bearbeiten',
+    wikiSummary:'Wikipedia-Zusammenfassung', readMore:'Vollständiger Artikel'
   }
 };
 const t = (key) => (i18n[state.lang] || i18n.en)[key] || key;
@@ -134,7 +139,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.1</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.3</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -250,13 +255,10 @@ function renderDashboard() {
 // 2. Medications
 function renderMedications() {
   let listHtml = state.medications.map(m => {
-    // Build avatar: real image or coloured initial pill
+    // Build avatar: deterministic coloured initial pill
     const initials = m.name.substring(0, 2).toUpperCase();
     const hue = [...m.name].reduce((h, c) => h + c.charCodeAt(0), 0) % 360;
-    const avatar = m.image_url
-      ? `<img src="${m.image_url}" alt="${m.name}" style="width:52px; height:52px; border-radius:10px; object-fit:contain; background:#fff; flex-shrink:0; border:1px solid rgba(255,255,255,0.1);" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
-         <div style="display:none; width:52px; height:52px; border-radius:10px; background:hsl(${hue},55%,35%); align-items:center; justify-content:center; font-size:16px; font-weight:700; color:white; flex-shrink:0;">${initials}</div>`
-      : `<div style="width:52px; height:52px; border-radius:10px; background:hsl(${hue},55%,35%); display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:700; color:white; flex-shrink:0;">${initials}</div>`;
+    const avatar = `<div style="width:52px; height:52px; border-radius:10px; background:hsl(${hue},55%,35%); display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:700; color:white; flex-shrink:0;">${initials}</div>`;
     return `
     <div class="card" style="align-items: flex-start; gap: 12px;">
       <div style="display:flex; gap:12px; align-items:flex-start; flex:1; min-width:0;">
@@ -271,9 +273,14 @@ function renderMedications() {
                  <div id="adv-${m.id}" style="display:none; margin-top: 6px; font-size: 11px; color: #f87171; background: rgba(0,0,0,0.2); border: 1px solid rgba(239, 68, 68, 0.2); padding: 8px; border-radius: 6px; line-height: 1.4;">${m.adverse_events}</div>
               </div>
           ` : ''}
+          <div id="wiki-${m.id}" style="display:none; margin-top: 10px; font-size: 13px; color: #cbd5e1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 12px; border-radius: 8px; line-height: 1.5;"></div>
         </div>
       </div>
-      <button class="btn btn-danger" style="padding: 8px 12px; width: auto; flex-shrink:0;" onclick="window.deleteMed('${m.id}')">${t('delete')}</button>
+      <div style="display: flex; gap: 8px; margin-top: 12px; width: 100%; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px;">
+         <button class="btn btn-secondary" style="padding: 8px; flex: 1; font-size:12px;" onclick="window.showDetails('${m.id}', '${m.name}')">${t('detailsBtn')}</button>
+         <button class="btn btn-secondary" style="padding: 8px; flex: 1; font-size:12px;" onclick="window.editMed('${m.id}')">${t('editBtn')}</button>
+         <button class="btn btn-danger" style="padding: 8px; flex: 0.5; font-size:12px;" onclick="window.deleteMed('${m.id}')">${t('delete')}</button>
+      </div>
     </div>`;
   }).join('');
 
@@ -281,7 +288,8 @@ function renderMedications() {
 
   return `
     <div class="glass-panel" id="add-med-panel" style="display: none;">
-      <div class="text-h2">${t('addMedication')}</div>
+      <div class="text-h2" id="add-med-title">${t('addMedication')}</div>
+      <input type="hidden" id="med-id">
       <div class="form-group" style="position: relative;">
         <label>${t('nameLbl')}</label>
         <input type="text" id="med-name" placeholder="E.g., Aspirin" autocomplete="off" oninput="window.searchFDA(this.value)">
@@ -312,14 +320,14 @@ function renderMedications() {
            <option value="Inhaler">${t('inhalerFormat')}</option>
         </select>
       </div>
-      <button class="btn" onclick="window.saveMed()">${t('saveMedication')}</button>
-      <button class="btn btn-secondary" style="margin-top:12px;" onclick="document.getElementById('add-med-panel').style.display='none'">${t('cancel')}</button>
+      <button class="btn" id="med-save-btn" onclick="window.saveMed()">${t('saveMedication')}</button>
+      <button class="btn btn-secondary" style="margin-top:12px;" onclick="window.closeMedPanel()">${t('cancel')}</button>
     </div>
 
     <div class="glass-panel">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
         <div class="text-h2" style="margin: 0;">${t('yourMedications')}</div>
-        <button class="btn" style="width: auto; padding: 8px 16px; font-size: 14px;" onclick="document.getElementById('add-med-panel').style.display='block'">${t('addBtn')}</button>
+        <button class="btn" style="width: auto; padding: 8px 16px; font-size: 14px;" onclick="window.openAddMedPanel()">${t('addBtn')}</button>
       </div>
       <div class="card-list">
         ${listHtml}
@@ -448,6 +456,7 @@ function renderSettings() {
 // === GLOBALS EXPOSED FOR HTML ===
 
 window.saveMed = async () => {
+  const id = document.getElementById('med-id').value;
   const name = document.getElementById('med-name').value;
   const dose = document.getElementById('med-dose').value;
   const unit = document.getElementById('med-unit').value;
@@ -455,15 +464,100 @@ window.saveMed = async () => {
   
   if (!name || !dose) return alert(t('nameAndDose'));
   
-  // Fetch Wikipedia image if not already set
-  if (!state.pendingImageUrl) {
-    state.pendingImageUrl = await window._fetchDrugImage(name);
+  // Use existing data if editing, or fetch if new/changed
+  let advEvents = state.pendingAdverseEvents;
+
+  if (id) {
+    const existing = state.medications.find(m => m.id === id);
+    if (existing && existing.name === name) {
+      if (!advEvents) advEvents = existing.adverse_events;
+    }
   }
   
-  await API.addMedication({ name, dose, unit, format, adverse_events: state.pendingAdverseEvents, image_url: state.pendingImageUrl });
-  state.pendingAdverseEvents = null;
-  state.pendingImageUrl = null;
+  await API.addMedication({ id: id || undefined, name, dose, unit, format, adverse_events: advEvents });
+  window.closeMedPanel();
   window.navigate('medications');
+};
+
+window.editMed = (id) => {
+  const med = state.medications.find(m => m.id === id);
+  if (!med) return;
+  
+  state.editingMedId = id;
+  document.getElementById('med-id').value = id;
+  document.getElementById('med-name').value = med.name;
+  document.getElementById('med-dose').value = med.dose;
+  document.getElementById('med-unit').value = med.unit;
+  document.getElementById('med-format').value = med.format;
+  
+  document.getElementById('add-med-title').innerText = t('updateMedication');
+  document.getElementById('med-save-btn').innerText = t('saveMedication');
+  document.getElementById('add-med-panel').style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+window.openAddMedPanel = () => {
+  window.closeMedPanel();
+  document.getElementById('add-med-panel').style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+window.closeMedPanel = () => {
+  state.editingMedId = null;
+  state.pendingAdverseEvents = null;
+  document.getElementById('med-id').value = '';
+  document.getElementById('med-name').value = '';
+  document.getElementById('med-dose').value = '';
+  document.getElementById('add-med-title').innerText = t('addMedication');
+  document.getElementById('add-med-panel').style.display = 'none';
+  const advEl = document.getElementById('med-fda-adverse');
+  if (advEl) advEl.style.display = 'none';
+};
+
+window.showDetails = async (id, name) => {
+  const el = document.getElementById('wiki-' + id);
+  if (el.style.display === 'block') {
+    el.style.display = 'none';
+    return;
+  }
+  
+  if (_wikiSummaryCache.has(name)) {
+    el.innerHTML = _wikiSummaryCache.get(name);
+    el.style.display = 'block';
+    return;
+  }
+
+  el.innerHTML = t('translating');
+  el.style.display = 'block';
+
+  try {
+    // 1. Search for title
+    const lang = state.lang === 'de' ? 'de' : 'en';
+    const s = await fetch(`https://${lang}.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(name + ' drug')}&format=json&origin=*&srlimit=1`);
+    const sd = await s.json();
+    if (!sd.query.search.length) {
+      el.innerHTML = "No detailed information found.";
+      return;
+    }
+    const title = sd.query.search[0].title;
+
+    // 2. Get extract
+    const r = await fetch(`https://${lang}.wikipedia.org/w/api.php?action=query&prop=extracts&exintro=1&explaintext=1&titles=${encodeURIComponent(title)}&format=json&origin=*`);
+    const d = await r.json();
+    const pages = d.query.pages;
+    const page = pages[Object.keys(pages)[0]];
+    const extract = page.extract || "No summary available.";
+    
+    const html = `
+      <div style="font-weight:700; margin-bottom:8px; color:var(--accent-color);">${t('wikiSummary')}</div>
+      <div>${extract.substring(0, 600)}${extract.length > 600 ? '...' : ''}</div>
+      <a href="https://${lang}.wikipedia.org/wiki/${encodeURIComponent(title)}" target="_blank" style="display:inline-block; margin-top:12px; color:var(--accent-color); text-decoration:none; font-weight:600; border-bottom:1px solid var(--accent-color);">${t('readMore')} →</a>
+    `;
+    _wikiSummaryCache.set(name, html);
+    el.innerHTML = html;
+  } catch(e) {
+    el.innerHTML = "Failed to load details.";
+  }
 };
 
 window.deleteMed = async (id) => {
@@ -745,8 +839,6 @@ window.saveAsTyped = (name) => {
   document.getElementById('med-name').value = name;
   document.getElementById('fda-dropdown').style.display = 'none';
   state.pendingAdverseEvents = null;
-  state.pendingImageUrl = null;
-  window._fetchDrugImage(name).then(url => { state.pendingImageUrl = url; });
 };
 
 // Fetch FDA data for a manually entered ingredient, keep the brand name
@@ -797,24 +889,10 @@ window.fetchFDAIngredient = async (brandName) => {
         });
       }
   }
-  state.pendingImageUrl = null;
-  window._fetchDrugImage(brandName).then(url => { state.pendingImageUrl = url; });
+  state.pendingAdverseEvents = null;
 };
 
-// Fetch Wikipedia thumbnail for a drug name
-window._fetchDrugImage = async (name) => {
-  try {
-    const s = await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(name + ' drug')}&format=json&origin=*&srlimit=1`);
-    const sd = await s.json();
-    if (!sd.query.search.length) return null;
-    const title = sd.query.search[0].title;
-    const i = await fetch(`https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&titles=${encodeURIComponent(title)}&format=json&origin=*&pithumbsize=120`);
-    const id = await i.json();
-    const pages = id.query.pages;
-    const page = pages[Object.keys(pages)[0]];
-    return (page && page.thumbnail) ? page.thumbnail.source : null;
-  } catch(e) { return null; }
-};
+
 
 window.downloadICS = (id) => {
   const plan = state.plans.find(p => p.id === id);
