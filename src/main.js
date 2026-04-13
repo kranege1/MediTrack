@@ -55,7 +55,11 @@ const i18n = {
     wikiIngredientFound:'Wikipedia identified active ingredient: {ing}', translating:'Translating...',
     unknown:'Unknown', units:'units', pillUnit:'pill(s)', kg:'kg',
     pillFormat:'Pill', liquidFormat:'Liquid', injectionFormat:'Injection', inhalerFormat:'Inhaler',
-    detailsBtn:'Details', editBtn:'Edit', updateMedication:'Edit Medication'
+    detailsBtn:'Details', editBtn:'Edit', updateMedication:'Edit Medication',
+    sideEffectsTitle:'⚠️ Side Effects', frequency:'Frequency', symptom:'Symptom', close:'Close',
+    morning:'Morning', noon:'Noon', evening:'Evening',
+    daily:'Daily', weekly:'Weekly', monthly:'Monthly', quarterly:'Quarterly', everyXDays:'Every X days',
+    dayIntervalLbl:'Repeat every {x} days'
   },
   de: {
     dataExports:'Daten & Export', home:'Start', meds:'Medikamente', logAction:'Einnahme', plans:'Pläne',
@@ -96,7 +100,11 @@ const i18n = {
     wikiIngredientFound:'Wikipedia hat Wirkstoff gefunden: {ing}', translating:'Übersetze...',
     unknown:'Unbekannt', units:'Einheiten', pillUnit:'Pille(n)', kg:'kg',
     pillFormat:'Pille', liquidFormat:'Flüssigkeit', injectionFormat:'Injektion', inhalerFormat:'Inhalator',
-    detailsBtn:'Details', editBtn:'Bearbeiten', updateMedication:'Medikament bearbeiten'
+    detailsBtn:'Details', editBtn:'Bearbeiten', updateMedication:'Medikament bearbeiten',
+    sideEffectsTitle:'⚠️ Nebenwirkungen', frequency:'Häufigkeit', symptom:'Symptom', close:'Schließen',
+    morning:'Morgens', noon:'Mittags', evening:'Abends',
+    daily:'Täglich', weekly:'Wöchentlich', monthly:'Monatlich', quarterly:'Vierteljährlich', everyXDays:'Alle X Tage',
+    dayIntervalLbl:'Wiederhole alle {x} Tage'
   }
 };
 const t = (key) => (i18n[state.lang] || i18n.en)[key] || key;
@@ -136,7 +144,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.6</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.8</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -193,7 +201,7 @@ function renderDashboard() {
   const todaysLogs = state.logs.filter(l => new Date(l.timestamp).setHours(0,0,0,0) === today).reverse();
   const latestWeight = state.metrics.filter(m => m.type === 'weight').sort((a,b) => b.timestamp - a.timestamp)[0];
 
-  let scheduleHtml = state.plans.length > 0 ? state.plans.map(p => {
+  let scheduleHtml = state.plans.length > 0 ? state.plans.filter(window._isPlanDueToday).map(p => {
      const med = state.medications.find(m => m.id === p.medicationId) || {name: t('unknown')};
      const isCompleted = todaysLogs.some(l => l.medicationId === p.medicationId);
      const statusColor = isCompleted ? 'var(--accent-color)' : '#ef4444';
@@ -202,11 +210,15 @@ function renderDashboard() {
      return `<div class="card" style="border-left: 4px solid ${statusColor}; opacity: ${opacity}; margin-bottom: 8px;">
                <div>
                  <div class="card-title">${med.name}</div>
-                 <div class="card-subtitle">${t('scheduled')}: ${p.timeOfDay} | ${p.dose} ${med.unit || t('units')}</div>
+                 <div class="card-subtitle">${t('scheduled')}: ${t(p.timeCategory || 'morning')} | ${p.dose} ${med.unit || t('units')}</div>
                </div>
                <div style="color: ${statusColor}; font-size: 13px; font-weight: 600;">${statusText}</div>
              </div>`;
   }).join('') : `<div class="empty-state">${t('noPlans')}</div>`;
+
+  if (state.plans.length > 0 && scheduleHtml === '') {
+     scheduleHtml = `<div class="empty-state">${t('noPlans')}</div>`;
+  }
 
   let logsHtml = todaysLogs.length ? todaysLogs.map(l => {
     const med = state.medications.find(m => m.id === l.medicationId) || {name: t('unknown')};
@@ -281,9 +293,8 @@ function renderMedications() {
           <div class="card-title" style="margin-bottom: 2px; line-height: 1.2;">${m.name}</div>
           ${m.adverse_events ? `
               <div style="margin-top: 8px;">
-                 <button class="btn btn-secondary" style="font-size: 10px; padding: 4px 10px; width: auto; background: rgba(239, 68, 68, 0.1); color: #ef4444; border-color: rgba(239, 68, 68, 0.3); border-radius: 6px;" onclick="document.getElementById('adv-${m.id}').style.display = document.getElementById('adv-${m.id}').style.display === 'none' ? 'block' : 'none'">${t('viewSideEffects')}</button>
+                 <button class="btn btn-secondary" style="font-size: 10px; padding: 4px 10px; width: auto; background: rgba(239, 68, 68, 0.1); color: #ef4444; border-color: rgba(239, 68, 68, 0.3); border-radius: 6px;" onclick="window.showAdverseOverlay('${m.id}')">${t('sideEffectsTitle')}</button>
                  ${state.lang === 'de' ? `<button onclick="window.translateAdverse('${m.id}', '${m.adverse_events.replace(/'/g, ' ').replace(/"/g, ' ')}')" style="font-size:10px; padding: 4px 10px; background:rgba(99,102,241,0.15); color:#a5b4fc; border:1px solid rgba(99,102,241,0.4); border-radius:6px; cursor:pointer; margin-left:6px;">${t('translateAdverse')}</button>` : ''}
-                 <div id="adv-${m.id}" style="display:none; margin-top: 6px; font-size: 11px; color: #f87171; background: rgba(0,0,0,0.3); border: 1px solid rgba(239, 68, 68, 0.2); padding: 8px; border-radius: 8px; line-height: 1.4;">${m.adverse_events}</div>
               </div>
           ` : ''}
         </div>
@@ -359,10 +370,14 @@ function renderPlans() {
 
   let listHtml = state.plans.map(p => {
     const med = state.medications.find(m => m.id === p.medicationId) || {name: t('unknown')};
+    let freqText = t(p.frequency || 'daily');
+    if (p.frequency === 'everyXDays') freqText = t('dayIntervalLbl').replace('{x}', p.intervalX);
+
     return `<div class="card" style="align-items: flex-start;">
       <div>
         <div class="card-title">${med.name}</div>
-        <div class="card-subtitle">${t('takes')} ${p.dose} ${med.unit || t('units')} ${t('at')} ${p.timeOfDay}</div>
+        <div class="card-subtitle">${t('takes')} ${p.dose} ${med.unit || t('units')} ${t('at')} <strong>${t(p.timeCategory || 'morning')}</strong></div>
+        <div style="font-size: 11px; color: var(--accent-color); margin-top: 4px; font-weight: 600;">${freqText}</div>
         <button class="btn btn-secondary" style="padding: 6px 10px; width: auto; font-size: 11px; margin-top: 8px; border-color: #64748b; color: #cbd5e1" onclick="window.downloadICS('${p.id}')">${t('appleCalendar')}</button>
       </div>
       <button class="btn btn-danger" style="padding: 8px 12px; width: auto;" onclick="window.deletePlan('${p.id}')">${t('remove')}</button>
@@ -382,16 +397,38 @@ function renderPlans() {
            ${medOptions}
         </select>
       </div>
+      
       <div style="display: flex; gap: 12px;">
         <div class="form-group" style="flex:1;">
           <label>${t('timeOfDay')}</label>
-          <input type="time" id="plan-time" required>
+          <select id="plan-category">
+             <option value="morning">${t('morning')}</option>
+             <option value="noon">${t('noon')}</option>
+             <option value="evening">${t('evening')}</option>
+          </select>
         </div>
         <div class="form-group" style="flex:1;">
           <label>${t('dose')}</label>
           <input type="number" id="plan-dose">
         </div>
       </div>
+
+      <div class="form-group">
+        <label>${t('frequency')}</label>
+        <select id="plan-freq" onchange="document.getElementById('plan-x-days-row').style.display = (this.value === 'everyXDays' ? 'block' : 'none')">
+           <option value="daily">${t('daily')}</option>
+           <option value="weekly">${t('weekly')}</option>
+           <option value="monthly">${t('monthly')}</option>
+           <option value="quarterly">${t('quarterly')}</option>
+           <option value="everyXDays">${t('everyXDays')}</option>
+        </select>
+      </div>
+
+      <div class="form-group" id="plan-x-days-row" style="display:none;">
+        <label>${t('dayIntervalLbl').replace('{x}', 'X')}</label>
+        <input type="number" id="plan-interval-x" value="2" min="2" max="30">
+      </div>
+
       <button class="btn" onclick="window.savePlan()">${t('savePlan')}</button>
       <button class="btn btn-secondary" style="margin-top:12px;" onclick="document.getElementById('add-plan-panel').style.display='none'">${t('cancel')}</button>
       `}
@@ -533,6 +570,116 @@ window.closeMedPanel = () => {
 
 
 
+window.showAdverseOverlay = (id) => {
+  const m = state.medications.find(med => med.id === id);
+  if (!m || !m.adverse_events) return;
+
+  const app = document.getElementById('app');
+  let overlay = document.getElementById('adverse-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'adverse-overlay';
+    overlay.className = 'glass-panel';
+    overlay.style.cssText = `
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      z-index: 2000; display: flex; flex-direction: column;
+      padding: 24px; padding-top: max(24px, env(safe-area-inset-top));
+      overflow-y: auto; background: rgba(15, 17, 21, 0.95);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border: none; border-radius: 0;
+    `;
+    app.appendChild(overlay);
+  }
+
+  const parsedContent = window._parseAdverseEvents(m.adverse_events);
+
+  overlay.innerHTML = `
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 24px;">
+      <div class="text-h2" style="margin:0; color:var(--accent-color);">${t('sideEffectsTitle')}</div>
+      <button onclick="window.closeAdverseOverlay()" class="btn btn-secondary" style="width:auto; padding:8px 16px; font-size:14px;">${t('close')}</button>
+    </div>
+    <div style="margin-bottom: 20px; font-size: 20px; font-weight: 700; color: white;">${m.name}</div>
+    <div style="flex:1;">
+      ${parsedContent}
+    </div>
+    <button onclick="window.closeAdverseOverlay()" class="btn" style="margin-top:24px;">${t('close')}</button>
+  `;
+  overlay.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+};
+
+window.closeAdverseOverlay = () => {
+  const overlay = document.getElementById('adverse-overlay');
+  if (overlay) overlay.style.display = 'none';
+  document.body.style.overflow = '';
+};
+
+window._parseAdverseEvents = (text) => {
+  // 1. Frequency Parsing (Symptom (XX%))
+  const freqRegex = /([^,.;:]+?)\s*\(?\s*(\d+(?:\.\d+)?\s*%|>\s*\d+\s*%)\s*\)?/g;
+  const matches = [...text.matchAll(freqRegex)];
+  
+  if (matches.length > 2) {
+    const tableRows = matches.map(match => `
+      <tr>
+        <td style="padding:14px 0; border-bottom:1px solid rgba(255,255,255,0.06); color:#cbd5e1; font-size:18px;">${match[1].trim()}</td>
+        <td style="padding:14px 0; border-bottom:1px solid rgba(255,255,255,0.06); color:var(--accent-color); text-align:right; font-weight:700; font-size:18px;">${match[2].trim()}</td>
+      </tr>
+    `).join('');
+    return `
+      <table style="width:100%; border-collapse:collapse;">
+        <thead>
+          <tr>
+            <th style="text-align:left; color:#94a3b8; font-size:12px; text-transform:uppercase; padding-bottom:10px;">${t('symptom')}</th>
+            <th style="text-align:right; color:#94a3b8; font-size:12px; text-transform:uppercase; padding-bottom:10px;">${t('frequency')}</th>
+          </tr>
+        </thead>
+        <tbody>${tableRows}</tbody>
+      </table>`;
+  }
+
+  // 2. Bullet Parsing
+  const bullets = text.split(/[•\n;]|\.\s(?=[A-Z])/).map(s => s.trim()).filter(s => s.length > 5);
+  if (bullets.length > 1) {
+    return `
+      <ul style="list-style: none; padding: 0;">
+        ${bullets.map(b => `
+          <li style="margin-bottom: 16px; display: flex; gap: 12px; font-size: 18px; line-height: 1.5; color: #f3f4f6;">
+            <span style="color:var(--accent-color); flex-shrink:0;">•</span>
+            <span>${b}</span>
+          </li>
+        `).join('')}
+      </ul>`;
+  }
+
+  // 3. Text Fallback
+  return `<div style="font-size: 18px; line-height: 1.6; color: #f3f4f6;">${text}</div>`;
+};
+
+window._isPlanDueToday = (p) => {
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const start = new Date(p.startDate || today);
+  start.setHours(0,0,0,0);
+  
+  if (today < start) return false;
+
+  const diffDays = Math.round((today - start) / (1000 * 60 * 60 * 24));
+
+  switch(p.frequency) {
+    case 'weekly': return today.getDay() === start.getDay();
+    case 'monthly': return today.getDate() === start.getDate();
+    case 'quarterly': 
+      return today.getDate() === start.getDate() && 
+             (today.getMonth() - start.getMonth() + (12 * (today.getFullYear() - start.getFullYear()))) % 3 === 0;
+    case 'everyXDays': 
+      const x = parseInt(p.intervalX) || 1;
+      return diffDays % x === 0;
+    case 'daily':
+    default: return true;
+  }
+};
+
 window.deleteMed = async (id) => {
   if(confirm(t('deleteMedConfirm'))) {
     await API.deleteMedication(id);
@@ -560,12 +707,22 @@ window.quickLog = async (medId, amount) => {
 
 window.savePlan = async () => {
   const medicationId = document.getElementById('plan-med').value;
-  const timeOfDay = document.getElementById('plan-time').value;
+  const timeCategory = document.getElementById('plan-category').value;
   const dose = document.getElementById('plan-dose').value;
+  const frequency = document.getElementById('plan-freq').value;
+  const intervalX = document.getElementById('plan-interval-x').value;
   
-  if (!medicationId || !timeOfDay) return alert(t('medAndTime'));
+  if (!medicationId || !dose) return alert(t('medAndTime'));
   
-  await API.addPlan({ medicationId, timeOfDay, dose });
+  const plan = { 
+    medicationId, 
+    timeCategory, 
+    dose, 
+    frequency, 
+    intervalX, 
+    startDate: new Date().toISOString() 
+  };
+  await API.addPlan(plan);
   window.navigate('plans');
 };
 
