@@ -9,7 +9,9 @@ const state = {
   logs: [],
   metrics: [],
   plans: [],
-  html5QrCode: null
+  html5QrCode: null,
+  fdaTimeout: null,
+  pendingAdverseEvents: null
 };
 
 // --- DOM ---
@@ -45,7 +47,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v3.5</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v3.6</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <button class="header-action" onclick="window.navigate('settings')">Data & Exports</button>
@@ -165,6 +167,12 @@ function renderMedications() {
         <div class="card-title">${m.name}</div>
         <div class="card-subtitle">Default: ${m.dose} ${m.unit} | Format: ${m.format}</div>
         ${m.barcode ? `<div class="card-subtitle" style="font-size: 11px; margin-top:4px;">Barcode: ${m.barcode}</div>` : ''}
+        ${m.adverse_events ? `
+            <div style="margin-top: 8px;">
+               <button class="btn btn-secondary" style="font-size: 11px; padding: 4px 8px; width: auto; background: rgba(239, 68, 68, 0.1); color: #ef4444; border-color: rgba(239, 68, 68, 0.3);" onclick="document.getElementById('adv-${m.id}').style.display = document.getElementById('adv-${m.id}').style.display === 'none' ? 'block' : 'none'">⚠️ View Side Effects</button>
+               <div id="adv-${m.id}" style="display:none; margin-top: 6px; font-size: 11px; color: #f87171; background: rgba(0,0,0,0.2); border: 1px solid rgba(239, 68, 68, 0.2); padding: 8px; border-radius: 6px; line-height: 1.4;">${m.adverse_events}</div>
+            </div>
+        ` : ''}
       </div>
       <button class="btn btn-danger" style="padding: 8px 12px; width: auto;" onclick="window.deleteMed('${m.id}')">Delete</button>
     </div>
@@ -175,9 +183,10 @@ function renderMedications() {
   return `
     <div class="glass-panel" id="add-med-panel" style="display: none;">
       <div class="text-h2">Add Medication</div>
-      <div class="form-group">
+      <div class="form-group" style="position: relative;">
         <label>Name</label>
-        <input type="text" id="med-name" placeholder="E.g., Aspirin">
+        <input type="text" id="med-name" placeholder="E.g., Aspirin" autocomplete="off" oninput="window.searchFDA(this.value)">
+        <div id="fda-dropdown" style="position: absolute; top: 100%; left: 0; right: 0; background: var(--card-bg); border: 1px solid var(--accent-color); border-radius: 8px; z-index: 50; display: none; max-height: 200px; overflow-y: auto;"></div>
       </div>
       <div style="display: flex; gap: 12px;">
         <div class="form-group" style="flex:1;">
@@ -426,7 +435,8 @@ window.saveMed = async () => {
   
   if (!name || !dose) return alert("Name and dose required");
   
-  await API.addMedication({ name, dose, unit, format, barcode });
+  await API.addMedication({ name, dose, unit, format, barcode, adverse_events: state.pendingAdverseEvents });
+  state.pendingAdverseEvents = null;
   window.navigate('medications');
 };
 
@@ -590,6 +600,65 @@ window.deletePlan = async (id) => {
   if(confirm("Remove this schedule?")) {
     await API.deletePlan(id);
     window.navigate('plans');
+  }
+};
+
+window.searchFDA = (query) => {
+  state.pendingAdverseEvents = null;
+  if (state.fdaTimeout) clearTimeout(state.fdaTimeout);
+  const dropdown = document.getElementById('fda-dropdown');
+  
+  if (query.length < 3) {
+      dropdown.style.display = 'none';
+      return;
+  }
+  
+  dropdown.innerHTML = `<div style="padding: 12px; font-size: 13px; color: var(--accent-color);">Querying United States FDA API...</div>`;
+  dropdown.style.display = 'block';
+
+  state.fdaTimeout = setTimeout(async () => {
+    try {
+      const res = await fetch(`https://api.fda.gov/drug/label.json?search=openfda.brand_name:"${encodeURIComponent(query)}*"&limit=5`);
+      const data = await res.json();
+      
+      if (data.results && data.results.length > 0) {
+        dropdown.innerHTML = data.results.map(r => {
+           let brand = 'Unknown Brand';
+           let generic = '';
+           if (r.openfda && r.openfda.brand_name) brand = r.openfda.brand_name[0];
+           if (r.openfda && r.openfda.generic_name) generic = r.openfda.generic_name[0];
+           
+           let adverseRaw = '';
+           if (r.adverse_reactions && r.adverse_reactions.length > 0) {
+             adverseRaw = r.adverse_reactions[0];
+             // filter out the initial section name usually present
+             adverseRaw = adverseRaw.replace(/^[0-9]+(\.[0-9]+)?\s*ADVERSE REACTIONS\s*/i, '');
+           }
+           let adverseText = adverseRaw.replace(/'/g, ' ').replace(/"/g, ' ');
+           if (adverseText.length > 250) adverseText = adverseText.substring(0, 250) + '...';
+           
+           return `<div style="padding: 12px; border-bottom: 1px solid var(--glass-border); cursor: pointer; transition: background 0.2s;" 
+                        onclick="window.selectFDA('${brand}', '${adverseText}')" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">
+                     <div style="font-weight: bold; color: white;">${brand}</div>
+                     <div style="font-size: 11px; color: #cbd5e1; margin-top: 2px;">${generic}</div>
+                   </div>`;
+        }).join('');
+      } else {
+        dropdown.innerHTML = `<div style="padding: 12px; font-size: 13px; color: #94a3b8;">No direct FDA matches found.</div>`;
+      }
+    } catch(e) {
+        dropdown.innerHTML = `<div style="padding: 12px; font-size: 13px; color: #94a3b8;">No matches.</div>`;
+    }
+  }, 500);
+};
+
+window.selectFDA = (brand, adverseEvents) => {
+  document.getElementById('med-name').value = brand;
+  document.getElementById('fda-dropdown').style.display = 'none';
+  if (adverseEvents && adverseEvents !== 'undefined' && adverseEvents.trim() !== '') {
+      state.pendingAdverseEvents = adverseEvents;
+  } else {
+      state.pendingAdverseEvents = null;
   }
 };
 
