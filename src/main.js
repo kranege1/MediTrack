@@ -45,7 +45,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v3.3</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v3.4</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <button class="header-action" onclick="window.navigate('settings')">Data & Exports</button>
@@ -340,17 +340,7 @@ function renderScanner() {
 function initScanner() {
   state.html5QrCode = new Html5Qrcode("reader");
   const config = { 
-    fps: 15, 
-    formatsToSupport: [
-      Html5QrcodeSupportedFormats.DATA_MATRIX,
-      Html5QrcodeSupportedFormats.QR_CODE,
-      Html5QrcodeSupportedFormats.EAN_13,
-      Html5QrcodeSupportedFormats.EAN_8,
-      Html5QrcodeSupportedFormats.UPC_A,
-      Html5QrcodeSupportedFormats.UPC_E,
-      Html5QrcodeSupportedFormats.CODE_128,
-      Html5QrcodeSupportedFormats.CODE_39
-    ],
+    fps: 10, 
     experimentalFeatures: {
       useBarCodeDetectorIfSupported: true
     }
@@ -448,17 +438,7 @@ window.startInlineScan = () => {
   
   state.html5QrCode = new Html5Qrcode("inline-reader");
   const config = { 
-    fps: 15,
-    formatsToSupport: [
-      Html5QrcodeSupportedFormats.DATA_MATRIX,
-      Html5QrcodeSupportedFormats.QR_CODE,
-      Html5QrcodeSupportedFormats.EAN_13,
-      Html5QrcodeSupportedFormats.EAN_8,
-      Html5QrcodeSupportedFormats.UPC_A,
-      Html5QrcodeSupportedFormats.UPC_E,
-      Html5QrcodeSupportedFormats.CODE_128,
-      Html5QrcodeSupportedFormats.CODE_39
-    ],
+    fps: 10,
     experimentalFeatures: {
       useBarCodeDetectorIfSupported: true
     }
