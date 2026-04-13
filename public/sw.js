@@ -1,4 +1,4 @@
-const CACHE_NAME = 'medicatrack-v1.3';
+const CACHE_NAME = 'medicatrack-v2.0';
 const urlsToCache = [
   '/',
   '/index.html',
