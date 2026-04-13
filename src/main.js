@@ -13,7 +13,6 @@ const state = {
   editingMedId: null,
   lang: localStorage.getItem('medilang') || 'en'
 };
-const _wikiSummaryCache = new Map();
 
 // === i18n ===
 const i18n = {
@@ -56,8 +55,7 @@ const i18n = {
     wikiIngredientFound:'Wikipedia identified active ingredient: {ing}', translating:'Translating...',
     unknown:'Unknown', units:'units', pillUnit:'pill(s)', kg:'kg',
     pillFormat:'Pill', liquidFormat:'Liquid', injectionFormat:'Injection', inhalerFormat:'Inhaler',
-    detailsBtn:'Details', editBtn:'Edit', updateMedication:'Edit Medication',
-    wikiSummary:'Wikipedia Summary', readMore:'Full Article'
+    detailsBtn:'Details', editBtn:'Edit', updateMedication:'Edit Medication'
   },
   de: {
     dataExports:'Daten & Export', home:'Start', meds:'Medikamente', logAction:'Einnahme', plans:'Pläne',
@@ -98,8 +96,7 @@ const i18n = {
     wikiIngredientFound:'Wikipedia hat Wirkstoff gefunden: {ing}', translating:'Übersetze...',
     unknown:'Unbekannt', units:'Einheiten', pillUnit:'Pille(n)', kg:'kg',
     pillFormat:'Pille', liquidFormat:'Flüssigkeit', injectionFormat:'Injektion', inhalerFormat:'Inhalator',
-    detailsBtn:'Details', editBtn:'Bearbeiten', updateMedication:'Medikament bearbeiten',
-    wikiSummary:'Wikipedia-Zusammenfassung', readMore:'Vollständiger Artikel'
+    detailsBtn:'Details', editBtn:'Bearbeiten', updateMedication:'Medikament bearbeiten'
   }
 };
 const t = (key) => (i18n[state.lang] || i18n.en)[key] || key;
@@ -139,7 +136,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.3</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.6</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -255,31 +252,51 @@ function renderDashboard() {
 // 2. Medications
 function renderMedications() {
   let listHtml = state.medications.map(m => {
-    // Build avatar: deterministic coloured initial pill
-    const initials = m.name.substring(0, 2).toUpperCase();
+    const formatIcons = {
+      'Pill': '💊',
+      'Liquid': '💧',
+      'Injection': '💉',
+      'Inhaler': '💨'
+    };
+    const icon = formatIcons[m.format] || '💊';
     const hue = [...m.name].reduce((h, c) => h + c.charCodeAt(0), 0) % 360;
-    const avatar = `<div style="width:52px; height:52px; border-radius:10px; background:hsl(${hue},55%,35%); display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:700; color:white; flex-shrink:0;">${initials}</div>`;
+    
+    // Avatar: Icon on top, small dose below
+    const avatar = `
+      <div style="display:flex; flex-direction:column; align-items:center; gap:4px; flex-shrink:0; width:64px;">
+        <div style="width:52px; height:52px; border-radius:12px; background:hsl(${hue},55%,35%); display:flex; align-items:center; justify-content:center; font-size:24px; color:white; border:1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+          ${icon}
+        </div>
+        <div style="font-size:10px; font-weight:700; color:var(--accent-color); text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%;">
+          ${m.dose} ${m.unit}
+        </div>
+      </div>`;
+
     return `
-    <div class="card" style="align-items: flex-start; gap: 12px;">
-      <div style="display:flex; gap:12px; align-items:flex-start; flex:1; min-width:0;">
+    <div class="card" style="display: flex; flex-direction: column; align-items: stretch; padding: 16px; gap: 0;">
+      <!-- Top Section: Avatar and Name -->
+      <div style="display: flex; gap: 16px; align-items: flex-start; margin-bottom: 16px;">
         ${avatar}
-        <div style="flex:1; min-width:0;">
-          <div class="card-title">${m.name}</div>
-          <div class="card-subtitle">${t('scheduled')}: ${m.dose} ${m.unit} | ${t('formatLbl')}: ${m.format}</div>
+        <div style="flex: 1; min-width: 0;">
+          <div class="card-title" style="margin-bottom: 2px; line-height: 1.2;">${m.name}</div>
           ${m.adverse_events ? `
               <div style="margin-top: 8px;">
-                 <button class="btn btn-secondary" style="font-size: 11px; padding: 4px 8px; width: auto; background: rgba(239, 68, 68, 0.1); color: #ef4444; border-color: rgba(239, 68, 68, 0.3);" onclick="document.getElementById('adv-${m.id}').style.display = document.getElementById('adv-${m.id}').style.display === 'none' ? 'block' : 'none'">${t('viewSideEffects')}</button>
-                 ${state.lang === 'de' ? `<button onclick="window.translateAdverse('${m.id}', '${m.adverse_events.replace(/'/g, ' ').replace(/"/g, ' ')}')" style="font-size:11px; padding: 4px 8px; background:rgba(99,102,241,0.15); color:#a5b4fc; border:1px solid rgba(99,102,241,0.4); border-radius:6px; cursor:pointer; margin-left:6px;">${t('translateAdverse')}</button>` : ''}
-                 <div id="adv-${m.id}" style="display:none; margin-top: 6px; font-size: 11px; color: #f87171; background: rgba(0,0,0,0.2); border: 1px solid rgba(239, 68, 68, 0.2); padding: 8px; border-radius: 6px; line-height: 1.4;">${m.adverse_events}</div>
+                 <button class="btn btn-secondary" style="font-size: 10px; padding: 4px 10px; width: auto; background: rgba(239, 68, 68, 0.1); color: #ef4444; border-color: rgba(239, 68, 68, 0.3); border-radius: 6px;" onclick="document.getElementById('adv-${m.id}').style.display = document.getElementById('adv-${m.id}').style.display === 'none' ? 'block' : 'none'">${t('viewSideEffects')}</button>
+                 ${state.lang === 'de' ? `<button onclick="window.translateAdverse('${m.id}', '${m.adverse_events.replace(/'/g, ' ').replace(/"/g, ' ')}')" style="font-size:10px; padding: 4px 10px; background:rgba(99,102,241,0.15); color:#a5b4fc; border:1px solid rgba(99,102,241,0.4); border-radius:6px; cursor:pointer; margin-left:6px;">${t('translateAdverse')}</button>` : ''}
+                 <div id="adv-${m.id}" style="display:none; margin-top: 6px; font-size: 11px; color: #f87171; background: rgba(0,0,0,0.3); border: 1px solid rgba(239, 68, 68, 0.2); padding: 8px; border-radius: 8px; line-height: 1.4;">${m.adverse_events}</div>
               </div>
           ` : ''}
-          <div id="wiki-${m.id}" style="display:none; margin-top: 10px; font-size: 13px; color: #cbd5e1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 12px; border-radius: 8px; line-height: 1.5;"></div>
         </div>
       </div>
-      <div style="display: flex; gap: 8px; margin-top: 12px; width: 100%; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px;">
-         <button class="btn btn-secondary" style="padding: 8px; flex: 1; font-size:12px;" onclick="window.showDetails('${m.id}', '${m.name}')">${t('detailsBtn')}</button>
-         <button class="btn btn-secondary" style="padding: 8px; flex: 1; font-size:12px;" onclick="window.editMed('${m.id}')">${t('editBtn')}</button>
-         <button class="btn btn-danger" style="padding: 8px; flex: 0.5; font-size:12px;" onclick="window.deleteMed('${m.id}')">${t('delete')}</button>
+      
+      <!-- Bottom Section: Actions -->
+      <div style="display: flex; gap: 8px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.05); justify-content: flex-end;">
+         <button class="btn btn-secondary" style="width: 36px; height: 36px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 10px;" onclick="window.editMed('${m.id}')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+         </button>
+         <button class="btn btn-danger" style="width: 36px; height: 36px; padding: 0; display: flex; align-items: center; justify-content: center; background: rgba(239, 68, 68, 0.1); border-radius: 10px;" onclick="window.deleteMed('${m.id}')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+         </button>
       </div>
     </div>`;
   }).join('');
@@ -514,51 +531,7 @@ window.closeMedPanel = () => {
   if (advEl) advEl.style.display = 'none';
 };
 
-window.showDetails = async (id, name) => {
-  const el = document.getElementById('wiki-' + id);
-  if (el.style.display === 'block') {
-    el.style.display = 'none';
-    return;
-  }
-  
-  if (_wikiSummaryCache.has(name)) {
-    el.innerHTML = _wikiSummaryCache.get(name);
-    el.style.display = 'block';
-    return;
-  }
 
-  el.innerHTML = t('translating');
-  el.style.display = 'block';
-
-  try {
-    // 1. Search for title
-    const lang = state.lang === 'de' ? 'de' : 'en';
-    const s = await fetch(`https://${lang}.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(name + ' drug')}&format=json&origin=*&srlimit=1`);
-    const sd = await s.json();
-    if (!sd.query.search.length) {
-      el.innerHTML = "No detailed information found.";
-      return;
-    }
-    const title = sd.query.search[0].title;
-
-    // 2. Get extract
-    const r = await fetch(`https://${lang}.wikipedia.org/w/api.php?action=query&prop=extracts&exintro=1&explaintext=1&titles=${encodeURIComponent(title)}&format=json&origin=*`);
-    const d = await r.json();
-    const pages = d.query.pages;
-    const page = pages[Object.keys(pages)[0]];
-    const extract = page.extract || "No summary available.";
-    
-    const html = `
-      <div style="font-weight:700; margin-bottom:8px; color:var(--accent-color);">${t('wikiSummary')}</div>
-      <div>${extract.substring(0, 600)}${extract.length > 600 ? '...' : ''}</div>
-      <a href="https://${lang}.wikipedia.org/wiki/${encodeURIComponent(title)}" target="_blank" style="display:inline-block; margin-top:12px; color:var(--accent-color); text-decoration:none; font-weight:600; border-bottom:1px solid var(--accent-color);">${t('readMore')} →</a>
-    `;
-    _wikiSummaryCache.set(name, html);
-    el.innerHTML = html;
-  } catch(e) {
-    el.innerHTML = "Failed to load details.";
-  }
-};
 
 window.deleteMed = async (id) => {
   if(confirm(t('deleteMedConfirm'))) {
