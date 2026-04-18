@@ -60,7 +60,8 @@ const i18n = {
     sideEffectsTitle:'⚠️ Side Effects', frequency:'Frequency', symptom:'Symptom', close:'Close',
     morning:'Morning', noon:'Noon', evening:'Evening',
     daily:'Daily', weekly:'Weekly', monthly:'Monthly', quarterly:'Quarterly', everyXDays:'Every X days',
-    dayIntervalLbl:'Repeat every {x} days'
+    dayIntervalLbl:'Repeat every {x} days',
+    searchStartpage:'🔍 Search on Startpage'
   },
   de: {
     dataExports:'Daten & Export', home:'Start', meds:'Medikamente', logAction:'Einnahme', plans:'Pläne',
@@ -105,7 +106,8 @@ const i18n = {
     sideEffectsTitle:'⚠️ Nebenwirkungen', frequency:'Häufigkeit', symptom:'Symptom', close:'Schließen',
     morning:'Morgens', noon:'Mittags', evening:'Abends',
     daily:'Täglich', weekly:'Wöchentlich', monthly:'Monatlich', quarterly:'Vierteljährlich', everyXDays:'Alle X Tage',
-    dayIntervalLbl:'Wiederhole alle {x} Tage'
+    dayIntervalLbl:'Wiederhole alle {x} Tage',
+    searchStartpage:'🔍 Auf Startpage suchen'
   }
 };
 const LOCAL_DRUG_KB = {
@@ -574,12 +576,7 @@ window.editMed = (id) => {
   if (med.adverse_events) {
     state.pendingAdverseEvents = med.adverse_events;
     adverseEl.style.display = 'block';
-    adverseEl.innerHTML = `
-      <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
-        <div><strong>${t('adverseLabel')}</strong><br>${med.adverse_events}</div>
-        <button class="btn btn-secondary" style="width:auto; padding:4px 8px; font-size:10px; margin-top:2px;" onclick="window.showAdverseOverlay(null, state.pendingAdverseEvents, '${med.name.replace(/'/g, "\\'")}')">${t('detailsBtn')}</button>
-      </div>
-    `;
+    adverseEl.innerHTML = window._renderAdverseBox(med.adverse_events, med.name);
   } else {
     adverseEl.style.display = 'none';
   }
@@ -606,6 +603,19 @@ window.closeMedPanel = () => {
 };
 
 
+
+window._renderAdverseBox = (text, brand, viaIngredient = false) => {
+  const label = viaIngredient ? t('adverseVia').replace('{ing}', '...') : t('adverseLabel');
+  return `
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
+      <div style="flex:1;"><strong>${label}</strong><br>${text}</div>
+      <div style="display:flex; flex-direction:column; gap:4px; flex-shrink:0;">
+        <button class="btn btn-secondary" style="width:auto; padding:4px 8px; font-size:10px;" onclick="window.showAdverseOverlay(null, state.pendingAdverseEvents, '${brand.replace(/'/g, "\\'")}')">${t('detailsBtn')}</button>
+        <button class="btn btn-secondary" style="width:auto; padding:4px 8px; font-size:10px; background:rgba(99,102,241,0.1); border-color:rgba(99,102,241,0.3); color:#a5b4fc;" onclick="window.open('https://www.startpage.com/sp/search?query=${encodeURIComponent(brand + ' medication')}', '_blank')">${t('searchStartpage').split(' ').pop()}</button>
+      </div>
+    </div>
+  `;
+};
 
 window.showAdverseOverlay = (id, rawText, name) => {
   let m = null;
@@ -646,11 +656,15 @@ window.showAdverseOverlay = (id, rawText, name) => {
       <div class="text-h2" style="margin:0; color:var(--accent-color);">${t('sideEffectsTitle')}</div>
       <button onclick="window.closeAdverseOverlay()" class="btn btn-secondary" style="width:auto; padding:8px 16px; font-size:14px;">${t('close')}</button>
     </div>
-    <div style="margin-bottom: 20px; font-size: 20px; font-weight: 700; color: white;">${displayName}</div>
     <div style="flex:1;">
       ${parsedContent}
     </div>
-    <button onclick="window.closeAdverseOverlay()" class="btn" style="margin-top:24px;">${t('close')}</button>
+    <div style="display:flex; gap:12px; margin-top:24px;">
+      <button onclick="window.open('https://www.startpage.com/sp/search?query=${encodeURIComponent(displayName + ' medication')}', '_blank')" class="btn btn-secondary" style="gap:8px;">
+        ${t('searchStartpage')}
+      </button>
+      <button onclick="window.closeAdverseOverlay()" class="btn" style="flex:1;">${t('close')}</button>
+    </div>
   `;
   overlay.style.display = 'flex';
   document.body.style.overflow = 'hidden';
@@ -1030,20 +1044,14 @@ window.selectFDA = (brand, adverseEvents, doseStr, doseUnit) => {
   if (adverseEvents && adverseEvents !== 'undefined' && adverseEvents.trim() !== '') {
       state.pendingAdverseEvents = adverseEvents;
       adverseEl.style.display = 'block';
-      const showAdverseHTML = (text) => `
-        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
-          <div><strong>${t('adverseLabel')}</strong><br>${text}</div>
-          <button class="btn btn-secondary" style="width:auto; padding:4px 8px; font-size:10px; margin-top:2px;" onclick="window.showAdverseOverlay(null, state.pendingAdverseEvents, '${brand.replace(/'/g, "\\'")}')">${t('detailsBtn')}</button>
-        </div>
-      `;
-      adverseEl.innerHTML = showAdverseHTML(adverseEvents);
+      adverseEl.innerHTML = window._renderAdverseBox(adverseEvents, brand);
 
       // Auto-translate if DE
       if (state.lang === 'de') {
-        adverseEl.innerHTML = showAdverseHTML(t('translating'));
+        adverseEl.innerHTML = window._renderAdverseBox(t('translating'), brand);
         window._autoTranslateAdverse(adverseEvents).then(trans => {
            state.pendingAdverseEvents = trans;
-           adverseEl.innerHTML = showAdverseHTML(trans);
+           adverseEl.innerHTML = window._renderAdverseBox(trans, brand);
         });
       }
   } else {
@@ -1118,20 +1126,14 @@ window.fetchFDAIngredient = async (brandName) => {
   if (adverseText.trim()) {
       state.pendingAdverseEvents = adverseText;
       adverseEl.style.display = 'block';
-      const showAdverseHTML = (text) => `
-        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
-          <div><strong>${t('adverseVia').replace('{ing}', ing)}</strong><br>${text}</div>
-          <button class="btn btn-secondary" style="width:auto; padding:4px 8px; font-size:10px; margin-top:2px;" onclick="window.showAdverseOverlay(null, state.pendingAdverseEvents, '${brandName.replace(/'/g, "\\'")}')">${t('detailsBtn')}</button>
-        </div>
-      `;
-      adverseEl.innerHTML = showAdverseHTML(adverseText);
+      adverseEl.innerHTML = window._renderAdverseBox(adverseText, brandName, true);
       
       // Auto-translate if DE
       if (state.lang === 'de') {
-        adverseEl.innerHTML = showAdverseHTML(t('translating'));
+        adverseEl.innerHTML = window._renderAdverseBox(t('translating'), brandName, true);
         window._autoTranslateAdverse(adverseText).then(trans => {
            state.pendingAdverseEvents = trans;
-           adverseEl.innerHTML = showAdverseHTML(trans);
+           adverseEl.innerHTML = window._renderAdverseBox(trans, brandName, true);
         });
       }
   }
