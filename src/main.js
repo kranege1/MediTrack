@@ -107,6 +107,26 @@ const i18n = {
     dayIntervalLbl:'Wiederhole alle {x} Tage'
   }
 };
+const LOCAL_DRUG_KB = {
+  'ezerosu': 'Rosuvastatin, Ezetimibe',
+  'sortis': 'Atorvastatin',
+  'crestor': 'Rosuvastatin',
+  'pantozol': 'Pantoprazol',
+  'pantoprazol': 'Pantoprazole',
+  'voltaren': 'Diclofenac',
+  'nexium': 'Esomeprazole',
+  'ibumetin': 'Ibuprofen',
+  'aspirin': 'Acetylsalicylic acid',
+  'lasix': 'Furosemide',
+  'concor': 'Bisoprolol',
+  'beloc': 'Metoprolol',
+  'xanax': 'Alprazolam',
+  'mexalen': 'Paracetamol',
+  'dafalgan': 'Paracetamol',
+  'benuron': 'Paracetamol',
+  'parkemed': 'Mefenamic acid'
+};
+
 const t = (key) => (i18n[state.lang] || i18n.en)[key] || key;
 const _advTransCache = new Map(); // session cache for translated adverse events
 
@@ -144,7 +164,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.8</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.9</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -765,40 +785,91 @@ window.searchFDA = (query) => {
         return;
       }
 
-      // === PASS 3: Wikipedia ingredient extraction — then re-query FDA ===
-      dropdown.innerHTML = `<div style="padding: 12px; font-size: 13px; color: var(--accent-color);">${t('searchingWiki')}</div>`;
-      const ingredients = await window._wikiExtractIngredients(query);
+      // === PASS 3: Smart Lookup (Local KB + Wikidata + Wikipedia) ===
+      dropdown.innerHTML = `<div style="padding: 12px; font-size: 13px; color: var(--accent-color);">${t('queryingFDA')}...</div>`;
+      const smartIngredient = await window._smartLookupIngredient(query);
+      
+      if (smartIngredient) {
+         // Now try to fetch FDA data using this ingredient
+         const res3 = await fetch(`https://api.fda.gov/drug/label.json?search=openfda.generic_name:"${encodeURIComponent(smartIngredient)}"&limit=5`);
+         const data3 = await res3.json();
+         if (data3.results && data3.results.length > 0) {
+            dropdown.innerHTML = window._fdaResultsHTML(data3.results, 'wikidata');
+            return;
+         }
 
-      if (ingredients.length === 0) {
-        dropdown.innerHTML = window._notFoundHTML(query);
-        return;
+         dropdown.innerHTML = `
+           <div style="padding: 14px;">
+             <div style="font-size: 13px; color: var(--accent-color); margin-bottom: 8px;">✨ ${t('wikiIngredientFound').replace('{ing}', `<strong>${smartIngredient}</strong>`)}</div>
+             <button onclick="window.saveAsTyped('${query.replace(/'/g, ' ')}'); document.getElementById('fda-ingredient-input').value = '${smartIngredient}'; window.fetchFDAIngredient('${query.replace(/'/g, ' ')}');" 
+                     class="btn" style="padding: 10px; font-size: 13px; width: 100%;">
+               ${t('use')} & ${t('fetchBtn')}
+             </button>
+           </div>
+           ${window._notFoundHTML(query)}
+         `;
+         return;
       }
 
-      // Try each extracted ingredient against FDA until we get results
-      let wikiResults = [];
-      let matchedIngredient = '';
-      for (const ing of ingredients) {
-        const res3 = await fetch(`https://api.fda.gov/drug/label.json?search=openfda.generic_name:"${encodeURIComponent(ing)}*"&limit=5`);
-        const data3 = await res3.json();
-        if (data3.results && data3.results.length > 0) {
-          wikiResults = data3.results;
-          matchedIngredient = ing;
-          break;
-        }
-      }
-
-      if (wikiResults.length > 0) {
-        dropdown.innerHTML =
-          `<div style="padding: 8px 12px; font-size: 11px; color: #a5b4fc; background: rgba(99,102,241,0.1); border-bottom: 1px solid rgba(99,102,241,0.2);">` +
-          `${t('wikiIngredientFound').replace('{ing}', `<strong>${matchedIngredient}</strong>`)}</div>` +
-          window._fdaResultsHTML(wikiResults, 'wiki');
-      } else {
-        dropdown.innerHTML = window._notFoundHTML(query);
-      }
-    } catch(e) {
-        dropdown.innerHTML = `<div style="padding: 12px; font-size: 13px; color: #94a3b8;">${t('lookupFailed')}</div>`;
+      dropdown.innerHTML = window._notFoundHTML(query);
+    } catch (err) {
+      console.error(err);
+      dropdown.innerHTML = window._notFoundHTML(query);
     }
-  }, 500);
+  }, 400);
+};
+
+window._wikidataLookupIngredient = async (query) => {
+  try {
+    // 1. Search for entity with language priority (DE, then EN)
+    const searchUrl = `https://www.wikidata.org/w/api.php?action=wbsearchentities&search=${encodeURIComponent(query)}&language=${state.lang}&format=json&origin=*`;
+    const searchRes = await fetch(searchUrl);
+    const searchData = await searchRes.json();
+    if (!searchData.search || searchData.search.length === 0) return null;
+
+    const entityId = searchData.search[0].id;
+
+    // 2. Get claims for P611 (has active ingredient)
+    const entitiesUrl = `https://www.wikidata.org/w/api.php?action=wbgetentities&ids=${entityId}&props=claims&languages=en&format=json&origin=*`;
+    const entitiesRes = await fetch(entitiesUrl);
+    const entitiesData = await entitiesRes.json();
+    
+    const claims = entitiesData.entities[entityId].claims;
+    if (claims && claims.P611) {
+      const ingredientId = claims.P611[0].mainsnak.datavalue.value.id;
+      // 3. Get English label of this ingredient
+      const ingRes = await fetch(`https://www.wikidata.org/w/api.php?action=wbgetentities&ids=${ingredientId}&props=labels&languages=en&format=json&origin=*`);
+      const ingData = await ingRes.json();
+      if (ingData.entities[ingredientId].labels && ingData.entities[ingredientId].labels.en) {
+        return ingData.entities[ingredientId].labels.en.value;
+      }
+    }
+  } catch(e) { console.error("Wikidata lookup error:", e); }
+  return null;
+};
+
+window._smartLookupIngredient = async (query) => {
+  const norm = query.toLowerCase().trim();
+  // 1. Check Local KB
+  if (LOCAL_DRUG_KB[norm]) return LOCAL_DRUG_KB[norm];
+  
+  // 2. Try Wikidata (Strong for Brand-to-Substance mapping in German)
+  const wikidataIng = await window._wikidataLookupIngredient(query);
+  if (wikidataIng) return wikidataIng;
+
+  // 3. Try Wikipedia (CORS-friendly search) fallback
+  try {
+    const wikiRes = await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)} medication&format=json&origin=*`);
+    const wikiData = await wikiRes.json();
+    if (wikiData.query && wikiData.query.search && wikiData.query.search.length > 0) {
+       const top = wikiData.query.search[0];
+       const keywords = ['drug', 'medication', 'statin', 'inhibitor', 'blocker', 'antibiotic', 'antacid'];
+       if (keywords.some(k => top.title.toLowerCase().includes(k) || top.snippet.toLowerCase().includes(k))) {
+          return top.title;
+       }
+    }
+  } catch(e) {}
+  return null;
 };
 
 window.toggleLang = (lang) => {
@@ -898,6 +969,7 @@ window._fdaResultsHTML = (results, matchType) => {
     const badges = {
       'generic': `<span style="font-size: 10px; background: rgba(99,102,241,0.2); color: #a5b4fc; border: 1px solid rgba(99,102,241,0.4); border-radius: 4px; padding: 1px 5px; margin-left: 6px;">${t('genericMatch')}</span>`,
       'wiki':    `<span style="font-size: 10px; background: rgba(16,185,129,0.2); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.4); border-radius: 4px; padding: 1px 5px; margin-left: 6px;">📚 Via Wikipedia</span>`,
+      'wikidata': `<span style="font-size: 10px; background: rgba(236,72,153,0.2); color: #f9a8d4; border: 1px solid rgba(236,72,153,0.4); border-radius: 4px; padding: 1px 5px; margin-left: 6px;">✨ Via Wikidata</span>`,
       'brand':   ''
     };
     const badge = badges[matchType] || '';
@@ -947,6 +1019,11 @@ window.selectFDA = (brand, adverseEvents, doseStr, doseUnit) => {
   // Kick off background image fetch
   state.pendingImageUrl = null;
   window._fetchDrugImage(brand).then(url => { state.pendingImageUrl = url; });
+};
+
+window._fetchDrugImage = async (brand) => {
+  // Use a high-quality drug placeholder from Unsplash
+  return `https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=200&auto=format&fit=crop`;
 };
 
 // Build the "not found" fallback panel in the dropdown
