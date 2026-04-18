@@ -832,8 +832,11 @@ window.searchFDA = (query) => {
       const smartIngredient = await window._smartLookupIngredient(query);
       
       if (smartIngredient) {
+         // CLEANUP: If multiple ingredients (A, B), use the first one as primary for FDA fetch
+         const primaryIngredient = smartIngredient.split(',')[0].trim();
+
          // Now try to fetch FDA data using this ingredient
-         const res3 = await fetch(`https://api.fda.gov/drug/label.json?search=openfda.generic_name:"${encodeURIComponent(smartIngredient)}"&limit=5`);
+         const res3 = await fetch(`https://api.fda.gov/drug/label.json?search=openfda.generic_name:"${encodeURIComponent(primaryIngredient)}"&limit=5`);
          const data3 = await res3.json();
          if (data3.results && data3.results.length > 0) {
             dropdown.innerHTML = window._fdaResultsHTML(data3.results, 'wikidata');
@@ -878,13 +881,19 @@ window._wikidataLookupIngredient = async (query) => {
     
     const claims = entitiesData.entities[entityId].claims;
     if (claims && claims.P611) {
-      const ingredientId = claims.P611[0].mainsnak.datavalue.value.id;
-      // 3. Get English label of this ingredient
-      const ingRes = await fetch(`https://www.wikidata.org/w/api.php?action=wbgetentities&ids=${ingredientId}&props=labels&languages=en&format=json&origin=*`);
-      const ingData = await ingRes.json();
-      if (ingData.entities[ingredientId].labels && ingData.entities[ingredientId].labels.en) {
-        return ingData.entities[ingredientId].labels.en.value;
+      const ingredientNames = [];
+      for (const claim of claims.P611) {
+        const ingredientId = claim.mainsnak.datavalue.value.id;
+        try {
+          // 3. Get English label of this ingredient
+          const ingRes = await fetch(`https://www.wikidata.org/w/api.php?action=wbgetentities&ids=${ingredientId}&props=labels&languages=en&format=json&origin=*`);
+          const ingData = await ingRes.json();
+          if (ingData.entities[ingredientId].labels && ingData.entities[ingredientId].labels.en) {
+            ingredientNames.push(ingData.entities[ingredientId].labels.en.value);
+          }
+        } catch(e) {}
       }
+      if (ingredientNames.length > 0) return ingredientNames.join(', ');
     }
   } catch(e) { console.error("Wikidata lookup error:", e); }
   return null;
