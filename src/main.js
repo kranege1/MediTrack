@@ -2,7 +2,7 @@ import './style.css';
 import { API } from './db.js';
 
 // --- App State ---
-const state = {
+window.state = {
   currentView: 'dashboard',
   medications: [],
   logs: [],
@@ -13,6 +13,7 @@ const state = {
   editingMedId: null,
   lang: localStorage.getItem('medilang') || 'en'
 };
+const state = window.state;
 
 // === i18n ===
 const i18n = {
@@ -567,6 +568,22 @@ window.editMed = (id) => {
   document.getElementById('add-med-title').innerText = t('updateMedication');
   document.getElementById('med-save-btn').innerText = t('saveMedication');
   document.getElementById('add-med-panel').style.display = 'block';
+
+  // Show adverse events if they exist
+  const adverseEl = document.getElementById('med-fda-adverse');
+  if (med.adverse_events) {
+    state.pendingAdverseEvents = med.adverse_events;
+    adverseEl.style.display = 'block';
+    adverseEl.innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
+        <div><strong>${t('adverseLabel')}</strong><br>${med.adverse_events}</div>
+        <button class="btn btn-secondary" style="width:auto; padding:4px 8px; font-size:10px; margin-top:2px;" onclick="window.showAdverseOverlay(null, state.pendingAdverseEvents, '${med.name.replace(/'/g, "\\'")}')">${t('detailsBtn')}</button>
+      </div>
+    `;
+  } else {
+    adverseEl.style.display = 'none';
+  }
+
   window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
@@ -590,9 +607,20 @@ window.closeMedPanel = () => {
 
 
 
-window.showAdverseOverlay = (id) => {
-  const m = state.medications.find(med => med.id === id);
-  if (!m || !m.adverse_events) return;
+window.showAdverseOverlay = (id, rawText, name) => {
+  let m = null;
+  let adverseEvents = rawText;
+  let displayName = name || t('unknown');
+
+  if (id) {
+    m = state.medications.find(med => med.id === id);
+    if (m) {
+      adverseEvents = m.adverse_events;
+      displayName = m.name;
+    }
+  }
+
+  if (!adverseEvents) return;
 
   const app = document.getElementById('app');
   let overlay = document.getElementById('adverse-overlay');
@@ -611,14 +639,14 @@ window.showAdverseOverlay = (id) => {
     app.appendChild(overlay);
   }
 
-  const parsedContent = window._parseAdverseEvents(m.adverse_events);
+  const parsedContent = window._parseAdverseEvents(adverseEvents);
 
   overlay.innerHTML = `
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 24px;">
       <div class="text-h2" style="margin:0; color:var(--accent-color);">${t('sideEffectsTitle')}</div>
       <button onclick="window.closeAdverseOverlay()" class="btn btn-secondary" style="width:auto; padding:8px 16px; font-size:14px;">${t('close')}</button>
     </div>
-    <div style="margin-bottom: 20px; font-size: 20px; font-weight: 700; color: white;">${m.name}</div>
+    <div style="margin-bottom: 20px; font-size: 20px; font-weight: 700; color: white;">${displayName}</div>
     <div style="flex:1;">
       ${parsedContent}
     </div>
@@ -1002,14 +1030,20 @@ window.selectFDA = (brand, adverseEvents, doseStr, doseUnit) => {
   if (adverseEvents && adverseEvents !== 'undefined' && adverseEvents.trim() !== '') {
       state.pendingAdverseEvents = adverseEvents;
       adverseEl.style.display = 'block';
-      adverseEl.innerHTML = `<strong>${t('adverseLabel')}</strong><br>${adverseEvents}`;
+      const showAdverseHTML = (text) => `
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
+          <div><strong>${t('adverseLabel')}</strong><br>${text}</div>
+          <button class="btn btn-secondary" style="width:auto; padding:4px 8px; font-size:10px; margin-top:2px;" onclick="window.showAdverseOverlay(null, state.pendingAdverseEvents, '${brand.replace(/'/g, "\\'")}')">${t('detailsBtn')}</button>
+        </div>
+      `;
+      adverseEl.innerHTML = showAdverseHTML(adverseEvents);
 
       // Auto-translate if DE
       if (state.lang === 'de') {
-        adverseEl.innerHTML = `<strong>${t('adverseLabel')}</strong><br>${t('translating')}`;
+        adverseEl.innerHTML = showAdverseHTML(t('translating'));
         window._autoTranslateAdverse(adverseEvents).then(trans => {
            state.pendingAdverseEvents = trans;
-           adverseEl.innerHTML = `<strong>${t('adverseLabel')}</strong><br>${trans}`;
+           adverseEl.innerHTML = showAdverseHTML(trans);
         });
       }
   } else {
@@ -1084,15 +1118,20 @@ window.fetchFDAIngredient = async (brandName) => {
   if (adverseText.trim()) {
       state.pendingAdverseEvents = adverseText;
       adverseEl.style.display = 'block';
-      adverseEl.innerHTML = `<strong>${t('adverseVia').replace('{ing}', ing)}</strong><br>${adverseText}`;
+      const showAdverseHTML = (text) => `
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
+          <div><strong>${t('adverseVia').replace('{ing}', ing)}</strong><br>${text}</div>
+          <button class="btn btn-secondary" style="width:auto; padding:4px 8px; font-size:10px; margin-top:2px;" onclick="window.showAdverseOverlay(null, state.pendingAdverseEvents, '${brandName.replace(/'/g, "\\'")}')">${t('detailsBtn')}</button>
+        </div>
+      `;
+      adverseEl.innerHTML = showAdverseHTML(adverseText);
       
       // Auto-translate if DE
       if (state.lang === 'de') {
-        const origHtml = adverseEl.innerHTML;
-        adverseEl.innerHTML = `<strong>${t('adverseVia').replace('{ing}', ing)}</strong><br>${t('translating')}`;
+        adverseEl.innerHTML = showAdverseHTML(t('translating'));
         window._autoTranslateAdverse(adverseText).then(trans => {
            state.pendingAdverseEvents = trans;
-           adverseEl.innerHTML = `<strong>${t('adverseVia').replace('{ing}', ing)}</strong><br>${trans}`;
+           adverseEl.innerHTML = showAdverseHTML(trans);
         });
       }
   }
