@@ -140,5 +140,35 @@ export const API = {
       await tx.objectStore('plans').put(plan);
     }
     await tx.done;
+  },
+
+  // --- Deletion ---
+  async clearAllData() {
+    const db = await initDB();
+    const tx = db.transaction(['medications', 'logs', 'metrics', 'plans'], 'readwrite');
+    await tx.objectStore('medications').clear();
+    await tx.objectStore('logs').clear();
+    await tx.objectStore('metrics').clear();
+    await tx.objectStore('plans').clear();
+    await tx.done;
+  },
+  async clearLogs() {
+    const db = await initDB();
+    const tx = db.transaction(['logs', 'metrics'], 'readwrite');
+    await tx.objectStore('logs').clear();
+    await tx.objectStore('metrics').clear();
+    await tx.done;
+  },
+  async clearTodayLogs() {
+    const db = await initDB();
+    const today = new Date().setHours(0,0,0,0);
+    const tx = db.transaction(['logs'], 'readwrite');
+    const logs = await tx.objectStore('logs').getAll();
+    for (const log of logs) {
+      if (new Date(log.timestamp).setHours(0,0,0,0) === today) {
+        await tx.objectStore('logs').delete(log.id);
+      }
+    }
+    await tx.done;
   }
 };

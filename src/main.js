@@ -88,7 +88,12 @@ const i18n = {
     glucose:'Blood Glucose',
     linkMetrics:'Link body metrics with this schedule',
     pulseLabel:'Pulse (bpm)',
-    glucoseLabel:'Blood Glucose (mg/dL)'
+    glucoseLabel:'Blood Glucose (mg/dL)',
+    deleteAllData:'Clear All Data',
+    deleteLogs:'Clear Intake Logs Only',
+    resetTodayLbl:'Reset Today\'s Progress',
+    confirmDeleteAll:'CRITICAL: Wipe ALL data (meds, plans, logs)? This cannot be undone!',
+    confirmDeleteLogs:'Delete all intake and metric history?'
   },
   de: {
     dataExports:'Daten & Export', home:'Start', meds:'Medikamente', logAction:'Einnahme', plans:'Pläne',
@@ -157,7 +162,12 @@ const i18n = {
     glucose:'Blutzucker',
     linkMetrics:'Körpermesswerte mit diesem Plan verknüpfen',
     pulseLabel:'Puls (bpm)',
-    glucoseLabel:'Blutzucker (mg/dL)'
+    glucoseLabel:'Blutzucker (mg/dL)',
+    deleteAllData:'Alle Projektdaten löschen',
+    deleteLogs:'Nur Einnahme-Log löschen',
+    resetTodayLbl:'Heutigen Tagesplan zurücksetzen',
+    confirmDeleteAll:'KRITISCH: ALLE Daten löschen (Medikamente, Pläne, Logs)? Dies kann nicht rückgängig gemacht werden!',
+    confirmDeleteLogs:'Alle Einnahme- und Messwert-Historien löschen?'
   }
 };
 const LOCAL_DRUG_KB = {
@@ -215,7 +225,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.21</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.22</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -700,7 +710,12 @@ function renderSettings() {
       <div class="text-h2">${t('dataManagement')}</div>
       <p class="text-body" style="margin-bottom: 20px;">${t('dataNote')}</p>
       
-      <button class="btn" style="margin-bottom: 32px;" onclick="window.exportData()">${t('exportData')}</button>
+      <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px;">
+        <button class="btn" onclick="window.exportData()">${t('exportData')}</button>
+        <button class="btn btn-secondary" onclick="window.confirmClearLogs()" style="border-color: #f59e0b; color: #f59e0b; background: rgba(245, 158, 11, 0.05);">${t('deleteLogs')}</button>
+        <button class="btn btn-secondary" onclick="window.resetToday()" style="border-color: var(--accent-color); color: var(--accent-color); background: rgba(99, 102, 241, 0.05);">${t('resetTodayLbl')}</button>
+        <button class="btn btn-danger" onclick="window.confirmClearAll()" style="margin-top: 8px;">${t('deleteAllData')}</button>
+      </div>
       
       <div class="text-h2">AI Configuration</div>
       <div class="form-group">
@@ -1302,17 +1317,35 @@ window.importData = async () => {
   if(!fileInput.files.length) return alert(t('selectFile'));
   
   const file = fileInput.files[0];
-  const text = await file.text();
-  
-  try {
-    await API.importData(text);
-    document.getElementById('settings-msg').innerText = t('restoredSuccess');
-    setTimeout(() => window.navigate('dashboard'), 1500);
-  } catch(e) {
-    alert(t('importError'));
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    try {
+      await API.importData(e.target.result);
+      alert(t('restoredSuccess'));
+      window.navigate('dashboard');
+    } catch(err) { alert(t('importError')); }
+  };
+  reader.readAsText(file);
+};
+
+window.confirmClearAll = async () => {
+  if (confirm(t('confirmDeleteAll'))) {
+    await API.clearAllData();
+    window.navigate('dashboard');
   }
 };
 
+window.confirmClearLogs = async () => {
+  if (confirm(t('confirmDeleteLogs'))) {
+    await API.clearLogs();
+    window.navigate('dashboard');
+  }
+};
+
+window.resetToday = async () => {
+  await API.clearTodayLogs();
+  window.navigate('dashboard');
+};
 // --- INIT ---
 window.addEventListener('DOMContentLoaded', () => {
   if ('serviceWorker' in navigator) {
