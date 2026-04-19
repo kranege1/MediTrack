@@ -215,7 +215,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.20</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.21</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -505,6 +505,17 @@ function renderPlans() {
         <div class="card-title">${med.name}</div>
         <div class="card-subtitle">${t('takes')} ${p.dose} ${med.unit || t('units')} ${t('at')} <strong>${t(p.timeCategory || 'morning')}</strong></div>
         <div style="font-size: 11px; color: var(--accent-color); margin-top: 4px; font-weight: 600;">${freqText}</div>
+        
+        ${p.linkedMetrics && p.linkedMetrics.length > 0 ? `
+          <div style="display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap;">
+            ${p.linkedMetrics.map(type => `
+              <span style="font-size: 9px; padding: 2px 6px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; color: rgba(255,255,255,0.6);">
+                ${t(type === 'weight' ? 'weight' : (type === 'bp' ? 'bloodPressure' : type))}
+              </span>
+            `).join('')}
+          </div>
+        ` : ''}
+
         <button class="btn btn-secondary" style="padding: 6px 10px; width: auto; font-size: 11px; margin-top: 8px; border-color: #64748b; color: #cbd5e1" onclick="window.downloadICS('${p.id}')">${t('appleCalendar')}</button>
       </div>
       <button class="btn btn-danger" style="padding: 8px 12px; width: auto;" onclick="window.deletePlan('${p.id}')">${t('remove')}</button>
