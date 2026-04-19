@@ -203,7 +203,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.17</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.18</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -872,19 +872,21 @@ window.searchWithGrok = async () => {
   adverseEl.innerHTML = `<div style="color: var(--accent-color);">${t('aiThinking')}</div>`;
 
   try {
-    const promptText = `Find medication matches for "${query}" and return them as a JSON array of objects in a "results" field. 
+    const promptText = `Identifiziere die wichtigsten Medikamente mit dem Namen oder einem ähnlichen Brand wie "${query}". 
+    Nenne die Namen in einer Liste und füge auch Generika an. Sortiere die Liste so, dass die Treffer, die am nächsten mit "${query}" übereinstimmen (inkl. korrigierter Typos), ganz oben stehen.
+    Return as JSON array of objects in a "results" field.
     Each object must have:
-    - name: string (The specific name searched for, corrected for typos. If the user searched for a brand like "Cymbalta", use "Cymbalta". If they searched for a generic like "Candesartan", use "Candesartan".)
-    - generic_name: string (The active pharmaceutical ingredient)
+    - name: string (Specific name, typo-corrected. E.g. search "Cymbalta" -> name "Cymbalta", search "Candesartan" -> name "Candesartan")
+    - generic_name: string (Active pharmaceutical ingredient)
     - default_dose: string (Common starting dose number)
     - unit: string (mg, ml, pills, or units)
     - format: string (Pill, Liquid, Injection, or Inhaler)
     - adverse_events: string (Main side effects, bullet points)
     
     Structure: {"results": [{"name": "...", "generic_name": "...", ...}]}
-    CRITICAL: Always include the most accurate corrected version of the user's search query as the first result.
+    CRITICAL: Always include the most accurate corrected version of "${query}" as the first result.
     Language: ${state.lang === 'de' ? 'German' : 'English'}.
-    CRITICAL: If the name "${query}" is not a real medication, return {"error": "NOT_FOUND"}.
+    CRITICAL: If the input is not a real medication, return {"error": "NOT_FOUND"}.
     ONLY valid JSON.`;
 
     const res = await fetch(GROK_BASE_URL, {
