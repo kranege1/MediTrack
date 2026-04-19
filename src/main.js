@@ -13,7 +13,8 @@ window.state = {
   editingMedId: null,
   lang: localStorage.getItem('medilang') || 'en',
   grokKey: localStorage.getItem('grok_api_key') || '',
-  grokModel: localStorage.getItem('grok_model') || 'grok-4.20-non-reasoning'
+  grokModel: localStorage.getItem('grok_model') || 'grok-4.20-non-reasoning',
+  availableModels: JSON.parse(localStorage.getItem('grok_available_models') || '[]')
 };
 const state = window.state;
 
@@ -74,10 +75,12 @@ const i18n = {
     saveSettingsBtn:'Save Settings',
     missingKeyError:'Please set your Grok API Key in Settings first.',
     testingKey:'Testing Key...',
-    keyValid:'Key is valid!',
     keyInvalid:'Key invalid',
     modelIdLabel:'Grok Model ID',
-    modelSuggestion:'Try: grok-4.20-non-reasoning or grok-2'
+    modelSuggestion:'Try: grok-4.20-non-reasoning or grok-2',
+    fetchingModels:'Fetching models...',
+    refreshModels:'Refresh Models',
+    customModel:'Custom (enter manually)...'
   },
   de: {
     dataExports:'Daten & Export', home:'Start', meds:'Medikamente', logAction:'Einnahme', plans:'Pläne',
@@ -132,10 +135,12 @@ const i18n = {
     saveSettingsBtn:'Einstellungen speichern',
     missingKeyError:'Bitte hinterlege zuerst deinen Grok API-Key in den Einstellungen.',
     testingKey:'Key wird geprüft...',
-    keyValid:'Key ist gültig!',
     keyInvalid:'Key ungültig',
     modelIdLabel:'Grok Modell ID',
-    modelSuggestion:'Versuche: grok-4.20-non-reasoning oder grok-2'
+    modelSuggestion:'Versuche: grok-4.20-non-reasoning oder grok-2',
+    fetchingModels:'Modelle werden geladen...',
+    refreshModels:'Modelle aktualisieren',
+    customModel:'Benutzerdefiniert...'
   }
 };
 const LOCAL_DRUG_KB = {
@@ -555,9 +560,18 @@ function renderSettings() {
         <label>${t('enteringApiKey')}</label>
         <input type="password" id="grok-api-key-input" value="${state.grokKey}" placeholder="xai-...">
       </div>
-      <div class="form-group">
+      <div class="form-group" style="position:relative;">
         <label>${t('modelIdLabel')}</label>
-        <input type="text" id="grok-model-input" value="${state.grokModel}" placeholder="grok-4.20-non-reasoning">
+        <div style="display:flex; gap:8px;">
+          ${state.availableModels.length > 0 
+            ? `<select id="grok-model-input" style="flex:1;">
+                ${state.availableModels.map(m => `<option value="${m}" ${state.grokModel === m ? 'selected' : ''}>${m}</option>`).join('')}
+                <option value="custom">${t('customModel')}</option>
+               </select>`
+            : `<input type="text" id="grok-model-input" value="${state.grokModel}" placeholder="grok-4.20-non-reasoning" style="flex:1;">`
+          }
+          <button class="btn btn-secondary" style="width:auto; padding:0 12px; font-size:12px;" onclick="window.fetchGrokModels()" title="${t('refreshModels')}">🔄</button>
+        </div>
         <div style="font-size:10px; color:#94a3b8; margin-top:4px;">${t('modelSuggestion')}</div>
       </div>
       <button class="btn" onclick="window.saveSettings()">${t('saveSettingsBtn')}</button>
@@ -1034,10 +1048,38 @@ window.saveSettings = async () => {
     state.grokModel = model;
     localStorage.setItem('grok_api_key', key);
     localStorage.setItem('grok_model', model);
+    
+    // Auto-fetch models on success
+    await window.fetchGrokModels(false);
+    
     msgEl.innerHTML = `<span style="color: #10b981;">✓ ${t('keyValid')}</span>`;
     setTimeout(() => msgEl.innerText = '', 3000);
   } catch (err) {
     msgEl.innerHTML = `<span style="color: #ef4444;">❌ ${t('keyInvalid')}<br><small style="font-size:10px;">${err.message}</small></span>`;
+  }
+};
+
+window.fetchGrokModels = async (manual = true) => {
+  if (!state.grokKey) return manual ? alert(t('missingKeyError')) : null;
+  
+  if (manual) {
+    const msgEl = document.getElementById('settings-msg');
+    if (msgEl) msgEl.innerText = t('fetchingModels');
+  }
+
+  try {
+    const res = await fetch("https://api.x.ai/v1/models", {
+      headers: { "Authorization": `Bearer ${state.grokKey}` }
+    });
+    const data = await res.json();
+    if (data.data) {
+      state.availableModels = data.data.map(m => m.id).sort();
+      localStorage.setItem('grok_available_models', JSON.stringify(state.availableModels));
+      if (manual) render();
+    }
+  } catch (e) {
+    console.error("Failed to fetch models", e);
+    if (manual) alert(t('aiError'));
   }
 };
 
