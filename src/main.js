@@ -17,7 +17,7 @@ window.state = {
 const state = window.state;
 
 // Grok API Configuration
-const GROK_MODEL = "grok-beta";
+const GROK_MODEL = "grok-2";
 const GROK_BASE_URL = "https://api.x.ai/v1/chat/completions";
 
 // === i18n ===
@@ -73,7 +73,10 @@ const i18n = {
     aiError:'Error during AI lookup.',
     settingsSavedLabel:'Settings Saved',
     saveSettingsBtn:'Save Settings',
-    missingKeyError:'Please set your Grok API Key in Settings first.'
+    missingKeyError:'Please set your Grok API Key in Settings first.',
+    testingKey:'Testing Key...',
+    keyValid:'Key is valid!',
+    keyInvalid:'Key invalid'
   },
   de: {
     dataExports:'Daten & Export', home:'Start', meds:'Medikamente', logAction:'Einnahme', plans:'Pläne',
@@ -126,7 +129,10 @@ const i18n = {
     aiError:'Fehler bei der KI-Abfrage.',
     settingsSavedLabel:'Einstellungen gespeichert',
     saveSettingsBtn:'Einstellungen speichern',
-    missingKeyError:'Bitte hinterlege zuerst deinen Grok API-Key in den Einstellungen.'
+    missingKeyError:'Bitte hinterlege zuerst deinen Grok API-Key in den Einstellungen.',
+    testingKey:'Key wird geprüft...',
+    keyValid:'Key ist gültig!',
+    keyInvalid:'Key ungültig'
   }
 };
 const LOCAL_DRUG_KB = {
@@ -862,7 +868,13 @@ window.searchWithGrok = async () => {
       })
     });
 
-    if (!res.ok) throw new Error(res.statusText);
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      const errorMsg = (typeof errData.error === 'string') 
+        ? errData.error 
+        : (errData.error?.message || res.statusText);
+      throw new Error(errorMsg);
+    }
     const data = await res.json();
     const result = JSON.parse(data.choices[0].message.content);
 
@@ -880,7 +892,7 @@ window.searchWithGrok = async () => {
     }
   } catch (err) {
     console.error(err);
-    adverseEl.innerHTML = `<div style="color: #ef4444;">${t('aiError')}</div>`;
+    adverseEl.innerHTML = `<div style="color: #ef4444;">${t('aiError')}<br><span style="font-size:10px; opacity:0.8;">${err.message}</span></div>`;
   }
 };
 
@@ -980,14 +992,42 @@ window.saveMetric = async () => {
   window.navigate('dashboard');
 };
 
-window.saveSettings = () => {
+window.saveSettings = async () => {
   const key = document.getElementById('grok-api-key-input').value;
-  state.grokKey = key;
-  localStorage.setItem('grok_api_key', key);
+  if (!key) return alert(t('enteringApiKey'));
   
   const msgEl = document.getElementById('settings-msg');
-  msgEl.innerText = t('settingsSavedLabel');
-  setTimeout(() => msgEl.innerText = '', 2000);
+  msgEl.innerHTML = `<span style="color: var(--accent-color);">${t('testingKey')}</span>`;
+  
+  try {
+    const res = await fetch(GROK_BASE_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${key}`
+      },
+      body: JSON.stringify({
+        model: GROK_MODEL,
+        messages: [{ role: "user", content: "ping" }],
+        max_tokens: 1
+      })
+    });
+    
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      const errorMsg = (typeof errData.error === 'string') 
+        ? errData.error 
+        : (errData.error?.message || res.statusText);
+      throw new Error(errorMsg);
+    }
+    
+    state.grokKey = key;
+    localStorage.setItem('grok_api_key', key);
+    msgEl.innerHTML = `<span style="color: #10b981;">✓ ${t('keyValid')}</span>`;
+    setTimeout(() => msgEl.innerText = '', 3000);
+  } catch (err) {
+    msgEl.innerHTML = `<span style="color: #ef4444;">❌ ${t('keyInvalid')}<br><small style="font-size:10px;">${err.message}</small></span>`;
+  }
 };
 
 window.exportData = async () => {
