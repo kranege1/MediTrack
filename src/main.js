@@ -203,7 +203,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.16</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.17</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -876,14 +876,15 @@ window.searchWithGrok = async () => {
     Each object must have:
     - name: string (The specific name searched for, corrected for typos. If the user searched for a brand like "Cymbalta", use "Cymbalta". If they searched for a generic like "Candesartan", use "Candesartan".)
     - generic_name: string (The active pharmaceutical ingredient)
-    - default_dose: string (Common starting dose number like '500')
+    - default_dose: string (Common starting dose number)
     - unit: string (mg, ml, pills, or units)
     - format: string (Pill, Liquid, Injection, or Inhaler)
     - adverse_events: string (Main side effects, bullet points)
     
-    CRITICAL: Always include the most accurate corrected version of the user's search query as the first result if it is a valid medication name.
-    Language for strings: ${state.lang === 'de' ? 'German' : 'English'}.
-    CRITICAL: If the name "${query}" is not a real or known medication, return {"error": "NOT_FOUND"}.
+    Structure: {"results": [{"name": "...", "generic_name": "...", ...}]}
+    CRITICAL: Always include the most accurate corrected version of the user's search query as the first result.
+    Language: ${state.lang === 'de' ? 'German' : 'English'}.
+    CRITICAL: If the name "${query}" is not a real medication, return {"error": "NOT_FOUND"}.
     ONLY valid JSON.`;
 
     const res = await fetch(GROK_BASE_URL, {
@@ -915,7 +916,15 @@ window.searchWithGrok = async () => {
       return;
     }
 
-    state.pendingGrokResults = result.results || [];
+    // Defensive check: wrap single result in array if Grok fails to follow structure
+    let resultsList = [];
+    if (Array.isArray(result.results)) {
+       resultsList = result.results;
+    } else if (result.name) {
+       resultsList = [result];
+    }
+    
+    state.pendingGrokResults = resultsList;
     
     if (state.pendingGrokResults.length === 0) {
        adverseEl.innerHTML = `<div style="color: #64748b; font-style: italic;">⚠️ ${t('notFoundAiLabel')}</div>`;
