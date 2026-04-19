@@ -93,7 +93,9 @@ const i18n = {
     deleteLogs:'Clear Intake Logs Only',
     resetTodayLbl:'Reset Today\'s Progress',
     confirmDeleteAll:'CRITICAL: Wipe ALL data (meds, plans, logs)? This cannot be undone!',
-    confirmDeleteLogs:'Delete all intake and metric history?'
+    confirmDeleteLogs:'Delete all intake and metric history?',
+    metricRequired:'Measurement Required',
+    fillRequiredMetrics:'Please fill in the required health metrics.'
   },
   de: {
     dataExports:'Daten & Export', home:'Start', meds:'Medikamente', logAction:'Einnahme', plans:'Pläne',
@@ -167,7 +169,9 @@ const i18n = {
     deleteLogs:'Nur Einnahme-Log löschen',
     resetTodayLbl:'Heutigen Tagesplan zurücksetzen',
     confirmDeleteAll:'KRITISCH: ALLE Daten löschen (Medikamente, Pläne, Logs)? Dies kann nicht rückgängig gemacht werden!',
-    confirmDeleteLogs:'Alle Einnahme- und Messwert-Historien löschen?'
+    confirmDeleteLogs:'Alle Einnahme- und Messwert-Historien löschen?',
+    metricRequired:'Messung erforderlich',
+    fillRequiredMetrics:'Bitte trage die erforderlichen Messwerte ein.'
   }
 };
 const LOCAL_DRUG_KB = {
@@ -225,7 +229,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.22</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.23</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -310,7 +314,9 @@ function renderDashboard() {
                </div>
                ${!isCompleted && p.linkedMetrics && p.linkedMetrics.length > 0 ? `
                  <div id="metrics-entry-${p.id}" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.05);">
-                   <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase; margin-bottom: 8px;">${t('recentMetrics')} (${t('cancel').toLowerCase()}? ${t('optional') || 'Optional'})</div>
+                   <div style="font-size: 10px; color: var(--accent-color); text-transform: uppercase; margin-bottom: 8px; font-weight: 700;">
+                      ⚠️ ${t('metricRequired')}
+                    </div>
                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                      ${p.linkedMetrics.map(type => `
                        <div class="form-group" style="margin-bottom:0;">
@@ -374,12 +380,22 @@ window.confirmIntake = async (planId) => {
   
   const linkedMetricIds = [];
   if (plan.linkedMetrics) {
+    let missing = false;
     for (const type of plan.linkedMetrics) {
-      const val = document.getElementById(`m-val-${planId}-${type}`)?.value;
-      if (val) {
+      const input = document.getElementById(`m-val-${planId}-${type}`);
+      const val = input?.value?.trim();
+      if (!val) {
+        if (input) input.style.borderColor = "#ef4444";
+        missing = true;
+      } else {
+        if (input) input.style.borderColor = "rgba(255,255,255,0.1)";
         const metric = await API.addMetric({ type, value: val });
         linkedMetricIds.push(metric.id);
       }
+    }
+    if (missing) {
+      alert(t('fillRequiredMetrics'));
+      return;
     }
   }
   
