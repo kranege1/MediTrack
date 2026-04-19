@@ -78,9 +78,8 @@ const i18n = {
     keyInvalid:'Key invalid',
     modelIdLabel:'Grok Model ID',
     modelSuggestion:'Try: grok-4.20-non-reasoning or grok-2',
-    fetchingModels:'Fetching models...',
-    refreshModels:'Refresh Models',
-    customModel:'Custom (enter manually)...'
+    customModel:'Custom (enter manually)...',
+    notFoundAiLabel:'Medication not found or unknown.'
   },
   de: {
     dataExports:'Daten & Export', home:'Start', meds:'Medikamente', logAction:'Einnahme', plans:'Pläne',
@@ -140,7 +139,8 @@ const i18n = {
     modelSuggestion:'Versuche: grok-4.20-non-reasoning oder grok-2',
     fetchingModels:'Modelle werden geladen...',
     refreshModels:'Modelle aktualisieren',
-    customModel:'Benutzerdefiniert...'
+    customModel:'Benutzerdefiniert...',
+    notFoundAiLabel:'Medikament nicht gefunden oder unbekannt.'
   }
 };
 const LOCAL_DRUG_KB = {
@@ -198,7 +198,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.13</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.14</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -874,6 +874,8 @@ window.searchWithGrok = async () => {
     - unit: string (mg, ml, pills, or units)
     - format: string (Pill, Liquid, Injection, or Inhaler)
     - adverse_events: string (Main side effects, bullet points)
+    
+    CRITICAL: If the name "${query}" is not a real, existing, or known medication, return ONLY {"error": "NOT_FOUND"}.
     ONLY valid JSON.`;
 
     const res = await fetch(GROK_BASE_URL, {
@@ -899,6 +901,11 @@ window.searchWithGrok = async () => {
     }
     const data = await res.json();
     const result = JSON.parse(data.choices[0].message.content);
+
+    if (result.error === "NOT_FOUND") {
+      adverseEl.innerHTML = `<div style="color: #64748b; font-style: italic;">⚠️ ${t('notFoundAiLabel')}</div>`;
+      return;
+    }
 
     // Apply results
     document.getElementById('med-name').value = result.name || query;
