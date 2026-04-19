@@ -82,7 +82,13 @@ const i18n = {
     customModel:'Custom (enter manually)...',
     notFoundAiLabel:'Medication not found or unknown.',
     selectMatch:'Select a match:',
-    multipleFound:'Multiple results found'
+    multipleFound:'Multiple results found',
+    history:'History',
+    pulse:'Pulse',
+    glucose:'Blood Glucose',
+    linkMetrics:'Link body metrics with this schedule',
+    pulseLabel:'Pulse (bpm)',
+    glucoseLabel:'Blood Glucose (mg/dL)'
   },
   de: {
     dataExports:'Daten & Export', home:'Start', meds:'Medikamente', logAction:'Einnahme', plans:'Pläne',
@@ -145,7 +151,13 @@ const i18n = {
     customModel:'Benutzerdefiniert...',
     notFoundAiLabel:'Medikament nicht gefunden oder unbekannt.',
     selectMatch:'Bitte Treffer wählen:',
-    multipleFound:'Mehrere Ergebnisse gefunden'
+    multipleFound:'Mehrere Ergebnisse gefunden',
+    history:'Historie',
+    pulse:'Puls',
+    glucose:'Blutzucker',
+    linkMetrics:'Körpermesswerte mit diesem Plan verknüpfen',
+    pulseLabel:'Puls (bpm)',
+    glucoseLabel:'Blutzucker (mg/dL)'
   }
 };
 const LOCAL_DRUG_KB = {
@@ -203,7 +215,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.19</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.20</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -236,6 +248,10 @@ function render() {
         <svg class="nav-icon" viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
         ${t('plans')}
       </div>
+      <div class="nav-item ${state.currentView === 'history' ? 'active' : ''}" onclick="window.navigate('history')">
+        <svg class="nav-icon" viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+        ${t('history')}
+      </div>
     </div>
   `;
 }
@@ -246,6 +262,7 @@ function getViewHTML() {
     case 'medications': return renderMedications();
     case 'plans': return renderPlans();
     case 'log': return renderLog();
+    case 'history': return renderHistory();
     case 'settings': return renderSettings();
     default: return renderDashboard();
   }
@@ -266,19 +283,33 @@ function renderDashboard() {
      const statusColor = isCompleted ? 'var(--accent-color)' : '#ef4444';
      const statusText = isCompleted ? t('completed') : t('dueTodayBadge');
      const opacity = isCompleted ? '0.6' : '1';
-     return `<div class="card" style="border-left: 4px solid ${statusColor}; opacity: ${opacity}; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
-               <div style="flex: 1;">
-                 <div class="card-title">${med.name}</div>
-                 <div class="card-subtitle">${t('scheduled')}: ${t(p.timeCategory || 'morning')} | ${p.dose} ${med.unit || t('units')}</div>
+     return `<div class="card" style="border-left: 4px solid ${statusColor}; opacity: ${opacity}; margin-bottom: 8px; display: flex; flex-direction: column; padding: 16px;">
+               <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                 <div style="flex: 1;">
+                   <div class="card-title">${med.name}</div>
+                   <div class="card-subtitle">${t('scheduled')}: ${t(p.timeCategory || 'morning')} | ${p.dose} ${med.unit || t('units')}</div>
+                 </div>
+                 <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
+                   <div style="color: ${statusColor}; font-size: 12px; font-weight: 600;">${statusText}</div>
+                   ${!isCompleted ? `
+                     <button class="btn btn-secondary" style="padding: 6px 10px; font-size: 11px; width: auto;" onclick="window.confirmIntake('${p.id}')">
+                       ✓ ${t('completed')}
+                     </button>
+                   ` : ''}
+                 </div>
                </div>
-               <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
-                 <div style="color: ${statusColor}; font-size: 12px; font-weight: 600;">${statusText}</div>
-                 ${!isCompleted ? `
-                   <button class="btn btn-secondary" style="padding: 6px 10px; font-size: 11px; width: auto;" onclick="window.quickLog('${p.medicationId}', '${p.dose}')">
-                     ✓ ${t('completed')}
-                   </button>
-                 ` : ''}
-               </div>
+               ${!isCompleted && p.linkedMetrics && p.linkedMetrics.length > 0 ? `
+                 <div id="metrics-entry-${p.id}" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.05);">
+                   <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase; margin-bottom: 8px;">${t('recentMetrics')} (${t('cancel').toLowerCase()}? ${t('optional') || 'Optional'})</div>
+                   <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                     ${p.linkedMetrics.map(type => `
+                       <div class="form-group" style="margin-bottom:0;">
+                         <input type="text" id="m-val-${p.id}-${type}" placeholder="${t(type === 'weight' ? 'weight' : (type === 'bp' ? 'bloodPressure' : type))}" style="padding: 6px; font-size: 11px; background: rgba(0,0,0,0.2);">
+                       </div>
+                     `).join('')}
+                   </div>
+                 </div>
+               ` : ''}
              </div>`;
   }).join('') : `<div class="empty-state">${t('noPlans')}</div>`;
 
@@ -327,13 +358,30 @@ function renderDashboard() {
   `;
 }
 
-window.quickLog = async (medId, dose) => {
+window.confirmIntake = async (planId) => {
+  const plan = state.plans.find(p => p.id === planId);
+  if (!plan) return;
+  
+  const linkedMetricIds = [];
+  if (plan.linkedMetrics) {
+    for (const type of plan.linkedMetrics) {
+      const val = document.getElementById(`m-val-${planId}-${type}`)?.value;
+      if (val) {
+        const metric = await API.addMetric({ type, value: val });
+        linkedMetricIds.push(metric.id);
+      }
+    }
+  }
+  
   await API.addLog({
-    medicationId: medId,
-    amount_taken: dose,
+    medicationId: plan.medicationId,
+    amount_taken: plan.dose,
+    linkedMetricIds,
     timestamp: Date.now()
   });
-  render();
+  
+  alert(t('loggedSuccess'));
+  window.navigate('dashboard');
 };
 
 // 2. Medications
@@ -508,6 +556,24 @@ function renderPlans() {
         <input type="number" id="plan-interval-x" value="2" min="2" max="30">
       </div>
 
+      <div class="form-group" style="margin-top:16px; padding:12px; background:rgba(255,255,255,0.03); border-radius:12px; border:1px solid var(--glass-border);">
+        <label style="color:var(--accent-color); font-size:12px; text-transform:uppercase; margin-bottom:12px; display:block;">${t('linkMetrics')}</label>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+          <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:normal; cursor:pointer;">
+            <input type="checkbox" name="link-metric" value="weight" style="width:18px; height:18px; accent-color:var(--accent-color);"> ${t('weight')}
+          </label>
+          <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:normal; cursor:pointer;">
+            <input type="checkbox" name="link-metric" value="bp" style="width:18px; height:18px; accent-color:var(--accent-color);"> ${t('bloodPressure')}
+          </label>
+          <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:normal; cursor:pointer;">
+            <input type="checkbox" name="link-metric" value="pulse" style="width:18px; height:18px; accent-color:var(--accent-color);"> ${t('pulse')}
+          </label>
+          <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:normal; cursor:pointer;">
+            <input type="checkbox" name="link-metric" value="glucose" style="width:18px; height:18px; accent-color:var(--accent-color);"> ${t('glucose')}
+          </label>
+        </div>
+      </div>
+
       <button class="btn" onclick="window.savePlan()">${t('savePlan')}</button>
       <button class="btn btn-secondary" style="margin-top:12px;" onclick="document.getElementById('add-plan-panel').style.display='none'">${t('cancel')}</button>
       `}
@@ -562,6 +628,55 @@ function renderLog() {
         <input type="text" id="metric-value" placeholder="e.g., 75.5 or 120/80">
       </div>
       <button class="btn" onclick="window.saveMetric()">${t('saveMetric')}</button>
+    </div>
+  `;
+}
+
+
+function renderHistory() {
+  const allLogs = [...state.logs].sort((a,b) => b.timestamp - a.timestamp);
+  
+  const logCards = allLogs.map(l => {
+    const med = state.medications.find(m => m.id === l.medicationId) || {name: t('unknown')};
+    const time = new Date(l.timestamp).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' });
+    
+    // Check for linked metrics in this log
+    let metricsHtml = '';
+    if (l.linkedMetricIds && l.linkedMetricIds.length > 0) {
+      const linkedMetrics = l.linkedMetricIds.map(id => state.metrics.find(m => m.id === id)).filter(Boolean);
+      if (linkedMetrics.length > 0) {
+        metricsHtml = `
+          <div style="margin-top:10px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.05); display:flex; flex-wrap:wrap; gap:12px;">
+            ${linkedMetrics.map(m => `
+              <div style="font-size:12px; color:var(--accent-color);">
+                <span style="opacity:0.6;">${t(m.type === 'weight' ? 'weight' : (m.type === 'bp' ? 'bloodPressure' : m.type))}:</span> ${m.value}
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+    }
+
+    return `
+      <div class="card" style="display:block; padding: 16px;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+          <div>
+            <div class="card-title">${med.name}</div>
+            <div class="card-subtitle">${l.amount_taken} ${med.unit || t('units')} ${t('taken')}</div>
+          </div>
+          <div style="font-size:12px; color:#94a3b8; text-align:right;">${time}</div>
+        </div>
+        ${metricsHtml}
+      </div>
+    `;
+  }).join('');
+
+  return `
+    <div class="glass-panel">
+      <div class="text-h2">${t('history')}</div>
+      <div class="card-list">
+        ${allLogs.length > 0 ? logCards : `<div class="empty-state">${t('noLogsToday')}</div>`}
+      </div>
     </div>
   `;
 }
@@ -838,11 +953,7 @@ window.saveLog = async () => {
   window.navigate('dashboard');
 };
 
-window.quickLog = async (medId, amount) => {
-  await API.addLog({ medicationId: medId, amount_taken: amount });
-  alert(t('loggedSuccess'));
-  window.navigate('dashboard');
-}
+
 
 
 window.savePlan = async () => {
@@ -854,12 +965,15 @@ window.savePlan = async () => {
   
   if (!medicationId || !dose) return alert(t('medAndTime'));
   
+  const linkedMetrics = Array.from(document.querySelectorAll('input[name="link-metric"]:checked')).map(cb => cb.value);
+  
   const plan = { 
     medicationId, 
     timeCategory, 
     dose, 
     frequency, 
     intervalX, 
+    linkedMetrics,
     startDate: new Date().toISOString() 
   };
   await API.addPlan(plan);
