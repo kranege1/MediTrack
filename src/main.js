@@ -203,7 +203,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.18</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.19</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -266,12 +266,19 @@ function renderDashboard() {
      const statusColor = isCompleted ? 'var(--accent-color)' : '#ef4444';
      const statusText = isCompleted ? t('completed') : t('dueTodayBadge');
      const opacity = isCompleted ? '0.6' : '1';
-     return `<div class="card" style="border-left: 4px solid ${statusColor}; opacity: ${opacity}; margin-bottom: 8px;">
-               <div>
+     return `<div class="card" style="border-left: 4px solid ${statusColor}; opacity: ${opacity}; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+               <div style="flex: 1;">
                  <div class="card-title">${med.name}</div>
                  <div class="card-subtitle">${t('scheduled')}: ${t(p.timeCategory || 'morning')} | ${p.dose} ${med.unit || t('units')}</div>
                </div>
-               <div style="color: ${statusColor}; font-size: 13px; font-weight: 600;">${statusText}</div>
+               <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
+                 <div style="color: ${statusColor}; font-size: 12px; font-weight: 600;">${statusText}</div>
+                 ${!isCompleted ? `
+                   <button class="btn btn-secondary" style="padding: 6px 10px; font-size: 11px; width: auto;" onclick="window.quickLog('${p.medicationId}', '${p.dose}')">
+                     ✓ ${t('completed')}
+                   </button>
+                 ` : ''}
+               </div>
              </div>`;
   }).join('') : `<div class="empty-state">${t('noPlans')}</div>`;
 
@@ -319,6 +326,15 @@ function renderDashboard() {
     </div>
   `;
 }
+
+window.quickLog = async (medId, dose) => {
+  await API.addLog({
+    medicationId: medId,
+    amount_taken: dose,
+    timestamp: Date.now()
+  });
+  render();
+};
 
 // 2. Medications
 function renderMedications() {
