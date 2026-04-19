@@ -237,7 +237,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.24</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.25</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -443,28 +443,27 @@ function renderMedications() {
 
     return `
     <div class="card" style="display: flex; flex-direction: column; align-items: stretch; padding: 16px; gap: 0;">
-      <!-- Top Section: Avatar and Name -->
-      <div style="display: flex; gap: 16px; align-items: flex-start; margin-bottom: 16px;">
+      <!-- Top Section: Avatar, Name and Actions -->
+      <div style="display: flex; gap: 16px; align-items: flex-start;">
         ${avatar}
         <div style="flex: 1; min-width: 0;">
-          <div class="card-title" style="margin-bottom: 2px; line-height: 1.2;">${m.name}</div>
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+            <div class="card-title" style="margin-bottom: 2px; line-height: 1.2; word-break: break-all;">${m.name}</div>
+            <div style="display: flex; gap: 6px; flex-shrink: 0;">
+               <button class="btn btn-secondary" style="width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 8px; border-color: rgba(255,255,255,0.1);" onclick="window.editMed('${m.id}')">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+               </button>
+               <button class="btn btn-danger" style="width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center; background: rgba(239, 68, 68, 0.1); border-radius: 8px;" onclick="window.deleteMed('${m.id}')">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+               </button>
+            </div>
+          </div>
           ${m.adverse_events ? `
               <div style="margin-top: 8px;">
                  <button class="btn btn-secondary" style="font-size: 10px; padding: 4px 10px; width: auto; background: rgba(239, 68, 68, 0.1); color: #ef4444; border-color: rgba(239, 68, 68, 0.3); border-radius: 6px;" onclick="window.showAdverseOverlay('${m.id}')">${t('sideEffectsTitle')}</button>
-                 ${state.lang === 'de' ? `<button onclick="window.translateAdverse('${m.id}', '${m.adverse_events.replace(/'/g, ' ').replace(/"/g, ' ')}')" style="font-size:10px; padding: 4px 10px; background:rgba(99,102,241,0.15); color:#a5b4fc; border:1px solid rgba(99,102,241,0.4); border-radius:6px; cursor:pointer; margin-left:6px;">${t('translateAdverse')}</button>` : ''}
               </div>
           ` : ''}
         </div>
-      </div>
-      
-      <!-- Bottom Section: Actions -->
-      <div style="display: flex; gap: 8px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.05); justify-content: flex-end;">
-         <button class="btn btn-secondary" style="width: 36px; height: 36px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 10px;" onclick="window.editMed('${m.id}')">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-         </button>
-         <button class="btn btn-danger" style="width: 36px; height: 36px; padding: 0; display: flex; align-items: center; justify-content: center; background: rgba(239, 68, 68, 0.1); border-radius: 10px;" onclick="window.deleteMed('${m.id}')">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-         </button>
       </div>
     </div>`;
   }).join('');
