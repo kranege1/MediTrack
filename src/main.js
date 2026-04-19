@@ -874,13 +874,14 @@ window.searchWithGrok = async () => {
   try {
     const promptText = `Find medication matches for "${query}" and return them as a JSON array of objects in a "results" field. 
     Each object must have:
-    - name: string (The BRAND name if searched, or the most common common name. E.g. if I search Cymbalta, use "Cymbalta")
-    - generic_name: string (The active pharmaceutical ingredient, e.g. "Duloxetine")
+    - name: string (The specific name searched for, corrected for typos. If the user searched for a brand like "Cymbalta", use "Cymbalta". If they searched for a generic like "Candesartan", use "Candesartan".)
+    - generic_name: string (The active pharmaceutical ingredient)
     - default_dose: string (Common starting dose number like '500')
     - unit: string (mg, ml, pills, or units)
     - format: string (Pill, Liquid, Injection, or Inhaler)
     - adverse_events: string (Main side effects, bullet points)
     
+    CRITICAL: Always include the most accurate corrected version of the user's search query as the first result if it is a valid medication name.
     Language for strings: ${state.lang === 'de' ? 'German' : 'English'}.
     CRITICAL: If the name "${query}" is not a real or known medication, return {"error": "NOT_FOUND"}.
     ONLY valid JSON.`;
