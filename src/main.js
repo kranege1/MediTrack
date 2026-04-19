@@ -12,12 +12,11 @@ window.state = {
   pendingAdverseEvents: null,
   editingMedId: null,
   lang: localStorage.getItem('medilang') || 'en',
-  grokKey: localStorage.getItem('grok_api_key') || ''
+  grokKey: localStorage.getItem('grok_api_key') || '',
+  grokModel: localStorage.getItem('grok_model') || 'grok-4.20-non-reasoning'
 };
 const state = window.state;
 
-// Grok API Configuration
-const GROK_MODEL = "grok-2";
 const GROK_BASE_URL = "https://api.x.ai/v1/chat/completions";
 
 // === i18n ===
@@ -76,7 +75,9 @@ const i18n = {
     missingKeyError:'Please set your Grok API Key in Settings first.',
     testingKey:'Testing Key...',
     keyValid:'Key is valid!',
-    keyInvalid:'Key invalid'
+    keyInvalid:'Key invalid',
+    modelIdLabel:'Grok Model ID',
+    modelSuggestion:'Try: grok-4.20-non-reasoning or grok-2'
   },
   de: {
     dataExports:'Daten & Export', home:'Start', meds:'Medikamente', logAction:'Einnahme', plans:'Pläne',
@@ -132,7 +133,9 @@ const i18n = {
     missingKeyError:'Bitte hinterlege zuerst deinen Grok API-Key in den Einstellungen.',
     testingKey:'Key wird geprüft...',
     keyValid:'Key ist gültig!',
-    keyInvalid:'Key ungültig'
+    keyInvalid:'Key ungültig',
+    modelIdLabel:'Grok Modell ID',
+    modelSuggestion:'Versuche: grok-4.20-non-reasoning oder grok-2'
   }
 };
 const LOCAL_DRUG_KB = {
@@ -552,6 +555,11 @@ function renderSettings() {
         <label>${t('enteringApiKey')}</label>
         <input type="password" id="grok-api-key-input" value="${state.grokKey}" placeholder="xai-...">
       </div>
+      <div class="form-group">
+        <label>${t('modelIdLabel')}</label>
+        <input type="text" id="grok-model-input" value="${state.grokModel}" placeholder="grok-4.20-non-reasoning">
+        <div style="font-size:10px; color:#94a3b8; margin-top:4px;">${t('modelSuggestion')}</div>
+      </div>
       <button class="btn" onclick="window.saveSettings()">${t('saveSettingsBtn')}</button>
       <div id="settings-msg" style="margin-top: 12px; color: var(--accent-color);"></div>
 
@@ -861,7 +869,7 @@ window.searchWithGrok = async () => {
         "Authorization": `Bearer ${state.grokKey}`
       },
       body: JSON.stringify({
-        model: GROK_MODEL,
+        model: state.grokModel,
         messages: [{ role: "user", content: promptText }],
         response_format: { type: "json_object" },
         temperature: 0
@@ -994,7 +1002,8 @@ window.saveMetric = async () => {
 
 window.saveSettings = async () => {
   const key = document.getElementById('grok-api-key-input').value;
-  if (!key) return alert(t('enteringApiKey'));
+  const model = document.getElementById('grok-model-input').value;
+  if (!key || !model) return alert(t('enteringApiKey'));
   
   const msgEl = document.getElementById('settings-msg');
   msgEl.innerHTML = `<span style="color: var(--accent-color);">${t('testingKey')}</span>`;
@@ -1007,7 +1016,7 @@ window.saveSettings = async () => {
         "Authorization": `Bearer ${key}`
       },
       body: JSON.stringify({
-        model: GROK_MODEL,
+        model: model,
         messages: [{ role: "user", content: "ping" }],
         max_tokens: 1
       })
@@ -1022,7 +1031,9 @@ window.saveSettings = async () => {
     }
     
     state.grokKey = key;
+    state.grokModel = model;
     localStorage.setItem('grok_api_key', key);
+    localStorage.setItem('grok_model', model);
     msgEl.innerHTML = `<span style="color: #10b981;">✓ ${t('keyValid')}</span>`;
     setTimeout(() => msgEl.innerText = '', 3000);
   } catch (err) {
