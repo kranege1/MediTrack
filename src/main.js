@@ -95,7 +95,11 @@ const i18n = {
     confirmDeleteAll:'CRITICAL: Wipe ALL data (meds, plans, logs)? This cannot be undone!',
     confirmDeleteLogs:'Delete all intake and metric history?',
     metricRequired:'Measurement Required',
-    fillRequiredMetrics:'Please fill in the required health metrics.'
+    fillRequiredMetrics:'Please fill in the required health metrics.',
+    anchorDate:'Start Date',
+    startWeekday:'Weekday',
+    dayOfMonth:'Day of Month',
+    monday:'Monday', tuesday:'Tuesday', wednesday:'Wednesday', thursday:'Thursday', friday:'Friday', saturday:'Saturday', sunday:'Sunday'
   },
   de: {
     dataExports:'Daten & Export', home:'Start', meds:'Medikamente', logAction:'Einnahme', plans:'Pläne',
@@ -171,7 +175,11 @@ const i18n = {
     confirmDeleteAll:'KRITISCH: ALLE Daten löschen (Medikamente, Pläne, Logs)? Dies kann nicht rückgängig gemacht werden!',
     confirmDeleteLogs:'Alle Einnahme- und Messwert-Historien löschen?',
     metricRequired:'Messung erforderlich',
-    fillRequiredMetrics:'Bitte trage die erforderlichen Messwerte ein.'
+    fillRequiredMetrics:'Bitte trage die erforderlichen Messwerte ein.',
+    anchorDate:'Startdatum',
+    startWeekday:'Wochentag',
+    dayOfMonth:'Tag des Monats',
+    monday:'Montag', tuesday:'Dienstag', wednesday:'Mittwoch', thursday:'Donnerstag', friday:'Freitag', saturday:'Samstag', sunday:'Sonntag'
   }
 };
 const LOCAL_DRUG_KB = {
@@ -229,7 +237,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.23</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.24</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -525,6 +533,13 @@ function renderPlans() {
     const med = state.medications.find(m => m.id === p.medicationId) || {name: t('unknown')};
     let freqText = t(p.frequency || 'daily');
     if (p.frequency === 'everyXDays') freqText = t('dayIntervalLbl').replace('{x}', p.intervalX);
+    if (p.frequency === 'weekly' && p.startWeekday !== undefined) {
+      const days = [t('sunday'), t('monday'), t('tuesday'), t('wednesday'), t('thursday'), t('friday'), t('saturday')];
+      freqText = `${t('weekly')} (${days[p.startWeekday]})`;
+    }
+    if ((p.frequency === 'monthly' || p.frequency === 'quarterly') && p.startDayOfMonth !== undefined) {
+      freqText = `${t(p.frequency)} (${t('dayOfMonth')}: ${p.startDayOfMonth})`;
+    }
 
     return `<div class="card" style="align-items: flex-start;">
       <div>
@@ -579,13 +594,40 @@ function renderPlans() {
 
       <div class="form-group">
         <label>${t('frequency')}</label>
-        <select id="plan-freq" onchange="document.getElementById('plan-x-days-row').style.display = (this.value === 'everyXDays' ? 'block' : 'none')">
+        <select id="plan-freq" onchange="window._handleFreqChange(this.value)">
            <option value="daily">${t('daily')}</option>
            <option value="weekly">${t('weekly')}</option>
            <option value="monthly">${t('monthly')}</option>
            <option value="quarterly">${t('quarterly')}</option>
            <option value="everyXDays">${t('everyXDays')}</option>
         </select>
+      </div>
+
+      <div class="form-group">
+        <label>${t('anchorDate')}</label>
+        <input type="date" id="plan-start-date" value="${new Date().toISOString().split('T')[0]}" onchange="window._syncPlanAnchors(this.value)">
+      </div>
+
+      <div id="plan-weekday-row" style="display:none;">
+        <div class="form-group">
+          <label>${t('startWeekday')}</label>
+          <select id="plan-weekday">
+            <option value="1">${t('monday')}</option>
+            <option value="2">${t('tuesday')}</option>
+            <option value="3">${t('wednesday')}</option>
+            <option value="4">${t('thursday')}</option>
+            <option value="5">${t('friday')}</option>
+            <option value="6">${t('saturday')}</option>
+            <option value="0">${t('sunday')}</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="plan-day-month-row" style="display:none;">
+        <div class="form-group">
+          <label>${t('dayOfMonth')}</label>
+          <input type="number" id="plan-day-of-month" min="1" max="31" value="${new Date().getDate()}">
+        </div>
       </div>
 
       <div class="form-group" id="plan-x-days-row" style="display:none;">
@@ -964,10 +1006,15 @@ window._isPlanDueToday = (p) => {
   const diffDays = Math.round((today - start) / (1000 * 60 * 60 * 24));
 
   switch(p.frequency) {
-    case 'weekly': return today.getDay() === start.getDay();
-    case 'monthly': return today.getDate() === start.getDate();
+    case 'weekly': 
+      const targetWeekday = p.startWeekday !== undefined ? parseInt(p.startWeekday) : start.getDay();
+      return today.getDay() === targetWeekday;
+    case 'monthly': 
+      const targetDay = p.startDayOfMonth !== undefined ? parseInt(p.startDayOfMonth) : start.getDate();
+      return today.getDate() === targetDay;
     case 'quarterly': 
-      return today.getDate() === start.getDate() && 
+      const targetQDay = p.startDayOfMonth !== undefined ? parseInt(p.startDayOfMonth) : start.getDate();
+      return today.getDate() === targetQDay && 
              (today.getMonth() - start.getMonth() + (12 * (today.getFullYear() - start.getFullYear()))) % 3 === 0;
     case 'everyXDays': 
       const x = parseInt(p.intervalX) || 1;
@@ -975,6 +1022,20 @@ window._isPlanDueToday = (p) => {
     case 'daily':
     default: return true;
   }
+};
+
+window._handleFreqChange = (freq) => {
+  document.getElementById('plan-x-days-row').style.display = (freq === 'everyXDays' ? 'block' : 'none');
+  document.getElementById('plan-weekday-row').style.display = (freq === 'weekly' ? 'block' : 'none');
+  document.getElementById('plan-day-month-row').style.display = (freq === 'monthly' || freq === 'quarterly' ? 'block' : 'none');
+};
+
+window._syncPlanAnchors = (dateStr) => {
+  if (!dateStr) return;
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return;
+  document.getElementById('plan-weekday').value = d.getDay();
+  document.getElementById('plan-day-of-month').value = d.getDate();
 };
 
 window.deleteMed = async (id) => {
@@ -1004,6 +1065,9 @@ window.savePlan = async () => {
   const dose = document.getElementById('plan-dose').value;
   const frequency = document.getElementById('plan-freq').value;
   const intervalX = document.getElementById('plan-interval-x').value;
+  const startDate = document.getElementById('plan-start-date').value;
+  const startWeekday = document.getElementById('plan-weekday').value;
+  const startDayOfMonth = document.getElementById('plan-day-of-month').value;
   
   if (!medicationId || !dose) return alert(t('medAndTime'));
   
@@ -1016,7 +1080,9 @@ window.savePlan = async () => {
     frequency, 
     intervalX, 
     linkedMetrics,
-    startDate: new Date().toISOString() 
+    startDate: new Date(startDate).toISOString(),
+    startWeekday,
+    startDayOfMonth
   };
   await API.addPlan(plan);
   window.navigate('plans');
