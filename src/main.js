@@ -14,7 +14,8 @@ window.state = {
   lang: localStorage.getItem('medilang') || 'en',
   grokKey: localStorage.getItem('grok_api_key') || '',
   grokModel: localStorage.getItem('grok_model') || 'grok-4.20-non-reasoning',
-  availableModels: JSON.parse(localStorage.getItem('grok_available_models') || '[]')
+  availableModels: JSON.parse(localStorage.getItem('grok_available_models') || '[]'),
+  pendingGrokResults: []
 };
 const state = window.state;
 
@@ -79,7 +80,9 @@ const i18n = {
     modelIdLabel:'Grok Model ID',
     modelSuggestion:'Try: grok-4.20-non-reasoning or grok-2',
     customModel:'Custom (enter manually)...',
-    notFoundAiLabel:'Medication not found or unknown.'
+    notFoundAiLabel:'Medication not found or unknown.',
+    selectMatch:'Select a match:',
+    multipleFound:'Multiple results found'
   },
   de: {
     dataExports:'Daten & Export', home:'Start', meds:'Medikamente', logAction:'Einnahme', plans:'Pläne',
@@ -140,7 +143,9 @@ const i18n = {
     fetchingModels:'Modelle werden geladen...',
     refreshModels:'Modelle aktualisieren',
     customModel:'Benutzerdefiniert...',
-    notFoundAiLabel:'Medikament nicht gefunden oder unbekannt.'
+    notFoundAiLabel:'Medikament nicht gefunden oder unbekannt.',
+    selectMatch:'Bitte Treffer wählen:',
+    multipleFound:'Mehrere Ergebnisse gefunden'
   }
 };
 const LOCAL_DRUG_KB = {
@@ -867,15 +872,17 @@ window.searchWithGrok = async () => {
   adverseEl.innerHTML = `<div style="color: var(--accent-color);">${t('aiThinking')}</div>`;
 
   try {
-    const promptText = `Return medication details for "${query}" as JSON in ${state.lang === 'de' ? 'German' : 'English'}.
-    Fields:
-    - name: string (Official generic name)
-    - default_dose: string (Number like '500')
+    const promptText = `Find medication matches for "${query}" and return them as a JSON array of objects in a "results" field. 
+    Each object must have:
+    - name: string (The BRAND name if searched, or the most common common name. E.g. if I search Cymbalta, use "Cymbalta")
+    - generic_name: string (The active pharmaceutical ingredient, e.g. "Duloxetine")
+    - default_dose: string (Common starting dose number like '500')
     - unit: string (mg, ml, pills, or units)
     - format: string (Pill, Liquid, Injection, or Inhaler)
     - adverse_events: string (Main side effects, bullet points)
     
-    CRITICAL: If the name "${query}" is not a real, existing, or known medication, return ONLY {"error": "NOT_FOUND"}.
+    Language for strings: ${state.lang === 'de' ? 'German' : 'English'}.
+    CRITICAL: If the name "${query}" is not a real or known medication, return {"error": "NOT_FOUND"}.
     ONLY valid JSON.`;
 
     const res = await fetch(GROK_BASE_URL, {
@@ -907,21 +914,55 @@ window.searchWithGrok = async () => {
       return;
     }
 
-    // Apply results
-    document.getElementById('med-name').value = result.name || query;
-    document.getElementById('med-dose').value = result.default_dose || "";
-    if (result.unit) document.getElementById('med-unit').value = result.unit;
-    if (result.format) document.getElementById('med-format').value = result.format;
-
-    if (result.adverse_events) {
-      state.pendingAdverseEvents = result.adverse_events;
-      adverseEl.innerHTML = window._renderAdverseBox(result.adverse_events, result.name || query);
-    } else {
-      adverseEl.style.display = 'none';
+    state.pendingGrokResults = result.results || [];
+    
+    if (state.pendingGrokResults.length === 0) {
+       adverseEl.innerHTML = `<div style="color: #64748b; font-style: italic;">⚠️ ${t('notFoundAiLabel')}</div>`;
+       return;
     }
+
+    if (state.pendingGrokResults.length === 1) {
+       window.applyGrokMatch(0);
+       return;
+    }
+
+    // Multiple results found
+    let html = `<div style="margin-bottom:10px;"><strong>${t('multipleFound')}</strong></div>
+                <div style="display:flex; flex-direction:column; gap:6px;">`;
+    state.pendingGrokResults.forEach((m, idx) => {
+      html += `<button class="btn btn-secondary" style="text-align:left; padding:8px; font-size:12px;" onclick="window.applyGrokMatch(${idx})">
+                ${m.name} <span style="opacity:0.6; font-size:10px;">(${m.generic_name})</span>
+               </button>`;
+    });
+    html += `</div>`;
+    adverseEl.innerHTML = html;
   } catch (err) {
     console.error(err);
     adverseEl.innerHTML = `<div style="color: #ef4444;">${t('aiError')}<br><span style="font-size:10px; opacity:0.8;">${err.message}</span></div>`;
+  }
+};
+
+window.applyGrokMatch = (idx) => {
+  const match = state.pendingGrokResults[idx];
+  if (!match) return;
+
+  const nameEl = document.getElementById('med-name');
+  const doseEl = document.getElementById('med-dose');
+  const unitEl = document.getElementById('med-unit');
+  const formatEl = document.getElementById('med-format');
+  const adverseEl = document.getElementById('med-fda-adverse');
+
+  nameEl.value = match.name;
+  doseEl.value = match.default_dose || "";
+  if (match.unit) unitEl.value = match.unit;
+  if (match.format) formatEl.value = match.format;
+
+  if (match.adverse_events) {
+    state.pendingAdverseEvents = match.adverse_events;
+    adverseEl.innerHTML = window._renderAdverseBox(match.adverse_events, match.name);
+    adverseEl.style.display = 'block';
+  } else {
+    adverseEl.style.display = 'none';
   }
 };
 
