@@ -122,7 +122,18 @@ const i18n = {
     noUpcoming:'No upcoming medications.',
     weeklyExport:'Weekly Export (.ics)',
     addToCalendar:'Add to Calendar',
-    calendarFileName:'Medication_Schedule.ics'
+    calendarFileName:'Medication_Schedule.ics',
+    appointment:'Appointment',
+    medication:'Medication',
+    doctorName:'Doctor / Clinic Name',
+    location:'Location / Address',
+    phone:'Phone Number',
+    note:'Notes',
+    oneTime:'One-time (Date & Time)',
+    recurring:'Recurring',
+    doctorSearch:'Search Doctor (AI)',
+    regionPlaceholder:'City / Region (optional)',
+    doctorSelect:'Select Doctor'
   },
   de: {
     dataExports:'Daten & Export', home:'Start', meds:'Medikamente', logAction:'Einnahme', plans:'Pläne',
@@ -223,7 +234,18 @@ const i18n = {
     noUpcoming:'Keine anstehenden Medikamente.',
     weeklyExport:'Wochen-Export (.ics)',
     addToCalendar:'Erinnerung',
-    calendarFileName:'Medikamente_Plan.ics'
+    calendarFileName:'Medikamente_Plan.ics',
+    appointment:'Arzt-Termin',
+    medication:'Medikament',
+    doctorName:'Name des Arztes / Klinik',
+    location:'Ort / Adresse',
+    phone:'Telefonnummer',
+    note:'Notizen',
+    oneTime:'Einmalig (Datum & Uhrzeit)',
+    recurring:'Regelmäßig',
+    doctorSearch:'Arzt suchen (KI)',
+    regionPlaceholder:'Stadt / Region (optional)',
+    doctorSelect:'Arzt wählen'
   }
 };
 const LOCAL_DRUG_KB = {
@@ -281,7 +303,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.41</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.50</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -357,25 +379,35 @@ function renderDashboard() {
     
     if (duePlans.length > 0) {
       const itemsHtml = duePlans.map(p => {
-        const med = state.medications.find(m => m.id === p.medicationId) || {name: t('unknown')};
-        const isCompleted = isToday && todaysLogs.some(l => l.medicationId === p.medicationId);
-        const statusColor = isCompleted ? 'var(--accent-color)' : (isToday ? '#ef4444' : 'rgba(255,255,255,0.2)');
+        const isAppt = p.type === 'appointment';
+        const med = !isAppt ? (state.medications.find(m => m.id === p.medicationId) || {name: t('unknown')}) : null;
+        const isCompleted = !isAppt && isToday && todaysLogs.some(l => l.medicationId === p.medicationId);
+        
+        let statusColor = isCompleted ? 'var(--accent-color)' : (isToday ? '#ef4444' : 'rgba(255,255,255,0.2)');
+        if (isAppt) statusColor = '#8b5cf6'; // Unified color for appointments
+
         const opacity = isCompleted ? '0.6' : '1';
         
+        const title = isAppt ? `🩺 ${p.doctorName}` : med.name;
+        const subtitle = isAppt 
+          ? `${p.location ? '📍 ' + p.location : ''} ${p.phone ? ' | 📞 ' + p.phone : ''}`
+          : `${t(p.timeCategory || 'morning')} | ${p.dose} ${med.unit || t('units')}`;
+
         return `
           <div class="card" style="border-left: 3px solid ${statusColor}; opacity: ${opacity}; margin-bottom: 8px; padding: 12px; display:flex; justify-content:space-between; align-items:center;">
             <div style="flex:1; min-width:0;">
-              <div class="card-title" style="font-size:14px; margin-bottom:0;">${med.name}</div>
-              <div class="card-subtitle" style="font-size:11px;">${t(p.timeCategory || 'morning')} | ${p.dose} ${med.unit || t('units')}</div>
+              <div class="card-title" style="font-size:14px; margin-bottom:0;">${title}</div>
+              <div class="card-subtitle" style="font-size:11px; word-break:break-word;">${subtitle}</div>
+              ${isAppt && p.note ? `<div style="font-size:10px; color:#94a3b8; margin-top:4px; font-style:italic;">"${p.note}"</div>` : ''}
             </div>
             <div style="display:flex; align-items:center; gap:8px;">
-              ${isToday && !isCompleted ? `
+              ${!isAppt && isToday && !isCompleted ? `
                 <button class="btn btn-secondary" style="width:auto; padding:6px 10px; font-size:10px;" onclick="window.confirmIntake('${p.id}')">✓</button>
-              ` : (isToday && isCompleted ? `<div style="color:var(--accent-color); font-size:10px; font-weight:700;">${t('completed')}</div>` : '')}
+              ` : (!isAppt && isToday && isCompleted ? `<div style="color:var(--accent-color); font-size:10px; font-weight:700;">${t('completed')}</div>` : '')}
               <button class="btn btn-secondary" style="width:auto; padding:6px 10px; font-size:10px; border-color:rgba(255,255,255,0.15);" onclick="window._exportSingleEvent('${p.id}', '${targetDate.toISOString()}')" title="${t('addToCalendar')}">🗓️</button>
             </div>
           </div>
-          ${isToday && !isCompleted && p.linkedMetrics && p.linkedMetrics.length > 0 ? `
+          ${!isAppt && isToday && !isCompleted && p.linkedMetrics && p.linkedMetrics.length > 0 ? `
              <div id="metrics-entry-${p.id}" style="margin-bottom:12px; padding:8px; background:rgba(0,0,0,0.2); border-radius:8px;">
                <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
                  ${p.linkedMetrics.map(type => `
@@ -577,24 +609,40 @@ function renderPlans() {
   const medOptions = state.medications.map(m => `<option value="${m.id}" data-dose="${m.dose}">${m.name}</option>`).join('');
 
   let listHtml = state.plans.map(p => {
-    const med = state.medications.find(m => m.id === p.medicationId) || {name: t('unknown')};
-    let freqText = t(p.frequency || 'daily');
-    if (p.frequency === 'everyXDays') freqText = t('dayIntervalLbl').replace('{x}', p.intervalX);
-    if (p.frequency === 'weekly' && p.startWeekday !== undefined) {
-      const days = [t('sunday'), t('monday'), t('tuesday'), t('wednesday'), t('thursday'), t('friday'), t('saturday')];
-      freqText = `${t('weekly')} (${days[p.startWeekday]})`;
-    }
-    if ((p.frequency === 'monthly' || p.frequency === 'quarterly') && p.startDayOfMonth !== undefined) {
-      freqText = `${t(p.frequency)} (${t('dayOfMonth')}: ${p.startDayOfMonth})`;
+    const isAppt = p.type === 'appointment';
+    let title, subtitle, infoLine;
+
+    if (isAppt) {
+      title = `🩺 ${p.doctorName || t('appointment')}`;
+      subtitle = `${p.location ? '📍 ' + p.location : ''} ${p.phone ? ' | 📞 ' + p.phone : ''}`;
+      const dt = (p.isOneTime && p.startDate) ? new Date(p.startDate) : null;
+      infoLine = dt 
+        ? `📅 ${dt.toLocaleDateString()} ${t('at')} ${dt.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}` 
+        : `📅 ${t('recurring')}: ${t(p.timeCategory || 'morning')}`;
+    } else {
+      const med = state.medications.find(m => m.id === p.medicationId) || {name: t('unknown')};
+      title = med.name;
+      subtitle = `${t('takes')} ${p.dose} ${med.unit || t('units')} ${t('at')} <strong>${t(p.timeCategory || 'morning')}</strong>`;
+      
+      let freqText = t(p.frequency || 'daily');
+      if (p.frequency === 'everyXDays') freqText = t('dayIntervalLbl').replace('{x}', p.intervalX);
+      if (p.frequency === 'weekly' && p.startWeekday !== undefined) {
+        const days = [t('sunday'), t('monday'), t('tuesday'), t('wednesday'), t('thursday'), t('friday'), t('saturday')];
+        freqText = `${t('weekly')} (${days[p.startWeekday]})`;
+      }
+      if ((p.frequency === 'monthly' || p.frequency === 'quarterly') && p.startDayOfMonth !== undefined) {
+        freqText = `${t(p.frequency)} (${t('dayOfMonth')}: ${p.startDayOfMonth})`;
+      }
+      infoLine = freqText;
     }
 
     return `<div class="card" style="align-items: flex-start;">
-      <div>
-        <div class="card-title">${med.name}</div>
-        <div class="card-subtitle">${t('takes')} ${p.dose} ${med.unit || t('units')} ${t('at')} <strong>${t(p.timeCategory || 'morning')}</strong></div>
-        <div style="font-size: 11px; color: var(--accent-color); margin-top: 4px; font-weight: 600;">${freqText}</div>
+      <div style="flex:1; min-width:0;">
+        <div class="card-title">${title}</div>
+        <div class="card-subtitle" style="word-break:break-word;">${subtitle}</div>
+        <div style="font-size: 11px; color: var(--accent-color); margin-top: 4px; font-weight: 600;">${infoLine}</div>
         
-        ${p.linkedMetrics && p.linkedMetrics.length > 0 ? `
+        ${!isAppt && p.linkedMetrics && p.linkedMetrics.length > 0 ? `
           <div style="display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap;">
             ${p.linkedMetrics.map(type => `
               <span style="font-size: 9px; padding: 2px 6px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; color: rgba(255,255,255,0.6);">
@@ -606,7 +654,7 @@ function renderPlans() {
 
         <button class="btn btn-secondary" style="padding: 6px 10px; width: auto; font-size: 11px; margin-top: 8px; border-color: #64748b; color: #cbd5e1" onclick="window.downloadICS('${p.id}')">${t('appleCalendar')}</button>
       </div>
-      <button class="btn btn-danger" style="padding: 8px 12px; width: auto;" onclick="window.deletePlan('${p.id}')">${t('remove')}</button>
+      <button class="btn btn-danger" style="padding: 8px 12px; width: auto; flex-shrink:0;" onclick="window.deletePlan('${p.id}')">${t('remove')}</button>
     </div>`;
   }).join('');
 
@@ -615,94 +663,107 @@ function renderPlans() {
   return `
     <div class="glass-panel" id="add-plan-panel" style="display: none;">
       <div class="text-h2">${t('createSchedule')}</div>
-      ${state.medications.length === 0 ? `<div class="empty-state">${t('addMedFirst')}</div>` : `
-      <div class="form-group">
-        <label>${t('selectMed')}</label>
-        <select id="plan-med" onchange="document.getElementById('plan-dose').value = this.options[this.selectedIndex].getAttribute('data-dose')">
-           <option value="" disabled selected>${t('chooseOption')}</option>
-           ${medOptions}
-        </select>
-      </div>
       
-      <div style="display: flex; gap: 12px;">
-        <div class="form-group" style="flex:1;">
-          <label>${t('timeOfDay')}</label>
-          <select id="plan-category">
-             <option value="morning">${t('morning')}</option>
-             <option value="noon">${t('noon')}</option>
-             <option value="evening">${t('evening')}</option>
-          </select>
-        </div>
-        <div class="form-group" style="flex:1;">
-          <label>${t('dose')}</label>
-          <input type="number" id="plan-dose">
-        </div>
+      <!-- Type Switcher -->
+      <div style="display:flex; background:rgba(255,255,255,0.05); border-radius:10px; padding:4px; margin-bottom:20px;">
+        <button onclick="window._setPlanType('medication')" style="flex:1; border:none; padding:8px; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer; background:${type==='medication'?'var(--accent-color)':'transparent'}; color:${type==='medication'?'#000':'#94a3b8'}; transition:all 0.2s;">${t('medication')}</button>
+        <button onclick="window._setPlanType('appointment')" style="flex:1; border:none; padding:8px; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer; background:${type==='appointment'?'var(--accent-color)':'transparent'}; color:${type==='appointment'?'#000':'#94a3b8'}; transition:all 0.2s;">${t('appointment')}</button>
       </div>
 
-      <div class="form-group">
-        <label>${t('frequency')}</label>
-        <select id="plan-freq" onchange="window._handleFreqChange(this.value)">
-           <option value="daily">${t('daily')}</option>
-           <option value="weekly">${t('weekly')}</option>
-           <option value="monthly">${t('monthly')}</option>
-           <option value="quarterly">${t('quarterly')}</option>
-           <option value="everyXDays">${t('everyXDays')}</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label>${t('anchorDate')}</label>
-        <input type="date" id="plan-start-date" value="${new Date().toISOString().split('T')[0]}" onchange="window._syncPlanAnchors(this.value)">
-      </div>
-
-      <div id="plan-weekday-row" style="display:none;">
+      ${type === 'medication' ? `
+        <!-- Medication Selection -->
+        ${state.medications.length === 0 ? `<div class="empty-state">${t('addMedFirst')}</div>` : `
+          <div class="form-group">
+            <label>${t('selectMed')}</label>
+            <select id="plan-med" onchange="document.getElementById('plan-dose').value = this.options[this.selectedIndex].getAttribute('data-dose')">
+               <option value="" disabled selected>${t('chooseOption')}</option>
+               ${medOptions}
+            </select>
+          </div>
+          <div style="display: flex; gap: 12px;">
+            <div class="form-group" style="flex:1;">
+              <label>${t('timeOfDay')}</label>
+              <select id="plan-category">
+                 <option value="morning">${t('morning')}</option>
+                 <option value="noon">${t('noon')}</option>
+                 <option value="evening">${t('evening')}</option>
+              </select>
+            </div>
+            <div class="form-group" style="flex:1;">
+              <label>${t('dose')}</label>
+              <input type="number" id="plan-dose">
+            </div>
+          </div>
+          ${_renderSharedPlanFields()}
+          <div class="form-group" style="margin-top:16px; padding:12px; background:rgba(255,255,255,0.03); border-radius:12px; border:1px solid var(--glass-border);">
+            <label style="color:var(--accent-color); font-size:12px; text-transform:uppercase; margin-bottom:12px; display:block;">${t('linkMetrics')}</label>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+              <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:normal; cursor:pointer;">
+                <input type="checkbox" name="link-metric" value="weight" style="width:18px; height:18px; accent-color:var(--accent-color);"> ${t('weight')}
+              </label>
+              <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:normal; cursor:pointer;">
+                <input type="checkbox" name="link-metric" value="bp" style="width:18px; height:18px; accent-color:var(--accent-color);"> ${t('bloodPressure')}
+              </label>
+              <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:normal; cursor:pointer;">
+                <input type="checkbox" name="link-metric" value="pulse" style="width:18px; height:18px; accent-color:var(--accent-color);"> ${t('pulse')}
+              </label>
+              <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:normal; cursor:pointer;">
+                <input type="checkbox" name="link-metric" value="glucose" style="width:18px; height:18px; accent-color:var(--accent-color);"> ${t('glucose')}
+              </label>
+            </div>
+          </div>
+        `}
+      ` : `
+        <!-- Appointment Fields -->
         <div class="form-group">
-          <label>${t('startWeekday')}</label>
-          <select id="plan-weekday">
-            <option value="1">${t('monday')}</option>
-            <option value="2">${t('tuesday')}</option>
-            <option value="3">${t('wednesday')}</option>
-            <option value="4">${t('thursday')}</option>
-            <option value="5">${t('friday')}</option>
-            <option value="6">${t('saturday')}</option>
-            <option value="0">${t('sunday')}</option>
-          </select>
+          <label>${t('doctorName')}</label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="appt-doctor" placeholder="e.g. Dr. Miller" style="flex:1;">
+            <button class="btn btn-secondary" style="width:auto; padding:0 12px;" onclick="window.searchDoctorAi()" title="${t('doctorSearch')}">🔍 AI</button>
+          </div>
+          <div id="doctor-ai-results" style="display:none; margin-top:8px; padding:12px; background:rgba(0,0,0,0.2); border-radius:10px;"></div>
         </div>
-      </div>
-
-      <div id="plan-day-month-row" style="display:none;">
         <div class="form-group">
-          <label>${t('dayOfMonth')}</label>
-          <input type="number" id="plan-day-of-month" min="1" max="31" value="${new Date().getDate()}">
+          <input type="text" id="appt-region" placeholder="${t('regionPlaceholder')}" style="font-size:11px; opacity:0.8; height:32px;">
         </div>
-      </div>
-
-      <div class="form-group" id="plan-x-days-row" style="display:none;">
-        <label>${t('dayIntervalLbl').replace('{x}', 'X')}</label>
-        <input type="number" id="plan-interval-x" value="2" min="2" max="30">
-      </div>
-
-      <div class="form-group" style="margin-top:16px; padding:12px; background:rgba(255,255,255,0.03); border-radius:12px; border:1px solid var(--glass-border);">
-        <label style="color:var(--accent-color); font-size:12px; text-transform:uppercase; margin-bottom:12px; display:block;">${t('linkMetrics')}</label>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
-          <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:normal; cursor:pointer;">
-            <input type="checkbox" name="link-metric" value="weight" style="width:18px; height:18px; accent-color:var(--accent-color);"> ${t('weight')}
-          </label>
-          <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:normal; cursor:pointer;">
-            <input type="checkbox" name="link-metric" value="bp" style="width:18px; height:18px; accent-color:var(--accent-color);"> ${t('bloodPressure')}
-          </label>
-          <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:normal; cursor:pointer;">
-            <input type="checkbox" name="link-metric" value="pulse" style="width:18px; height:18px; accent-color:var(--accent-color);"> ${t('pulse')}
-          </label>
-          <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:normal; cursor:pointer;">
-            <input type="checkbox" name="link-metric" value="glucose" style="width:18px; height:18px; accent-color:var(--accent-color);"> ${t('glucose')}
-          </label>
+        <div class="form-group">
+          <label>${t('location')}</label>
+          <input type="text" id="appt-location">
         </div>
-      </div>
+        <div class="form-group">
+          <label>${t('phone')}</label>
+          <input type="text" id="appt-phone">
+        </div>
+        <div class="form-group">
+           <label style="display:flex; align-items:center; gap:8px; font-weight:normal; font-size:13px;">
+             <input type="checkbox" id="appt-one-time" onchange="document.getElementById('appt-dt-box').style.display=this.checked?'block':'none'; document.getElementById('appt-recurring-box').style.display=this.checked?'none':'block';">
+             ${t('oneTime')}
+           </label>
+        </div>
+        <div id="appt-dt-box" style="display:none;">
+           <div class="form-group">
+             <input type="datetime-local" id="appt-date">
+           </div>
+        </div>
+        <div id="appt-recurring-box">
+          <div class="form-group">
+            <label>${t('timeOfDay')}</label>
+            <select id="appt-category">
+               <option value="morning">${t('morning')}</option>
+               <option value="noon">${t('noon')}</option>
+               <option value="evening">${t('evening')}</option>
+            </select>
+          </div>
+          ${_renderSharedPlanFields()}
+        </div>
+        <div class="form-group">
+          <label>${t('note')}</label>
+          <textarea id="appt-note" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:10px; color:white; padding:12px; font-family:inherit; width:100%; height:80px;"></textarea>
+        </div>
+      `}
 
       <button class="btn" onclick="window.savePlan()">${t('savePlan')}</button>
       <button class="btn btn-secondary" style="margin-top:12px;" onclick="document.getElementById('add-plan-panel').style.display='none'">${t('cancel')}</button>
-      `}
     </div>
 
     <div class="glass-panel">
@@ -1134,27 +1195,43 @@ window.saveLog = async () => {
 
 
 window.savePlan = async () => {
-  const medicationId = document.getElementById('plan-med').value;
-  const timeCategory = document.getElementById('plan-category').value;
-  const dose = document.getElementById('plan-dose').value;
+  const type = state.planType || 'medication';
+  const medicationId = type === 'medication' ? document.getElementById('plan-med').value : null;
+  const doctorName = type === 'appointment' ? document.getElementById('appt-doctor').value : null;
+  const location = type === 'appointment' ? document.getElementById('appt-location').value : null;
+  const phone = type === 'appointment' ? document.getElementById('appt-phone').value : null;
+  const note = type === 'appointment' ? document.getElementById('appt-note').value : null;
+  const isOneTime = type === 'appointment' ? document.getElementById('appt-one-time').checked : false;
+  
+  const timeCategory = type === 'medication' ? document.getElementById('plan-category').value : (isOneTime ? null : document.getElementById('appt-category').value);
+  const dose = type === 'medication' ? document.getElementById('plan-dose').value : null;
+  
   const frequency = document.getElementById('plan-freq').value;
   const intervalX = document.getElementById('plan-interval-x').value;
-  const startDate = document.getElementById('plan-start-date').value;
+  const startDateRaw = isOneTime ? document.getElementById('appt-date').value : document.getElementById('plan-start-date').value;
   const startWeekday = document.getElementById('plan-weekday').value;
   const startDayOfMonth = document.getElementById('plan-day-of-month').value;
   
-  if (!medicationId || !dose) return alert(t('medAndTime'));
-  
-  const linkedMetrics = Array.from(document.querySelectorAll('input[name="link-metric"]:checked')).map(cb => cb.value);
+  if (type === 'medication' && (!medicationId || !dose)) return alert(t('medAndTime'));
+  if (type === 'appointment' && !doctorName) return alert(t('doctorName'));
+  if (isOneTime && !startDateRaw) return alert(t('oneTime'));
+
+  const linkedMetrics = type === 'medication' ? Array.from(document.querySelectorAll('input[name="link-metric"]:checked')).map(cb => cb.value) : [];
   
   const plan = { 
+    type,
     medicationId, 
+    doctorName,
+    location,
+    phone,
+    note,
+    isOneTime,
     timeCategory, 
     dose, 
     frequency, 
     intervalX, 
     linkedMetrics,
-    startDate: new Date(startDate).toISOString(),
+    startDate: new Date(startDateRaw).toISOString(),
     startWeekday,
     startDayOfMonth
   };
@@ -1339,41 +1416,101 @@ window.translateAdverse = async (medId, text) => {
 
 
 
-window.downloadICS = (id) => {
-  const plan = state.plans.find(p => p.id === id);
-  const med = state.medications.find(m => m.id === plan.medicationId);
-  if (!plan || !med) return;
+// --- CALENDAR EXPORT HELPERS ---
+function _generateICS(events) {
+    const formatICSDate = (date) => {
+        return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+    };
+    
+    let icsItems = events.map(e => {
+        const desc = (e.description || '').replace(/\n/g, '\\n');
+        const loc = (e.location || '').replace(/\n/g, '\\n');
+        return [
+            'BEGIN:VEVENT',
+            `UID:${crypto.randomUUID()}`,
+            `DTSTAMP:${formatICSDate(new Date())}`,
+            `DTSTART:${formatICSDate(e.start)}`,
+            `DTEND:${formatICSDate(new Date(e.start.getTime() + 30 * 60 * 1000))}`,
+            `SUMMARY:💊 ${e.title}`,
+            `DESCRIPTION:${desc}`,
+            `LOCATION:${loc}`,
+            'END:VEVENT'
+        ].join('\r\n');
+    }).join('\r\n');
 
-  const now = new Date();
-  const timeParts = plan.timeOfDay.split(':');
-  
-  const dtStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), parseInt(timeParts[0]), parseInt(timeParts[1]));
-  
-  const pad = n => n<10 ? '0'+n : n;
-  const dtString = `${dtStart.getFullYear()}${pad(dtStart.getMonth()+1)}${pad(dtStart.getDate())}T${pad(dtStart.getHours())}${pad(dtStart.getMinutes())}00`;
-  
-  const icsStr = `BEGIN:VCALENDAR
-VERSION:2.0
-BEGIN:VEVENT
-SUMMARY:MedicaTrack: Take ${med.name}
-DESCRIPTION:Time to take ${plan.dose} ${med.unit || 'units'} of ${med.name}.
-DTSTART:${dtString}
-RRULE:FREQ=DAILY
-BEGIN:VALARM
-ACTION:DISPLAY
-DESCRIPTION:MedicaTrack Reminder
-TRIGGER:-PT0M
-END:VALARM
-END:VEVENT
-END:VCALENDAR`;
+    return [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//MedicaTrack//Schedule//EN',
+        icsItems,
+        'END:VCALENDAR'
+    ].join('\r\n');
+}
 
-  const blob = new Blob([icsStr], { type: 'text/calendar;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `reminder_${med.name}.ics`;
-  a.click();
-  URL.revokeObjectURL(url);
+// AI DOCTOR SEARCH
+window.searchDoctorAi = async () => {
+  const name = document.getElementById('appt-doctor').value;
+  const region = document.getElementById('appt-region').value;
+  const listEl = document.getElementById('doctor-ai-results');
+  
+  if (!name || name.length < 2) return alert(t('doctorName'));
+  if (!state.grokKey) return window.navigate('settings');
+
+  listEl.style.display = 'block';
+  listEl.innerHTML = `<span style="font-size:11px; color:var(--accent-color);">${t('testingKey')}...</span>`;
+
+  try {
+    const prompt = `Search for medical doctors or clinics named "${name}" in "${region}". 
+    Return a valid JSON array of objects. Each object MUST have: "name", "address", "phone". 
+    If you find multiple, return up to 5 best matches. No extra text, just the JSON array.`;
+
+    const res = await fetch(GROK_BASE_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${state.grokKey}` },
+      body: JSON.stringify({
+        model: state.grokModel,
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0
+      })
+    });
+    
+    const d = await res.json();
+    const txt = d.choices[0].message.content;
+    const jsonMatch = txt.match(/\[[\s\S]*\]/);
+    const results = jsonMatch ? JSON.parse(jsonMatch[0]) : [];
+
+    if (results.length === 0) {
+      listEl.innerHTML = `<div style="font-size:11px; color:#94a3b8;">${t('notFoundAiLabel')}</div>`;
+      return;
+    }
+
+    listEl.innerHTML = `
+      <div style="font-size:10px; font-weight:700; margin-bottom:4px; opacity:0.6;">${t('doctorSelect')}:</div>
+      <div style="display:flex; flex-direction:column; gap:4px;">
+        ${results.map((doc, i) => `
+          <button class="btn btn-secondary" style="text-align:left; padding:8px; font-size:11px; background:rgba(255,255,255,0.03);" onclick="window._applyDoctorMatch(${i}, ${JSON.stringify(results).replace(/"/g, '&quot;')})">
+            <div><strong>${doc.name}</strong></div>
+            <div style="opacity:0.6; font-size:9px;">${doc.address}</div>
+          </button>
+        `).join('')}
+      </div>
+    `;
+  } catch(e) {
+    listEl.innerHTML = `<div style="color:#ef4444; font-size:11px;">Error: ${e.message}</div>`;
+  }
+};
+
+window._applyDoctorMatch = (i, results) => {
+  const doc = results[i];
+  document.getElementById('appt-doctor').value = doc.name;
+  document.getElementById('appt-location').value = doc.address || "";
+  document.getElementById('appt-phone').value = doc.phone || "";
+  document.getElementById('doctor-ai-results').style.display = 'none';
+};
+
+window._setPlanType = (type) => {
+  state.planType = type;
+  render();
 };
 
 window.saveMetric = async () => {
@@ -1715,16 +1852,30 @@ function _getEventTime(category) {
 window._exportSingleEvent = (planId, dateStr) => {
     const p = state.plans.find(x => x.id === planId);
     if (!p) return;
-    const med = state.medications.find(m => m.id === p.medicationId);
-    const date = new Date(dateStr);
-    date.setHours(_getEventTime(p.timeCategory), 0, 0, 0);
+    
+    const isAppt = p.type === 'appointment';
+    const med = !isAppt ? state.medications.find(m => m.id === p.medicationId) : null;
+    
+    let eventDate;
+    if (p.isOneTime && p.startDate) {
+        eventDate = new Date(p.startDate);
+    } else {
+        eventDate = new Date(dateStr);
+        eventDate.setHours(_getEventTime(p.timeCategory), 0, 0, 0);
+    }
+
+    const title = isAppt ? p.doctorName : `${med.name} (${p.dose})`;
+    const description = isAppt ? `${p.note || ''} ${p.phone ? '\\n📞 ' + p.phone : ''}` : `${t('scheduled')}: ${t(p.timeCategory)}`;
+    const location = isAppt ? p.location : "";
 
     const icsContent = _generateICS([{
-        title: `${med.name} (${p.dose})`,
-        start: date,
-        description: `${t('scheduled')}: ${t(p.timeCategory)}`
+        title,
+        start: eventDate,
+        description,
+        location,
+        type: p.type
     }]);
-    _downloadBlob(icsContent, `Reminder_${med.name}.ics`);
+    _downloadBlob(icsContent, `Reminder_${isAppt ? p.doctorName : med.name}.ics`);
 };
 
 window._exportWeeklyEvents = () => {
@@ -1736,14 +1887,25 @@ window._exportWeeklyEvents = () => {
         
         const duePlans = state.plans.filter(p => window._isPlanDueOnDate(p, targetDate));
         duePlans.forEach(p => {
-            const med = state.medications.find(m => m.id === p.medicationId);
-            const eventDate = new Date(targetDate);
-            eventDate.setHours(_getEventTime(p.timeCategory), 0, 0, 0);
+            const isAppt = p.type === 'appointment';
+            const med = !isAppt ? state.medications.find(m => m.id === p.medicationId) : null;
+            
+            let eventDate;
+            if (p.isOneTime && p.startDate) {
+                eventDate = new Date(p.startDate);
+                // Only add one-time if it actually falls on this targetDate
+                if (new Date(p.startDate).toDateString() !== targetDate.toDateString()) return;
+            } else {
+                eventDate = new Date(targetDate);
+                eventDate.setHours(_getEventTime(p.timeCategory || 'morning'), 0, 0, 0);
+            }
             
             events.push({
-                title: `${med.name} (${p.dose})`,
+                title: isAppt ? p.doctorName : `${med.name} (${p.dose})`,
                 start: eventDate,
-                description: `${t('scheduled')}: ${t(p.timeCategory)}`
+                description: isAppt ? `${p.note || ''} ${p.phone ? '\\n📞 ' + p.phone : ''}` : `${t('scheduled')}: ${t(p.timeCategory)}`,
+                location: isAppt ? p.location : "",
+                type: p.type
             });
         });
     }
