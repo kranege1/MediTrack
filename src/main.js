@@ -138,7 +138,9 @@ const i18n = {
     specialty:'Specialty / Field',
     anySpecialty:'Any Specialty',
     doctorSelect:'Select Doctor',
-    defaultRegionLabel:'Default City / Region for AI Search'
+    defaultRegionLabel:'Default City / Region for AI Search',
+    locating:'Locating...',
+    locErr:'Location failed'
   },
   de: {
     dataExports:'Daten & Export', home:'Start', meds:'Medikamente', logAction:'Einnahme', plans:'Pläne',
@@ -253,7 +255,9 @@ const i18n = {
     specialty:'Fachrichtung',
     anySpecialty:'Keine Einschränkung (Alle)',
     doctorSelect:'Arzt wählen',
-    defaultRegionLabel:'Standard Stadt / Region für KI-Suche'
+    defaultRegionLabel:'Standard Stadt / Region für KI-Suche',
+    locating:'Ortung...',
+    locErr:'Ortung fehlgeschlagen'
   }
 };
 const LOCAL_DRUG_KB = {
@@ -307,11 +311,41 @@ window.navigate = async (view) => {
   render();
 };
 
-function render() {
+window._geolocate = (inputId) => {
+  const el = document.getElementById(inputId);
+  if (!navigator.geolocation) return alert(t('locErr'));
+  
+  const originalVal = el.value;
+  el.value = t('locating');
+  
+  navigator.geolocation.getCurrentPosition(async (pos) => {
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json`, {
+        headers: { 'Accept-Language': state.lang }
+      });
+      const data = await res.json();
+      const city = data.address.city || data.address.town || data.address.village || data.address.county || '';
+      if (city) {
+        el.value = city;
+      } else {
+        el.value = originalVal;
+        alert(t('locErr'));
+      }
+    } catch (err) {
+      el.value = originalVal;
+      alert(t('locErr') + ': ' + err.message);
+    }
+  }, (err) => {
+    el.value = originalVal;
+    alert(t('locErr') + ': ' + err.message);
+  });
+};
+
+function _showFilePicker() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.54</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.55</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -749,7 +783,10 @@ function renderPlans() {
             <option value="Neurologe">Neurologe</option>
             <option value="Psychiater">Psychiater</option>
           </select>
-          <input type="text" id="appt-region" placeholder="${t('regionPlaceholder')}" value="${state.defaultRegion || ''}" style="flex:1; font-size:12px; padding:8px;">
+          <div style="display:flex; flex:1; gap:4px;">
+            <input type="text" id="appt-region" placeholder="${t('regionPlaceholder')}" value="${state.defaultRegion || ''}" style="width:100%; font-size:12px; padding:8px;">
+            <button class="btn btn-secondary" style="width:auto; padding:0 12px;" onclick="window._geolocate('appt-region')" title="GPS">📍</button>
+          </div>
         </div>
         <div class="form-group">
           <label>${t('location')}</label>
@@ -983,7 +1020,10 @@ function renderSettings() {
       </div>
       <div class="form-group">
         <label>${t('defaultRegionLabel')}</label>
-        <input type="text" id="grok-region-input" value="${state.defaultRegion}" placeholder="${t('regionPlaceholder')}" style="font-size:12px;">
+        <div style="display:flex; gap:8px;">
+          <input type="text" id="grok-region-input" value="${state.defaultRegion}" placeholder="${t('regionPlaceholder')}" style="flex:1; font-size:12px;">
+          <button class="btn btn-secondary" style="width:auto; padding:0 12px;" onclick="window._geolocate('grok-region-input')" title="GPS">📍</button>
+        </div>
       </div>
       <div class="form-group" style="position:relative;">
         <label>${t('modelIdLabel')}</label>
