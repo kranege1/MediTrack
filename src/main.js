@@ -115,7 +115,11 @@ const i18n = {
     generateTestBtn:'Add Test Data',
     clearTestBtn:'Clear Test Data',
     testDataCount:'Count: {n}',
-    testDataNote:'Test data is marked with metadata. Your personal records remain safe during deletion.'
+    testDataNote:'Test data is marked with metadata. Your personal records remain safe during deletion.',
+    upcomingEvents:'Upcoming Events',
+    today:'Today',
+    tomorrow:'Tomorrow',
+    noUpcoming:'No upcoming medications.'
   },
   de: {
     dataExports:'Daten & Export', home:'Start', meds:'Medikamente', logAction:'Einnahme', plans:'Pläne',
@@ -209,7 +213,11 @@ const i18n = {
     generateTestBtn:'Testdaten hinzufügen',
     clearTestBtn:'Testdaten löschen',
     testDataCount:'Anzahl: {n}',
-    testDataNote:'Testdaten sind markiert. Deine persönlichen Einträge bleiben beim Löschen sicher.'
+    testDataNote:'Testdaten sind markiert. Deine persönlichen Einträge bleiben beim Löschen sicher.',
+    upcomingEvents:'Anstehende Termine',
+    today:'Heute',
+    tomorrow:'Morgen',
+    noUpcoming:'Keine anstehenden Medikamente.'
   }
 };
 const LOCAL_DRUG_KB = {
@@ -267,7 +275,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.33</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.40</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -324,83 +332,86 @@ function getViewHTML() {
 
 // 1. Dashboard
 function renderDashboard() {
-  // get today's logs
-  const today = new Date().setHours(0,0,0,0);
-  const todaysLogs = state.logs.filter(l => new Date(l.timestamp).setHours(0,0,0,0) === today).reverse();
-  const latestWeight = state.metrics.filter(m => m.type === 'weight').sort((a,b) => b.timestamp - a.timestamp)[0];
+  const todayStart = new Date().setHours(0,0,0,0);
+  const todaysLogs = state.logs.filter(l => new Date(l.timestamp).setHours(0,0,0,0) === todayStart).reverse();
+  
+  let forecastHtml = '';
+  for (let i = 0; i < 14; i++) {
+    const targetDate = new Date();
+    targetDate.setDate(targetDate.getDate() + i);
+    targetDate.setHours(0,0,0,0);
+    const isToday = i === 0;
+    const isTomorrow = i === 1;
+    
+    let dateLabel = targetDate.toLocaleDateString(undefined, { weekday: 'short', day: '2-digit', month: '2-digit' });
+    if (isToday) dateLabel = t('today');
+    else if (isTomorrow) dateLabel = t('tomorrow');
 
-  let scheduleHtml = state.plans.length > 0 ? state.plans.filter(window._isPlanDueToday).map(p => {
-     const med = state.medications.find(m => m.id === p.medicationId) || {name: t('unknown')};
-     const isCompleted = todaysLogs.some(l => l.medicationId === p.medicationId);
-     const statusColor = isCompleted ? 'var(--accent-color)' : '#ef4444';
-     const statusText = isCompleted ? t('completed') : t('dueTodayBadge');
-     const opacity = isCompleted ? '0.6' : '1';
-     return `<div class="card" style="border-left: 4px solid ${statusColor}; opacity: ${opacity}; margin-bottom: 8px; display: flex; flex-direction: column; padding: 16px;">
-               <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                 <div style="flex: 1;">
-                   <div class="card-title">${med.name}</div>
-                   <div class="card-subtitle">${t('scheduled')}: ${t(p.timeCategory || 'morning')} | ${p.dose} ${med.unit || t('units')}</div>
-                 </div>
-                 <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
-                   <div style="color: ${statusColor}; font-size: 12px; font-weight: 600;">${statusText}</div>
-                   ${!isCompleted ? `
-                     <button class="btn btn-secondary" style="padding: 6px 10px; font-size: 11px; width: auto;" onclick="window.confirmIntake('${p.id}')">
-                       ✓ ${t('completed')}
-                     </button>
-                   ` : ''}
-                 </div>
+    const duePlans = state.plans.filter(p => window._isPlanDueOnDate(p, targetDate));
+    
+    if (duePlans.length > 0) {
+      const itemsHtml = duePlans.map(p => {
+        const med = state.medications.find(m => m.id === p.medicationId) || {name: t('unknown')};
+        const isCompleted = isToday && todaysLogs.some(l => l.medicationId === p.medicationId);
+        const statusColor = isCompleted ? 'var(--accent-color)' : (isToday ? '#ef4444' : 'rgba(255,255,255,0.2)');
+        const opacity = isCompleted ? '0.6' : '1';
+        
+        return `
+          <div class="card" style="border-left: 3px solid ${statusColor}; opacity: ${opacity}; margin-bottom: 8px; padding: 12px; display:flex; justify-content:space-between; align-items:center;">
+            <div style="flex:1; min-width:0;">
+              <div class="card-title" style="font-size:14px; margin-bottom:0;">${med.name}</div>
+              <div class="card-subtitle" style="font-size:11px;">${t(p.timeCategory || 'morning')} | ${p.dose} ${med.unit || t('units')}</div>
+            </div>
+            ${isToday && !isCompleted ? `
+              <button class="btn btn-secondary" style="width:auto; padding:6px 10px; font-size:10px;" onclick="window.confirmIntake('${p.id}')">✓</button>
+            ` : (isToday && isCompleted ? `<div style="color:var(--accent-color); font-size:10px; font-weight:700;">${t('completed')}</div>` : '')}
+          </div>
+          ${isToday && !isCompleted && p.linkedMetrics && p.linkedMetrics.length > 0 ? `
+             <div id="metrics-entry-${p.id}" style="margin-bottom:12px; padding:8px; background:rgba(0,0,0,0.2); border-radius:8px;">
+               <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+                 ${p.linkedMetrics.map(type => `
+                   <input type="text" id="m-val-${p.id}-${type}" placeholder="${t(type==='weight'?'weight':(type==='bp'?'bloodPressure':type))}" style="padding:6px; font-size:10px; background:transparent; border:1px solid rgba(255,255,255,0.1); color:white;">
+                 `).join('')}
                </div>
-               ${!isCompleted && p.linkedMetrics && p.linkedMetrics.length > 0 ? `
-                 <div id="metrics-entry-${p.id}" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.05);">
-                   <div style="font-size: 10px; color: var(--accent-color); text-transform: uppercase; margin-bottom: 8px; font-weight: 700;">
-                      ⚠️ ${t('metricRequired')}
-                    </div>
-                   <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                     ${p.linkedMetrics.map(type => `
-                       <div class="form-group" style="margin-bottom:0;">
-                         <input type="text" id="m-val-${p.id}-${type}" placeholder="${t(type === 'weight' ? 'weight' : (type === 'bp' ? 'bloodPressure' : type))}" style="padding: 6px; font-size: 11px; background: rgba(0,0,0,0.2);">
-                       </div>
-                     `).join('')}
-                   </div>
-                 </div>
-               ` : ''}
-             </div>`;
-  }).join('') : `<div class="empty-state">${t('noPlans')}</div>`;
+             </div>
+          ` : ''}
+        `;
+      }).join('');
 
-  if (state.plans.length > 0 && scheduleHtml === '') {
-     scheduleHtml = `<div class="empty-state">${t('noPlans')}</div>`;
+      forecastHtml += `
+        <div style="margin-bottom: 24px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <div style="font-size:13px; font-weight:700; color:${isToday?'var(--accent-color)':'#94a3b8'}; text-transform:uppercase; letter-spacing:0.5px;">${dateLabel}</div>
+            ${isToday ? `<button class="btn btn-secondary" style="width:auto; padding:4px 8px; font-size:10px; border-color:var(--accent-color); color:var(--accent-color);" onclick="window.navigate('log')">+ ${t('adHoc')}</button>` : ''}
+          </div>
+          ${itemsHtml}
+        </div>
+      `;
+    }
   }
 
-  let logsHtml = todaysLogs.length ? todaysLogs.map(l => {
+  const logsHtml = todaysLogs.length ? todaysLogs.map(l => {
     const med = state.medications.find(m => m.id === l.medicationId) || {name: t('unknown')};
-    return `<div class="card">
-              <div>
-                <div class="card-title">${med.name}</div>
-                <div class="card-subtitle">${l.amount_taken} ${med.unit || t('units')} ${t('taken')}</div>
-              </div>
-              <div class="text-secondary" style="font-size: 14px;">${new Date(l.timestamp).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div>
+    return `<div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:12px; opacity:0.7;">
+              <span>${med.name} (${l.amount_taken})</span>
+              <span>${new Date(l.timestamp).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</span>
             </div>`;
-  }).join('') : `<div class="empty-state">${t('noLogsToday')}</div>`;
+  }).join('') : `<div style="font-size:11px; opacity:0.5;">${t('noLogsToday')}</div>`;
 
   return `
-    <div class="glass-panel">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-        <div class="text-h2" style="margin-bottom: 0;">${t('dueToday')}</div>
-        <button class="btn btn-secondary" style="width: auto; padding: 6px 12px; font-size: 12px; border-color: var(--accent-color); color: var(--accent-color); background: rgba(99,102,241,0.05);" onclick="window.navigate('log')">
-          + ${t('adHoc')}
-        </button>
+    <div class="glass-panel" style="padding:20px;">
+      <div class="text-h2" style="margin-bottom:20px; color:#fff; display:flex; align-items:center; gap:8px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+        ${t('upcomingEvents')}
       </div>
-      <div class="card-list">
-        ${scheduleHtml}
+      <div style="max-height: 55vh; overflow-y:auto; padding-right:8px; margin-bottom:24px;">
+        ${forecastHtml || `<div class="empty-state">${t('noUpcoming')}</div>`}
       </div>
-    </div>
 
-    <div class="glass-panel">
-      <div class="text-h2">${t('loggedActivity')}</div>
-      <div class="card-list">
+      <div style="border-top:1px solid rgba(255,255,255,0.1); padding-top:20px;">
+        <div class="text-h2" style="font-size:14px; margin-bottom:12px; opacity:0.8;">${t('loggedActivity')}</div>
         ${logsHtml}
       </div>
-    </div>
     </div>
   `;
 }
