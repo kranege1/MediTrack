@@ -15,6 +15,7 @@ window.state = {
   grokKey: localStorage.getItem('grok_api_key') || '',
   grokModel: localStorage.getItem('grok_model') || 'grok-4.20-non-reasoning',
   availableModels: JSON.parse(localStorage.getItem('grok_available_models') || '[]'),
+  defaultRegion: localStorage.getItem('default_region') || '',
   pendingGrokResults: [],
   historyView: 'list',
   analyticsRange: 7,
@@ -136,7 +137,8 @@ const i18n = {
     regionPlaceholder:'City / Region (optional)',
     specialty:'Specialty / Field',
     anySpecialty:'Any Specialty',
-    doctorSelect:'Select Doctor'
+    doctorSelect:'Select Doctor',
+    defaultRegionLabel:'Default City / Region for AI Search'
   },
   de: {
     dataExports:'Daten & Export', home:'Start', meds:'Medikamente', logAction:'Einnahme', plans:'Pläne',
@@ -250,7 +252,8 @@ const i18n = {
     regionPlaceholder:'Stadt / Region (optional)',
     specialty:'Fachrichtung',
     anySpecialty:'Keine Einschränkung (Alle)',
-    doctorSelect:'Arzt wählen'
+    doctorSelect:'Arzt wählen',
+    defaultRegionLabel:'Standard Stadt / Region für KI-Suche'
   }
 };
 const LOCAL_DRUG_KB = {
@@ -308,7 +311,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.53</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.54</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -746,7 +749,7 @@ function renderPlans() {
             <option value="Neurologe">Neurologe</option>
             <option value="Psychiater">Psychiater</option>
           </select>
-          <input type="text" id="appt-region" placeholder="${t('regionPlaceholder')}" style="flex:1; font-size:12px; padding:8px;">
+          <input type="text" id="appt-region" placeholder="${t('regionPlaceholder')}" value="${state.defaultRegion || ''}" style="flex:1; font-size:12px; padding:8px;">
         </div>
         <div class="form-group">
           <label>${t('location')}</label>
@@ -977,6 +980,10 @@ function renderSettings() {
       <div class="form-group">
         <label>${t('enteringApiKey')}</label>
         <input type="password" id="grok-api-key-input" value="${state.grokKey}" placeholder="xai-...">
+      </div>
+      <div class="form-group">
+        <label>${t('defaultRegionLabel')}</label>
+        <input type="text" id="grok-region-input" value="${state.defaultRegion}" placeholder="${t('regionPlaceholder')}" style="font-size:12px;">
       </div>
       <div class="form-group" style="position:relative;">
         <label>${t('modelIdLabel')}</label>
@@ -1520,6 +1527,11 @@ window.searchDoctorAi = async () => {
   const specialty = document.getElementById('appt-specialty').value;
   const listEl = document.getElementById('doctor-ai-results');
   
+  if (!region) {
+    alert(t('defaultRegionLabel') + ' 👋');
+    return window.navigate('settings');
+  }
+
   if (!name && !specialty) return alert(t('doctorName') + ' / ' + t('specialty'));
   if (!state.grokKey) return window.navigate('settings');
 
@@ -1605,6 +1617,12 @@ window.saveMetric = async () => {
 window.saveSettings = async () => {
   const key = document.getElementById('grok-api-key-input').value;
   const model = document.getElementById('grok-model-input').value;
+  const region = document.getElementById('grok-region-input').value;
+  
+  // Save non-API dependent settings immediately
+  state.defaultRegion = region;
+  localStorage.setItem('default_region', region);
+
   if (!key || !model) return alert(t('enteringApiKey'));
   
   const msgEl = document.getElementById('settings-msg');
