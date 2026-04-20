@@ -267,7 +267,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.32</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.33</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -401,18 +401,6 @@ function renderDashboard() {
         ${logsHtml}
       </div>
     </div>
-    
-    <div class="glass-panel">
-      <div class="text-h2">${t('recentMetrics')}</div>
-      ${latestWeight ? `
-        <div class="card">
-          <div>
-            <div class="card-title">${t('weight')}</div>
-            <div class="card-subtitle">${new Date(latestWeight.timestamp).toLocaleDateString()}</div>
-          </div>
-          <div class="text-h2" style="margin:0; color: var(--accent-color);">${latestWeight.value} ${t('kg')}</div>
-        </div>
-      ` : `<div class="empty-state">${t('noMetrics')}</div>`}
     </div>
   `;
 }
