@@ -111,7 +111,11 @@ const i18n = {
     last7Days:'Last 7 Days',
     last30Days:'Last 30 Days',
     lastYear:'Last Year',
-    missed:'Missed'
+    missed:'Missed',
+    generateTestBtn:'Add Test Data',
+    clearTestBtn:'Clear Test Data',
+    testDataCount:'Count: {n}',
+    testDataNote:'Test data is marked with metadata. Your personal records remain safe during deletion.'
   },
   de: {
     dataExports:'Daten & Export', home:'Start', meds:'Medikamente', logAction:'Einnahme', plans:'Pläne',
@@ -201,7 +205,11 @@ const i18n = {
     last7Days:'Letzte 7 Tage',
     last30Days:'Letzte 30 Tage',
     lastYear:'Letztes Jahr',
-    missed:'Vergessen'
+    missed:'Vergessen',
+    generateTestBtn:'Testdaten hinzufügen',
+    clearTestBtn:'Testdaten löschen',
+    testDataCount:'Anzahl: {n}',
+    testDataNote:'Testdaten sind markiert. Deine persönlichen Einträge bleiben beim Löschen sicher.'
   }
 };
 const LOCAL_DRUG_KB = {
@@ -259,7 +267,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.31</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.32</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -806,11 +814,24 @@ function renderSettings() {
       <div class="text-h2">${t('dataManagement')}</div>
       <p class="text-body" style="margin-bottom: 20px;">${t('dataNote')}</p>
       
-      <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px;">
+      <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px;">
         <button class="btn" onclick="window.exportData()">${t('exportData')}</button>
         <button class="btn btn-secondary" onclick="window.confirmClearLogs()" style="border-color: #f59e0b; color: #f59e0b; background: rgba(245, 158, 11, 0.05);">${t('deleteLogs')}</button>
         <button class="btn btn-secondary" onclick="window.resetToday()" style="border-color: var(--accent-color); color: var(--accent-color); background: rgba(99, 102, 241, 0.05);">${t('resetTodayLbl')}</button>
         <button class="btn btn-danger" onclick="window.confirmClearAll()" style="margin-top: 8px;">${t('deleteAllData')}</button>
+      </div>
+
+      <div style="background: rgba(99, 102, 241, 0.05); border: 1px dashed rgba(99, 102, 241, 0.3); border-radius: 12px; padding: 16px; margin-bottom: 32px;">
+        <div class="text-h2" style="font-size:16px; margin-bottom:8px;">🛠️ ${t('analytics')} Playground</div>
+        <div style="font-size:11px; color:#94a3b8; margin-bottom:16px;">${t('testDataNote')}</div>
+        
+        <label style="font-size:12px; color:var(--accent-color); font-weight:600;">${t('testDataCount').replace('{n}', '<span id="test-count-val">200</span>')}</label>
+        <input type="range" id="test-data-slider" min="1" max="500" value="200" style="width:100%; margin-bottom:16px;" oninput="document.getElementById('test-count-val').innerText = this.value">
+        
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-secondary" style="font-size:12px; flex:1;" onclick="window.generateTestData(document.getElementById('test-data-slider').value)">${t('generateTestBtn')}</button>
+          <button class="btn btn-secondary" style="font-size:12px; flex:1; border-color:#f87171; color:#f87171; background:rgba(239,68,68,0.05);" onclick="window.confirmClearTestData()">${t('clearTestBtn')}</button>
+        </div>
       </div>
       
       <div class="text-h2">AI Configuration</div>
@@ -1469,21 +1490,20 @@ window.resetToday = async () => {
   window.navigate('dashboard');
 };
 
-window.generateTestData = async () => {
+window.generateTestData = async (countVal) => {
     if (state.medications.length === 0) {
         alert(t('addMedFirst'));
         return;
     }
-    const count = 200;
+    const count = parseInt(countVal) || 200;
     const months = 23;
     const now = Date.now();
     const start = now - (months * 30 * 24 * 60 * 60 * 1000);
     
-    // Show a temporary overlay or just block
-    const btn = event.target;
-    const originalText = btn.innerText;
-    btn.disabled = true;
-    btn.innerText = "... Generating ...";
+    // UI Feedback
+    const btn = event?.target;
+    const originalText = btn ? btn.innerText : '';
+    if (btn) { btn.disabled = true; btn.innerText = "..."; }
 
     for (let i = 0; i < count; i++) {
         const timestamp = start + Math.random() * (now - start);
@@ -1493,16 +1513,16 @@ window.generateTestData = async () => {
         const linkedMetricIds = [];
         if (Math.random() > 0.3) {
             const weight = (75 + (Math.random() * 8 - 4)).toFixed(1);
-            const mw = await API.addMetric({ type: 'weight', value: weight, timestamp });
+            const mw = await API.addMetric({ type: 'weight', value: weight, timestamp, isTestData: true });
             linkedMetricIds.push(mw.id);
             
             const sys = 115 + Math.floor(Math.random() * 25);
             const dia = 75 + Math.floor(Math.random() * 15);
-            const mbp = await API.addMetric({ type: 'bp', value: `${sys}/${dia}`, timestamp });
+            const mbp = await API.addMetric({ type: 'bp', value: `${sys}/${dia}`, timestamp, isTestData: true });
             linkedMetricIds.push(mbp.id);
 
             const pulse = 60 + Math.floor(Math.random() * 30);
-            const mp = await API.addMetric({ type: 'pulse', value: pulse, timestamp });
+            const mp = await API.addMetric({ type: 'pulse', value: pulse, timestamp, isTestData: true });
             linkedMetricIds.push(mp.id);
         }
         
@@ -1510,13 +1530,21 @@ window.generateTestData = async () => {
             medicationId: med.id,
             amount_taken: amount,
             linkedMetricIds,
-            timestamp
+            timestamp,
+            isTestData: true
         });
     }
-    btn.disabled = false;
-    btn.innerText = originalText;
-    alert("200 test entries generated across 23 months!");
+    if (btn) { btn.disabled = false; btn.innerText = originalText; }
+    alert(`${count} test entries generated!`);
     window.navigate('history');
+};
+
+window.confirmClearTestData = async () => {
+    if (confirm(t('clearTestBtn') + "?")) {
+        await API.clearTestData();
+        alert(t('loggedSuccess'));
+        window.navigate('dashboard');
+    }
 };
 
 function renderAnalytics() {

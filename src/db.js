@@ -170,5 +170,18 @@ export const API = {
       }
     }
     await tx.done;
+  },
+  async clearTestData() {
+    const db = await initDB();
+    const tx = db.transaction(['logs', 'metrics'], 'readwrite');
+    const logs = await tx.objectStore('logs').getAll();
+    for (const log of logs) {
+      if (log.isTestData) await tx.objectStore('logs').delete(log.id);
+    }
+    const metrics = await tx.objectStore('metrics').getAll();
+    for (const m of metrics) {
+      if (m.isTestData) await tx.objectStore('metrics').delete(m.id);
+    }
+    await tx.done;
   }
 };
