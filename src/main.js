@@ -606,6 +606,7 @@ function renderMedications() {
 
 // 2.5 Plans
 function renderPlans() {
+  const type = state.planType || 'medication';
   const medOptions = state.medications.map(m => `<option value="${m.id}" data-dose="${m.dose}">${m.name}</option>`).join('');
 
   let listHtml = state.plans.map(p => {
@@ -774,6 +775,49 @@ function renderPlans() {
       <div class="card-list">
         ${listHtml}
       </div>
+    </div>
+  `;
+}
+
+function _renderSharedPlanFields() {
+  return `
+    <div class="form-group">
+      <label>${t('frequency')}</label>
+      <select id="plan-freq" onchange="window._handleFreqChange(this.value)">
+         <option value="daily">${t('daily')}</option>
+         <option value="weekly">${t('weekly')}</option>
+         <option value="monthly">${t('monthly')}</option>
+         <option value="quarterly">${t('quarterly')}</option>
+         <option value="everyXDays">${t('everyXDays')}</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>${t('anchorDate')}</label>
+      <input type="date" id="plan-start-date" value="${new Date().toISOString().split('T')[0]}" onchange="window._syncPlanAnchors(this.value)">
+    </div>
+    <div id="plan-weekday-row" style="display:none;">
+      <div class="form-group">
+        <label>${t('startWeekday')}</label>
+        <select id="plan-weekday">
+           <option value="1">${t('monday')}</option>
+           <option value="2">${t('tuesday')}</option>
+           <option value="3">${t('wednesday')}</option>
+           <option value="4">${t('thursday')}</option>
+           <option value="5">${t('friday')}</option>
+           <option value="6">${t('saturday')}</option>
+           <option value="0">${t('sunday')}</option>
+        </select>
+      </div>
+    </div>
+    <div id="plan-day-month-row" style="display:none;">
+      <div class="form-group">
+        <label>${t('dayOfMonth')}</label>
+        <input type="number" id="plan-day-of-month" min="1" max="31" value="${new Date().getDate()}">
+      </div>
+    </div>
+    <div class="form-group" id="plan-x-days-row" style="display:none;">
+      <label>${t('dayIntervalLbl').replace('{x}', 'X')}</label>
+      <input type="number" id="plan-interval-x" value="2" min="2" max="30">
     </div>
   `;
 }
@@ -1813,6 +1857,15 @@ function _downloadBlob(content, filename) {
     link.click();
     document.body.removeChild(link);
 }
+
+window._getWeekdayName = (idx) => {
+    const days = [t('sunday'), t('monday'), t('tuesday'), t('wednesday'), t('thursday'), t('friday'), t('saturday')];
+    return days[parseInt(idx)];
+};
+
+window.downloadICS = (id) => {
+    window._exportSingleEvent(id, new Date().toISOString());
+};
 
 function _getEventTime(category) {
     if (category === 'morning') return 8;
