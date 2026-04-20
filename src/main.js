@@ -17,7 +17,8 @@ window.state = {
   availableModels: JSON.parse(localStorage.getItem('grok_available_models') || '[]'),
   pendingGrokResults: [],
   historyView: 'list',
-  analyticsRange: 7
+  analyticsRange: 7,
+  showAddPlanPanel: false
 };
 const state = window.state;
 
@@ -662,7 +663,7 @@ function renderPlans() {
   if (!state.plans.length) listHtml = `<div class="empty-state">${t('noSchedule')}</div>`;
 
   return `
-    <div class="glass-panel" id="add-plan-panel" style="display: none;">
+    <div class="glass-panel" id="add-plan-panel" style="display: ${state.showAddPlanPanel ? 'block' : 'none'};">
       <div class="text-h2">${t('createSchedule')}</div>
       
       <!-- Type Switcher -->
@@ -764,13 +765,13 @@ function renderPlans() {
       `}
 
       <button class="btn" onclick="window.savePlan()">${t('savePlan')}</button>
-      <button class="btn btn-secondary" style="margin-top:12px;" onclick="document.getElementById('add-plan-panel').style.display='none'">${t('cancel')}</button>
+      <button class="btn btn-secondary" style="margin-top:12px;" onclick="window._setShowAddPlanPanel(false)">${t('cancel')}</button>
     </div>
 
     <div class="glass-panel">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
         <div class="text-h2" style="margin: 0;">${t('yourSchedule')}</div>
-        <button class="btn" style="width: auto; padding: 8px 16px; font-size: 14px;" onclick="document.getElementById('add-plan-panel').style.display='block'">${t('newPlan')}</button>
+        <button class="btn" style="width: auto; padding: 8px 16px; font-size: 14px;" onclick="window._setShowAddPlanPanel(true)">${t('newPlan')}</button>
       </div>
       <div class="card-list">
         ${listHtml}
@@ -1280,6 +1281,7 @@ window.savePlan = async () => {
     startDayOfMonth
   };
   await API.addPlan(plan);
+  state.showAddPlanPanel = false;
   window.navigate('plans');
 };
 
@@ -1554,6 +1556,11 @@ window._applyDoctorMatch = (i, results) => {
 
 window._setPlanType = (type) => {
   state.planType = type;
+  render();
+};
+
+window._setShowAddPlanPanel = (val) => {
+  state.showAddPlanPanel = val;
   render();
 };
 
