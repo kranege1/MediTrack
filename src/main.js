@@ -259,7 +259,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.30</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.31</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -1467,6 +1467,56 @@ window.confirmClearLogs = async () => {
 window.resetToday = async () => {
   await API.clearTodayLogs();
   window.navigate('dashboard');
+};
+
+window.generateTestData = async () => {
+    if (state.medications.length === 0) {
+        alert(t('addMedFirst'));
+        return;
+    }
+    const count = 200;
+    const months = 23;
+    const now = Date.now();
+    const start = now - (months * 30 * 24 * 60 * 60 * 1000);
+    
+    // Show a temporary overlay or just block
+    const btn = event.target;
+    const originalText = btn.innerText;
+    btn.disabled = true;
+    btn.innerText = "... Generating ...";
+
+    for (let i = 0; i < count; i++) {
+        const timestamp = start + Math.random() * (now - start);
+        const med = state.medications[Math.floor(Math.random() * state.medications.length)];
+        const amount = med.dose || 1;
+        
+        const linkedMetricIds = [];
+        if (Math.random() > 0.3) {
+            const weight = (75 + (Math.random() * 8 - 4)).toFixed(1);
+            const mw = await API.addMetric({ type: 'weight', value: weight, timestamp });
+            linkedMetricIds.push(mw.id);
+            
+            const sys = 115 + Math.floor(Math.random() * 25);
+            const dia = 75 + Math.floor(Math.random() * 15);
+            const mbp = await API.addMetric({ type: 'bp', value: `${sys}/${dia}`, timestamp });
+            linkedMetricIds.push(mbp.id);
+
+            const pulse = 60 + Math.floor(Math.random() * 30);
+            const mp = await API.addMetric({ type: 'pulse', value: pulse, timestamp });
+            linkedMetricIds.push(mp.id);
+        }
+        
+        await API.addLog({
+            medicationId: med.id,
+            amount_taken: amount,
+            linkedMetricIds,
+            timestamp
+        });
+    }
+    btn.disabled = false;
+    btn.innerText = originalText;
+    alert("200 test entries generated across 23 months!");
+    window.navigate('history');
 };
 
 function renderAnalytics() {
