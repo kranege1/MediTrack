@@ -1506,7 +1506,8 @@ window.searchDoctorAi = async () => {
   listEl.innerHTML = `<span style="font-size:11px; color:var(--accent-color);">${t('testingKey')}...</span>`;
 
   try {
-    const prompt = `Search for medical doctors or clinics named "${name}" in "${region}". 
+    const regionText = region ? ` in "${region}"` : '';
+    const prompt = `Search for medical doctors or clinics named "${name}"${regionText}. 
     Return a valid JSON array of objects. Each object MUST have: "name", "address", "phone". 
     If you find multiple, return up to 5 best matches. No extra text, just the JSON array.`;
 
@@ -1526,7 +1527,11 @@ window.searchDoctorAi = async () => {
     const results = jsonMatch ? JSON.parse(jsonMatch[0]) : [];
 
     if (results.length === 0) {
-      listEl.innerHTML = `<div style="font-size:11px; color:#94a3b8;">${t('notFoundAiLabel')}</div>`;
+      listEl.innerHTML = `
+        <div style="font-size:11px; color:#94a3b8; margin-bottom:8px;">${t('notFoundAiLabel')}</div>
+        <div style="font-size:10px; color:#ef4444; background:rgba(239,68,68,0.1); padding:8px; border-radius:6px; max-height:80px; overflow-y:auto;">
+          <strong>AI Status:</strong> ${txt.substring(0, 300).replace(/</g, "&lt;").replace(/>/g, "&gt;")}
+        </div>`;
       return;
     }
 
