@@ -119,7 +119,10 @@ const i18n = {
     upcomingEvents:'Upcoming Events',
     today:'Today',
     tomorrow:'Tomorrow',
-    noUpcoming:'No upcoming medications.'
+    noUpcoming:'No upcoming medications.',
+    weeklyExport:'Weekly Export (.ics)',
+    addToCalendar:'Add to Calendar',
+    calendarFileName:'Medication_Schedule.ics'
   },
   de: {
     dataExports:'Daten & Export', home:'Start', meds:'Medikamente', logAction:'Einnahme', plans:'Pläne',
@@ -217,7 +220,10 @@ const i18n = {
     upcomingEvents:'Anstehende Termine',
     today:'Heute',
     tomorrow:'Morgen',
-    noUpcoming:'Keine anstehenden Medikamente.'
+    noUpcoming:'Keine anstehenden Medikamente.',
+    weeklyExport:'Wochen-Export (.ics)',
+    addToCalendar:'Erinnerung',
+    calendarFileName:'Medikamente_Plan.ics'
   }
 };
 const LOCAL_DRUG_KB = {
@@ -275,7 +281,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.40</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.41</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -362,9 +368,12 @@ function renderDashboard() {
               <div class="card-title" style="font-size:14px; margin-bottom:0;">${med.name}</div>
               <div class="card-subtitle" style="font-size:11px;">${t(p.timeCategory || 'morning')} | ${p.dose} ${med.unit || t('units')}</div>
             </div>
-            ${isToday && !isCompleted ? `
-              <button class="btn btn-secondary" style="width:auto; padding:6px 10px; font-size:10px;" onclick="window.confirmIntake('${p.id}')">✓</button>
-            ` : (isToday && isCompleted ? `<div style="color:var(--accent-color); font-size:10px; font-weight:700;">${t('completed')}</div>` : '')}
+            <div style="display:flex; align-items:center; gap:8px;">
+              ${isToday && !isCompleted ? `
+                <button class="btn btn-secondary" style="width:auto; padding:6px 10px; font-size:10px;" onclick="window.confirmIntake('${p.id}')">✓</button>
+              ` : (isToday && isCompleted ? `<div style="color:var(--accent-color); font-size:10px; font-weight:700;">${t('completed')}</div>` : '')}
+              <button class="btn btn-secondary" style="width:auto; padding:6px 10px; font-size:10px; border-color:rgba(255,255,255,0.15);" onclick="window._exportSingleEvent('${p.id}', '${targetDate.toISOString()}')" title="${t('addToCalendar')}">🗓️</button>
+            </div>
           </div>
           ${isToday && !isCompleted && p.linkedMetrics && p.linkedMetrics.length > 0 ? `
              <div id="metrics-entry-${p.id}" style="margin-bottom:12px; padding:8px; background:rgba(0,0,0,0.2); border-radius:8px;">
@@ -400,9 +409,14 @@ function renderDashboard() {
 
   return `
     <div class="glass-panel" style="padding:20px;">
-      <div class="text-h2" style="margin-bottom:20px; color:#fff; display:flex; align-items:center; gap:8px;">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-        ${t('upcomingEvents')}
+      <div class="text-h2" style="margin-bottom:12px; color:#fff; display:flex; align-items:center; justify-content:space-between;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          ${t('upcomingEvents')}
+        </div>
+        <button class="btn btn-secondary" style="width:auto; padding:6px 12px; font-size:10px; border-color:#6366f1; color:#6366f1; background:rgba(99,102,241,0.05);" onclick="window._exportWeeklyEvents()">
+          ${t('weeklyExport')}
+        </button>
       </div>
       <div style="max-height: 55vh; overflow-y:auto; padding-right:8px; margin-bottom:24px;">
         ${forecastHtml || `<div class="empty-state">${t('noUpcoming')}</div>`}
@@ -1651,6 +1665,94 @@ async function _initCharts() {
         xaxis: { type: 'datetime' }
     }).render();
 }
+
+// --- CALENDAR EXPORT HELPERS ---
+function _generateICS(events) {
+    const formatICSDate = (date) => {
+        return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+    };
+    
+    let icsItems = events.map(e => {
+        return [
+            'BEGIN:VEVENT',
+            `UID:${crypto.randomUUID()}`,
+            `DTSTAMP:${formatICSDate(new Date())}`,
+            `DTSTART:${formatICSDate(e.start)}`,
+            `DTEND:${formatICSDate(new Date(e.start.getTime() + 30 * 60 * 1000))}`,
+            `SUMMARY:💊 ${e.title}`,
+            `DESCRIPTION:${e.description}`,
+            'END:VEVENT'
+        ].join('\r\n');
+    }).join('\r\n');
+
+    return [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//MedicaTrack//Schedule//EN',
+        icsItems,
+        'END:VCALENDAR'
+    ].join('\r\n');
+}
+
+function _downloadBlob(content, filename) {
+    const blob = new Blob([content], { type: 'text/calendar;charset=utf-8' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+function _getEventTime(category) {
+    if (category === 'morning') return 8;
+    if (category === 'noon') return 12;
+    if (category === 'evening') return 18;
+    if (category === 'night') return 22;
+    return 8; // default
+}
+
+window._exportSingleEvent = (planId, dateStr) => {
+    const p = state.plans.find(x => x.id === planId);
+    if (!p) return;
+    const med = state.medications.find(m => m.id === p.medicationId);
+    const date = new Date(dateStr);
+    date.setHours(_getEventTime(p.timeCategory), 0, 0, 0);
+
+    const icsContent = _generateICS([{
+        title: `${med.name} (${p.dose})`,
+        start: date,
+        description: `${t('scheduled')}: ${t(p.timeCategory)}`
+    }]);
+    _downloadBlob(icsContent, `Reminder_${med.name}.ics`);
+};
+
+window._exportWeeklyEvents = () => {
+    const events = [];
+    for (let i = 0; i < 14; i++) {
+        const targetDate = new Date();
+        targetDate.setDate(targetDate.getDate() + i);
+        targetDate.setHours(0, 0, 0, 0);
+        
+        const duePlans = state.plans.filter(p => window._isPlanDueOnDate(p, targetDate));
+        duePlans.forEach(p => {
+            const med = state.medications.find(m => m.id === p.medicationId);
+            const eventDate = new Date(targetDate);
+            eventDate.setHours(_getEventTime(p.timeCategory), 0, 0, 0);
+            
+            events.push({
+                title: `${med.name} (${p.dose})`,
+                start: eventDate,
+                description: `${t('scheduled')}: ${t(p.timeCategory)}`
+            });
+        });
+    }
+    
+    if (events.length === 0) return alert(t('noUpcoming'));
+    
+    const icsContent = _generateICS(events);
+    _downloadBlob(icsContent, t('calendarFileName'));
+};
 
 // --- INIT ---
 window.addEventListener('DOMContentLoaded', () => {
