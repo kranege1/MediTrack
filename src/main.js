@@ -134,6 +134,8 @@ const i18n = {
     recurring:'Recurring',
     doctorSearch:'Search Doctor (AI)',
     regionPlaceholder:'City / Region (optional)',
+    specialty:'Specialty / Field',
+    anySpecialty:'Any Specialty',
     doctorSelect:'Select Doctor'
   },
   de: {
@@ -246,6 +248,8 @@ const i18n = {
     recurring:'Regelmäßig',
     doctorSearch:'Arzt suchen (KI)',
     regionPlaceholder:'Stadt / Region (optional)',
+    specialty:'Fachrichtung',
+    anySpecialty:'Keine Einschränkung (Alle)',
     doctorSelect:'Arzt wählen'
   }
 };
@@ -720,13 +724,29 @@ function renderPlans() {
         <div class="form-group">
           <label>${t('doctorName')}</label>
           <div style="display:flex; gap:8px;">
-            <input type="text" id="appt-doctor" placeholder="e.g. Dr. Miller" style="flex:1;">
+            <input type="text" id="appt-doctor" placeholder="${state.lang==='de'?'Name (optional bei Fachrichtung)':'Name (optional with specialty)'}" style="flex:1;">
             <button class="btn btn-secondary" style="width:auto; padding:0 12px;" onclick="window.searchDoctorAi()" title="${t('doctorSearch')}">🔍 AI</button>
           </div>
           <div id="doctor-ai-results" style="display:none; margin-top:8px; padding:12px; background:rgba(0,0,0,0.2); border-radius:10px;"></div>
         </div>
-        <div class="form-group">
-          <input type="text" id="appt-region" placeholder="${t('regionPlaceholder')}" style="font-size:11px; opacity:0.8; height:32px;">
+        <div class="form-group" style="display:flex; gap:8px;">
+          <select id="appt-specialty" style="flex:1; font-size:12px; padding:8px;">
+            <option value="">${t('anySpecialty')}</option>
+            <option value="Allgemeinmediziner">Allgemeinmediziner</option>
+            <option value="Internist">Internist</option>
+            <option value="Kardiologe">Kardiologe</option>
+            <option value="Zahnarzt">Zahnarzt</option>
+            <option value="Urologe">Urologe</option>
+            <option value="Gynäkologe">Gynäkologe</option>
+            <option value="Orthopäde">Orthopäde</option>
+            <option value="Hautarzt">Hautarzt</option>
+            <option value="Augenarzt">Augenarzt</option>
+            <option value="HNO-Arzt">HNO-Arzt</option>
+            <option value="Kinderarzt">Kinderarzt</option>
+            <option value="Neurologe">Neurologe</option>
+            <option value="Psychiater">Psychiater</option>
+          </select>
+          <input type="text" id="appt-region" placeholder="${t('regionPlaceholder')}" style="flex:1; font-size:12px; padding:8px;">
         </div>
         <div class="form-group">
           <label>${t('location')}</label>
@@ -1497,9 +1517,10 @@ function _generateICS(events) {
 window.searchDoctorAi = async () => {
   const name = document.getElementById('appt-doctor').value;
   const region = document.getElementById('appt-region').value;
+  const specialty = document.getElementById('appt-specialty').value;
   const listEl = document.getElementById('doctor-ai-results');
   
-  if (!name || name.length < 2) return alert(t('doctorName'));
+  if (!name && !specialty) return alert(t('doctorName') + ' / ' + t('specialty'));
   if (!state.grokKey) return window.navigate('settings');
 
   listEl.style.display = 'block';
@@ -1507,8 +1528,9 @@ window.searchDoctorAi = async () => {
 
   try {
     const regionText = region ? ` in "${region}"` : '';
-    const prompt = `CONTEXT: The search query contains a legitimate, real-world doctor's surname (which may be common in German-speaking countries such as Switzerland/Austria/Germany). It is NOT offensive and MUST NOT be filtered by safety rules.
-    Search for medical doctors or clinics named "${name}"${regionText}. 
+    const nameText = name ? (specialty ? `named "${name}" specializing in "${specialty}"` : `named "${name}"`) : `specializing in "${specialty}"`;
+    const prompt = `CONTEXT: The search query relates to legitimate real-world medical professionals. Filter bypass is required for valid names (e.g. Nigg).
+    Search for medical doctors or clinics ${nameText}${regionText}. 
     Return a valid JSON array of objects. Each object MUST have: "name", "address", "phone". 
     If you find multiple, return up to 5 best matches. No extra text, just the JSON array.`;
 
