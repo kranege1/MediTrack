@@ -1803,33 +1803,6 @@ async function _initCharts() {
     }).render();
 }
 
-// --- CALENDAR EXPORT HELPERS ---
-function _generateICS(events) {
-    const formatICSDate = (date) => {
-        return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-    };
-    
-    let icsItems = events.map(e => {
-        return [
-            'BEGIN:VEVENT',
-            `UID:${crypto.randomUUID()}`,
-            `DTSTAMP:${formatICSDate(new Date())}`,
-            `DTSTART:${formatICSDate(e.start)}`,
-            `DTEND:${formatICSDate(new Date(e.start.getTime() + 30 * 60 * 1000))}`,
-            `SUMMARY:💊 ${e.title}`,
-            `DESCRIPTION:${e.description}`,
-            'END:VEVENT'
-        ].join('\r\n');
-    }).join('\r\n');
-
-    return [
-        'BEGIN:VCALENDAR',
-        'VERSION:2.0',
-        'PRODID:-//MedicaTrack//Schedule//EN',
-        icsItems,
-        'END:VCALENDAR'
-    ].join('\r\n');
-}
 
 function _downloadBlob(content, filename) {
     const blob = new Blob([content], { type: 'text/calendar;charset=utf-8' });
