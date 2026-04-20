@@ -15,7 +15,9 @@ window.state = {
   grokKey: localStorage.getItem('grok_api_key') || '',
   grokModel: localStorage.getItem('grok_model') || 'grok-4.20-non-reasoning',
   availableModels: JSON.parse(localStorage.getItem('grok_available_models') || '[]'),
-  pendingGrokResults: []
+  pendingGrokResults: [],
+  historyView: 'list',
+  analyticsRange: 7
 };
 const state = window.state;
 
@@ -100,7 +102,16 @@ const i18n = {
     startWeekday:'Weekday',
     dayOfMonth:'Day of Month',
     monday:'Monday', tuesday:'Tuesday', wednesday:'Wednesday', thursday:'Thursday', friday:'Friday', saturday:'Saturday', sunday:'Sunday',
-    adHoc:'Ad-hoc'
+    adHoc:'Ad-hoc',
+    analytics:'Analytics',
+    list:'List',
+    charts:'Charts',
+    adherence:'Adherence',
+    trends:'Trends',
+    last7Days:'Last 7 Days',
+    last30Days:'Last 30 Days',
+    lastYear:'Last Year',
+    missed:'Missed'
   },
   de: {
     dataExports:'Daten & Export', home:'Start', meds:'Medikamente', logAction:'Einnahme', plans:'Pläne',
@@ -179,9 +190,18 @@ const i18n = {
     fillRequiredMetrics:'Bitte trage die erforderlichen Messwerte ein.',
     anchorDate:'Startdatum',
     startWeekday:'Wochentag',
-    dayOfMonth:'Tag des Monats',
+    startDayOfMonth:'Tag des Monats',
     monday:'Montag', tuesday:'Dienstag', wednesday:'Mittwoch', thursday:'Donnerstag', friday:'Freitag', saturday:'Samstag', sunday:'Sonntag',
-    adHoc:'Ad-hoc'
+    adHoc:'Ad-hoc',
+    analytics:'Statistik',
+    list:'Liste',
+    charts:'Diagramme',
+    adherence:'Adhärenz',
+    trends:'Trends',
+    last7Days:'Letzte 7 Tage',
+    last30Days:'Letzte 30 Tage',
+    lastYear:'Letztes Jahr',
+    missed:'Vergessen'
   }
 };
 const LOCAL_DRUG_KB = {
@@ -239,7 +259,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.26</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.30</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -274,6 +294,10 @@ function render() {
       </div>
     </div>
   `;
+
+  if (state.currentView === 'history' && state.historyView === 'charts') {
+    _initCharts();
+  }
 }
 
 function getViewHTML() {
@@ -715,13 +739,21 @@ function renderLog() {
 
 
 function renderHistory() {
+  return `
+    <div style="padding: 16px 0; display: flex; gap: 8px; margin-bottom: 8px;">
+      <button class="btn" style="flex:1; font-weight:700; height:44px; border-radius:12px; background:${state.historyView==='list'?'var(--accent-color)':'rgba(0,0,0,0.2)'}; color:${state.historyView==='list'?'#000':'#94a3b8'}; border:none;" onclick="window._setHistoryView('list')">${t('list')}</button>
+      <button class="btn" style="flex:1; font-weight:700; height:44px; border-radius:12px; background:${state.historyView==='charts'?'var(--accent-color)':'rgba(0,0,0,0.2)'}; color:${state.historyView==='charts'?'#000':'#94a3b8'}; border:none;" onclick="window._setHistoryView('charts')">${t('charts')}</button>
+    </div>
+    ${state.historyView === 'list' ? _renderLogList() : renderAnalytics()}
+  `;
+}
+
+function _renderLogList() {
   const allLogs = [...state.logs].sort((a,b) => b.timestamp - a.timestamp);
-  
   const logCards = allLogs.map(l => {
     const med = state.medications.find(m => m.id === l.medicationId) || {name: t('unknown')};
     const time = new Date(l.timestamp).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' });
     
-    // Check for linked metrics in this log
     let metricsHtml = '';
     if (l.linkedMetricIds && l.linkedMetricIds.length > 0) {
       const linkedMetrics = l.linkedMetricIds.map(id => state.metrics.find(m => m.id === id)).filter(Boolean);
@@ -753,14 +785,18 @@ function renderHistory() {
   }).join('');
 
   return `
-    <div class="glass-panel">
-      <div class="text-h2">${t('history')}</div>
+    <div class="glass-panel" style="padding-top:0;">
       <div class="card-list">
         ${allLogs.length > 0 ? logCards : `<div class="empty-state">${t('noLogsToday')}</div>`}
       </div>
     </div>
   `;
 }
+
+window._setHistoryView = (view) => {
+  state.historyView = view;
+  render();
+};
 
 
 // 5. Settings / Export
@@ -997,27 +1033,29 @@ window._parseAdverseEvents = (text) => {
   return `<div style="font-size: 18px; line-height: 1.6; color: #f3f4f6;">${text}</div>`;
 };
 
-window._isPlanDueToday = (p) => {
-  const today = new Date();
-  today.setHours(0,0,0,0);
-  const start = new Date(p.startDate || today);
+window._isPlanDueToday = (p) => window._isPlanDueOnDate(p, new Date());
+
+window._isPlanDueOnDate = (p, targetDate) => {
+  const d = new Date(targetDate);
+  d.setHours(0,0,0,0);
+  const start = new Date(p.startDate || d);
   start.setHours(0,0,0,0);
   
-  if (today < start) return false;
+  if (d < start) return false;
 
-  const diffDays = Math.round((today - start) / (1000 * 60 * 60 * 24));
+  const diffDays = Math.round((d - start) / (1000 * 60 * 60 * 24));
 
   switch(p.frequency) {
     case 'weekly': 
       const targetWeekday = p.startWeekday !== undefined ? parseInt(p.startWeekday) : start.getDay();
-      return today.getDay() === targetWeekday;
+      return d.getDay() === targetWeekday;
     case 'monthly': 
       const targetDay = p.startDayOfMonth !== undefined ? parseInt(p.startDayOfMonth) : start.getDate();
-      return today.getDate() === targetDay;
+      return d.getDate() === targetDay;
     case 'quarterly': 
       const targetQDay = p.startDayOfMonth !== undefined ? parseInt(p.startDayOfMonth) : start.getDate();
-      return today.getDate() === targetQDay && 
-             (today.getMonth() - start.getMonth() + (12 * (today.getFullYear() - start.getFullYear()))) % 3 === 0;
+      return d.getDate() === targetQDay && 
+             (d.getMonth() - start.getMonth() + (12 * (d.getFullYear() - start.getFullYear()))) % 3 === 0;
     case 'everyXDays': 
       const x = parseInt(p.intervalX) || 1;
       return diffDays % x === 0;
@@ -1430,6 +1468,113 @@ window.resetToday = async () => {
   await API.clearTodayLogs();
   window.navigate('dashboard');
 };
+
+function renderAnalytics() {
+    const r = state.analyticsRange || 7;
+    return `
+      <div class="glass-panel" style="padding-top:0;">
+        <div style="display:flex; gap:8px; margin-bottom:20px; overflow-x:auto; padding-bottom:8px;">
+          <button class="btn btn-secondary" style="font-size:11px; padding:6px 12px; min-width:max-content; ${r===7?'background:var(--accent-color);color:#000;':''}" onclick="window._setAnalyticsRange(7)">${t('last7Days')}</button>
+          <button class="btn btn-secondary" style="font-size:11px; padding:6px 12px; min-width:max-content; ${r===30?'background:var(--accent-color);color:#000;':''}" onclick="window._setAnalyticsRange(30)">${t('last30Days')}</button>
+          <button class="btn btn-secondary" style="font-size:11px; padding:6px 12px; min-width:max-content; ${r===365?'background:var(--accent-color);color:#000;':''}" onclick="window._setAnalyticsRange(365)">${t('lastYear')}</button>
+        </div>
+        
+        <div class="text-h2" style="margin-top:20px;">${t('adherence')}</div>
+        <div id="chart-adherence" style="min-height: 200px; background: rgba(0,0,0,0.2); border-radius:12px; padding:12px;"></div>
+
+        <div class="text-h2" style="margin-top:32px;">${t('trends')}</div>
+        <div id="chart-weight" style="min-height: 200px; background: rgba(0,0,0,0.2); border-radius:12px; padding:12px; margin-bottom:16px;"></div>
+        <div id="chart-bp" style="min-height: 200px; background: rgba(0,0,0,0.2); border-radius:12px; padding:12px; margin-bottom:16px;"></div>
+        <div id="chart-others" style="min-height: 200px; background: rgba(0,0,0,0.2); border-radius:12px; padding:12px; margin-bottom:16px;"></div>
+      </div>
+    `;
+}
+
+window._setAnalyticsRange = (r) => {
+    state.analyticsRange = r;
+    render();
+};
+
+async function _initCharts() {
+    if (typeof ApexCharts === 'undefined') return setTimeout(_initCharts, 200);
+    
+    const range = state.analyticsRange || 7;
+    const dates = [];
+    const now = new Date();
+    for (let i = range - 1; i >= 0; i--) {
+        const d = new Date(now);
+        d.setDate(d.getDate() - i);
+        d.setHours(0,0,0,0);
+        dates.push(d);
+    }
+
+    // 1. Adherence Calculation
+    const adherenceData = dates.map(date => {
+        const due = state.plans.filter(p => window._isPlanDueOnDate(p, date)).length;
+        if (due === 0) return 0;
+        const taken = state.logs.filter(l => {
+            const ld = new Date(l.timestamp);
+            return ld.getDate() === date.getDate() && ld.getMonth() === date.getMonth() && ld.getFullYear() === date.getFullYear();
+        }).length;
+        return Math.min(100, Math.round((taken / due) * 100));
+    });
+
+    const categories = dates.map(d => d.toLocaleDateString(undefined, { day: '2-digit', month: '2-digit' }));
+
+    new ApexCharts(document.querySelector("#chart-adherence"), {
+        series: [{ name: t('adherence'), data: adherenceData }],
+        chart: { type: 'bar', height: 200, toolbar: { show: false }, background: 'transparent' },
+        theme: { mode: 'dark' },
+        colors: ['#6366f1'],
+        plotOptions: { bar: { borderRadius: 4, dataLabels: { position: 'top' } } },
+        xaxis: { categories },
+        yaxis: { max: 100, labels: { formatter: v => v + '%' } },
+        tooltip: { y: { formatter: v => v + '%' } }
+    }).render();
+
+    // 2. Metrics (Weight)
+    const weightData = state.metrics.filter(m => m.type === 'weight').map(m => ({ x: m.timestamp, y: parseFloat(m.value) }));
+    new ApexCharts(document.querySelector("#chart-weight"), {
+        series: [{ name: t('weight'), data: weightData }],
+        chart: { type: 'line', height: 200, toolbar: { show: false }, background: 'transparent' },
+        stroke: { curve: 'smooth' },
+        theme: { mode: 'dark' },
+        colors: ['#10b981'],
+        xaxis: { type: 'datetime' },
+        yaxis: { decimalsInFloat: 1 }
+    }).render();
+
+    // 3. Blood Pressure
+    const bpData = state.metrics.filter(m => m.type === 'bp').map(m => {
+        const parts = m.value.split('/');
+        return { t: m.timestamp, sys: parseInt(parts[0]), dia: parseInt(parts[1]) };
+    });
+    new ApexCharts(document.querySelector("#chart-bp"), {
+        series: [
+            { name: 'Sys', data: bpData.map(d => ({ x: d.t, y: d.sys })) },
+            { name: 'Dia', data: bpData.map(d => ({ x: d.t, y: d.dia })) }
+        ],
+        chart: { type: 'line', height: 200, toolbar: { show: false }, background: 'transparent' },
+        theme: { mode: 'dark' },
+        colors: ['#f43f5e', '#fb923c'],
+        xaxis: { type: 'datetime' }
+    }).render();
+
+    // 4. Pulse & Glucose
+    const pulseData = state.metrics.filter(m => m.type === 'pulse').map(m => ({ x: m.timestamp, y: parseFloat(m.value) }));
+    const glucoseData = state.metrics.filter(m => m.type === 'glucose').map(m => ({ x: m.timestamp, y: parseFloat(m.value) }));
+    new ApexCharts(document.querySelector("#chart-others"), {
+        series: [
+            { name: t('pulse'), data: pulseData },
+            { name: t('glucose'), data: glucoseData }
+        ],
+        chart: { type: 'line', height: 200, toolbar: { show: false }, background: 'transparent' },
+        theme: { mode: 'dark' },
+        colors: ['#ec4899', '#8b5cf6'],
+        xaxis: { type: 'datetime' }
+    }).render();
+}
+
 // --- INIT ---
 window.addEventListener('DOMContentLoaded', () => {
   if ('serviceWorker' in navigator) {
