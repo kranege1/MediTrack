@@ -38,82 +38,84 @@ const GROK_BASE_URL = "https://api.x.ai/v1/chat/completions";
 // === i18n ===
 const i18n = {
   en: {
-    dataExports:'Data & Exports', home:'Home', meds:'Meds', logAction:'Log Action', plans:'Plans',
-    dueToday:'Due Today', noPlans:'No scheduled plans. Set one up in the Plans tab!',
-    loggedActivity:'Logged Activity', noLogsToday:'No medications logged yet today.',
-    recentMetrics:'Recent Metrics', noMetrics:'No metrics logged yet.',
-    scheduled:'Scheduled', completed:'âœ“ Completed', skipped:'âœ• Skipped', skip:'Skip', dueTodayBadge:'â€¢ Due Today', taken:'taken', weight:'Weight',
-    pastDue:'Past Due', missedTitle:'Missed Items',
+    dataExports:'Data & Export', home:'Home', meds:'Medications', logAction:'Log Intake', plans:'Plans',
+    dueToday:'Due Today', noPlans:'No plans found. Create one!',
+    loggedActivity:'Today\'s Activity', noLogsToday:'No intake logged today.',
+    recentMetrics:'Recent Metrics', noMetrics:'No metrics recorded yet.', 
+    scheduled:'Scheduled', completed:'âœ… Completed', skipped:'âŒ Skipped', skip:'Skip', dueTodayBadge:'â€¢ Due Today', taken:'taken', weight:'Weight',
+    pastDue:'PAST DUE', missedTitle:'Missed Appointments',
     addMedication:'Add Medication', nameLbl:'Name', defaultDose:'Default Dose', unitLbl:'Unit', formatLbl:'Format',
     saveMedication:'Save Medication', cancel:'Cancel', yourMedications:'Your Medications',
-    noMedsFound:'No medications found. Add one to start!', delete:'Delete', addBtn:'+ Add',
+    noMedsFound:'No medications found. Add one!', delete:'Delete', addBtn:'+ Add New',
     viewSideEffects:'âš ï¸ View Side Effects', translateAdverse:'ðŸŒ Translate to German',
-    createSchedule:'Create Schedule', selectMed:'Select Medication', timeOfDay:'Time of Day',
-    dose:'Dose', savePlan:'Save Plan', yourSchedule:'Your Schedule',
-    noSchedule:'No daily schedule set.', remove:'Remove', newPlan:'+ New',
-    takes:'Takes', at:'at', appleCalendar:'+ Apple Calendar', chooseOption:'-- Choose --',
+    createSchedule:'Create Plan', selectMed:'Select Medication', timeOfDay:'Time',
+    dose:'Dose', savePlan:'Save Plan', yourSchedule:'Your Daily Schedule',
+    noSchedule:'No schedule created.', remove:'Remove', newPlan:'+ New',
+    takes:'Takes', at:'at', appleCalendar:'+ Apple Calendar', chooseOption:'-- Choose Option --',
     addMedFirst:'Add a medication first.',
-    logIntake:'Log Medication Intake', addMedFirst2:'Please add a medication first.',
-    amountTaken:'Amount Taken', quantity:'Quantity', recordIntake:'Record Intake',
-    logMetric:'Log Body Metric', metricType:'Metric Type', bodyWeight:'Body Weight (kg)',
+    logIntake:'Log Intake', addMedFirst2:'Please add a medication first.',
+    amountTaken:'Amount Taken', quantity:'Quantity', recordIntake:'Save Intake',
+    logMetric:'Record Body Metric', metricType:'Metric Type', bodyWeight:'Body Weight (kg)',
     bloodPressure:'Blood Pressure (mmHg)', valueLbl:'Value', saveMetric:'Save Metric',
     dataManagement:'Data Management',
-    dataNote:'Your data is completely private and stored locally. If you delete the app or clear your browser data, everything will be lost. Export your data regularly!',
+    dataNote:'Your data is entirely private and stored locally. Hard-deleting the app loses all data. Export regularly!',
     exportData:'Export Data (Backup)', restoreData:'Restore Data', importRestore:'Import / Restore',
-    nameAndDose:'Name and dose required', selectAndAmount:'Select medication and provide amount',
-    enterIngredient:'Enter an active ingredient name first.', medAndTime:'Medication and time required',
+    nameAndDose:'Name and dose required', selectAndAmount:'Select medication and amount',
+    enterIngredient:'Enter ingredient name first.', medAndTime:'Medication and time required',
     queryingFDA:'Querying FDA database...', noBrandTrying:'No brand match â€” trying active ingredient...',
-    searchingWiki:'Searching Wikipedia for active ingredients...',
+    searchingWiki:'Searching Wikipedia for ingredients...',
     genericMatch:'Generic match', viaWiki:'ðŸ“š Via Wikipedia', doses:'Doses',
     notFoundFDA:'Not found in FDA, Wikipedia, or generic databases.',
-    saveAsTypedBtn:'Save "{n}" as typed', linkIngredient:'Optional: link active ingredient to pull FDA data',
+    saveAsTypedBtn:'Save as "{n}"', linkIngredient:'Optional: Ingredient for FDA data',
     ingredientPlaceholder:'e.g. Rosuvastatin', fetchBtn:'Fetch',
     adverseLabel:'âš ï¸ Main Adverse Events:', adverseVia:'âš ï¸ Main Adverse Events (via {ing}):',
     notFoundFDAShort:'Not found in FDA either.',
-    deleteMedConfirm:'Delete this medication?', loggedSuccess:'Logged successfully!',
-    removeScheduleConfirm:'Remove this schedule?', valueRequired:'Value required',
-    selectFile:'Select a file first.', restoredSuccess:'Data restored successfully!',
-    importError:'Error reading backup file.', lookupFailed:'Lookup failed. Check your connection.',
-    wikiIngredientFound:'Wikipedia identified active ingredient: {ing}', translating:'Translating...',
-    unknown:'Unknown', units:'units', pillUnit:'pill(s)', kg:'kg',
+    deleteMedConfirm:'Delete medication?', loggedSuccess:'Logged successfully!',
+    removeScheduleConfirm:'Remove schedule?', valueRequired:'Value required',
+    selectFile:'Please select a file first.', restoredSuccess:'Data successfully restored!',
+    importError:'Error reading backup file.', lookupFailed:'Lookup failed. Check connection.',
+    wikiIngredientFound:'Wikipedia found ingredient: {ing}', translating:'Translating...',
+    unknown:'Unknown', units:'Units', pillUnit:'Pill(s)', kg:'kg',
     pillFormat:'Pill', liquidFormat:'Liquid', injectionFormat:'Injection', inhalerFormat:'Inhaler',
     detailsBtn:'Details', editBtn:'Edit', updateMedication:'Edit Medication',
     sideEffectsTitle:'âš ï¸ Side Effects', frequency:'Frequency', symptom:'Symptom', close:'Close',
     morning:'Morning', noon:'Noon', evening:'Evening',
-    daily:'Daily', weekly:'Weekly', monthly:'Monthly', quarterly:'Quarterly', everyXDays:'Every X days',
+    daily:'Daily', weekly:'Weekly', monthly:'Monthly', quarterly:'Quarterly', everyXDays:'Every X Days',
     dayIntervalLbl:'Repeat every {x} days',
     searchStartpage:'ðŸ” Search on Startpage',
     searchAi:'ðŸ” AI Search',
-    enteringApiKey:'Grok API Key',
-    aiThinking:'Grok is thinking...',
-    aiError:'Error during AI lookup.',
-    settingsSavedLabel:'Settings Saved',
+    enteringApiKey:'Grok API-Key',
+    aiThinking:'Grok thinking...',
+    aiError:'AI request failed.',
+    settingsSavedLabel:'Settings saved',
     saveSettingsBtn:'Save Settings',
-    missingKeyError:'Please set your Grok API Key in Settings first.',
+    missingKeyError:'Please setup your Grok API-Key in settings first.',
     testingKey:'Testing Key...',
     keyInvalid:'Key invalid',
     modelIdLabel:'Grok Model ID',
     modelSuggestion:'Try: grok-4.20-non-reasoning or grok-2',
-    customModel:'Custom (enter manually)...',
+    fetchingModels:'Loading models...',
+    refreshModels:'Refresh Models',
+    customModel:'Custom...',
     notFoundAiLabel:'Medication not found or unknown.',
-    selectMatch:'Select a match:',
-    multipleFound:'Multiple results found',
+    selectMatch:'Select match:',
+    multipleFound:'Multiple matches found',
     history:'History',
     pulse:'Pulse',
     glucose:'Blood Glucose',
-    linkMetrics:'Link body metrics with this schedule',
+    linkMetrics:'Link body metrics with this plan',
     pulseLabel:'Pulse (bpm)',
-    glucoseLabel:'Blood Glucose (mg/dL)',
-    deleteAllData:'Clear All Data',
-    deleteLogs:'Clear Intake Logs Only',
-    resetTodayLbl:'Reset Today\'s Progress',
-    confirmDeleteAll:'CRITICAL: Wipe ALL data (meds, plans, logs)? This cannot be undone!',
-    confirmDeleteLogs:'Delete all intake and metric history?',
-    metricRequired:'Measurement Required',
-    fillRequiredMetrics:'Please fill in the required health metrics.',
+    glucoseLabel:'Glucose (mg/dL)',
+    deleteAllData:'Clear all project data',
+    deleteLogs:'Clear intake log only',
+    resetTodayLbl:'Reset today\'s plan',
+    confirmDeleteAll:'CRITICAL: DELETE ALL DATA (Meds, Plans, Logs)? This cannot be undone!',
+    confirmDeleteLogs:'Clear all intake/metric history?',
+    metricRequired:'Metric required',
+    fillRequiredMetrics:'Please enter required metrics.',
     anchorDate:'Start Date',
     startWeekday:'Weekday',
-    dayOfMonth:'Day of Month',
+    startDayOfMonth:'Day of Month',
     monday:'Monday', tuesday:'Tuesday', wednesday:'Wednesday', thursday:'Thursday', friday:'Friday', saturday:'Saturday', sunday:'Sunday',
     adHoc:'Ad-hoc',
     analytics:'Analytics',
@@ -128,15 +130,17 @@ const i18n = {
     generateTestBtn:'Add Test Data',
     clearTestBtn:'Clear Test Data',
     testDataCount:'Count: {n}',
-    testDataNote:'Test data is marked with metadata. Your personal records remain safe during deletion.',
+    testDataNote:'Test data is marked. Your personal entries stay safe when clearing test data.',
     upcomingEvents:'Upcoming Events',
+    doctorNotFoundAi: 'No doctor matching your criteria was found.',
+    forceUpdateBtn: 'ðŸ”„ Force App Update (Clear Cache)',
     today:'Today',
     tomorrow:'Tomorrow',
     noUpcoming:'No upcoming medications.',
     weeklyExport:'Weekly Export (.ics)',
-    addToCalendar:'Add to Calendar',
-    calendarFileName:'Medication_Schedule.ics',
-    appointment:'Appointment',
+    addToCalendar:'Reminder',
+    calendarFileName:'Medicine_Plan.ics',
+    appointment:'Doctor Appointment',
     medication:'Medication',
     doctorName:'Doctor / Clinic Name',
     location:'Location / Address',
@@ -146,14 +150,12 @@ const i18n = {
     recurring:'Recurring',
     doctorSearch:'Search Doctor (AI)',
     regionPlaceholder:'City / Region (optional)',
-    specialty:'Specialty / Field',
+    specialty:'Specialty',
     anySpecialty:'Any Specialty',
     doctorSelect:'Select Doctor',
     defaultRegionLabel:'Default City / Region for AI Search',
     locating:'Locating...',
     locErr:'Location failed',
-    doctorNotFoundAi: 'No doctor matching your criteria was found.',
-    forceUpdateBtn: 'ðŸ”„ Force App Update (Clear Cache)',
     specialties: [
       'General Practitioner', 'Internist', 'Cardiologist', 'Dentist', 'Urologist', 
       'Gynecologist', 'Orthopedist', 'Dermatologist', 'Ophthalmologist', 'ENT', 
@@ -165,7 +167,7 @@ const i18n = {
     dueToday:'Heute fÃ¤llig', noPlans:'Keine PlÃ¤ne vorhanden. Erstelle einen Plan!',
     loggedActivity:'Heutige AktivitÃ¤t', noLogsToday:'Noch keine Einnahme heute.',
     recentMetrics:'Letzte Messwerte', noMetrics:'Noch keine Messwerte eingetragen.',
-    scheduled:'Geplant', completed:'âœ“ Eingenommen', skipped:'âœ• Ãœbersprungen', skip:'Ãœberspringen', dueTodayBadge:'â€¢ Heute fÃ¤llig', taken:'eingenommen', weight:'Gewicht',
+    scheduled:'Geplant', completed:'âœ… Eingenommen', skipped:'âŒ Ãœbersprungen', skip:'Ãœberspringen', dueTodayBadge:'â€¢ Heute fÃ¤llig', taken:'eingenommen', weight:'Gewicht',
     pastDue:'ÃœberfÃ¤llig', missedTitle:'Verpasste Termine',
     addMedication:'Medikament hinzufÃ¼gen', nameLbl:'Name', defaultDose:'Standarddosis', unitLbl:'Einheit', formatLbl:'Format',
     saveMedication:'Medikament speichern', cancel:'Abbrechen', yourMedications:'Ihre Medikamente',
@@ -189,7 +191,7 @@ const i18n = {
     searchingWiki:'Wikipedia wird nach Wirkstoffen durchsucht...',
     genericMatch:'Wirkstoff-Treffer', viaWiki:'ðŸ“š Via Wikipedia', doses:'Dosen',
     notFoundFDA:'Nicht in FDA, Wikipedia oder Wirkstoffdatenbank gefunden.',
-    saveAsTypedBtn:'\u201e{n}\u201c so speichern', linkIngredient:'Optional: Wirkstoff eingeben fÃ¼r FDA-Daten',
+    saveAsTypedBtn:'â€ž{n}â€œ so speichern', linkIngredient:'Optional: Wirkstoff eingeben fÃ¼r FDA-Daten',
     ingredientPlaceholder:'z.B. Rosuvastatin', fetchBtn:'Abrufen',
     adverseLabel:'âš ï¸ Hauptnebenwirkungen:', adverseVia:'âš ï¸ Hauptnebenwirkungen (via {ing}):',
     notFoundFDAShort:'Auch in FDA nicht gefunden.',
@@ -384,7 +386,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.60.2</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.60.3</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -503,9 +505,9 @@ function renderDashboard() {
 
         const opacity = isCompleted ? '0.6' : '1';
         
-        const title = isAppt ? `ðŸ©º ${p.doctorName}` : med.name;
+        const title = isAppt ? `Ã°Å¸Â©Âº ${p.doctorName}` : med.name;
         const subtitle = isAppt 
-          ? `${p.location ? 'ðŸ“ ' + p.location : ''} ${p.phone ? ' | ðŸ“ž ' + p.phone : ''}`
+          ? `${p.location ? 'Ã°Å¸â€œÂ ' + p.location : ''} ${p.phone ? ' | Ã°Å¸â€œÅ¾ ' + p.phone : ''}`
           : `${t(p.timeCategory || 'morning')} | ${p.dose} ${med.unit || t('units')}`;
 
         return `
@@ -517,10 +519,10 @@ function renderDashboard() {
             </div>
             <div style="display:flex; align-items:center; gap:8px;">
               ${!isAppt && isToday && !isCompleted ? `
-                <button class="btn btn-secondary" style="width:auto; padding:10px 14px; font-size:14px; border-color:var(--accent-color); color:var(--accent-color);" onclick="window.confirmIntake('${p.id}', '${targetDateISO}')">âœ“</button>
-                <button class="btn btn-secondary" style="width:auto; padding:10px 14px; font-size:14px; border-color:#f87171; color:#f87171;" onclick="window.skipIntake('${p.id}', '${targetDateISO}')">âœ•</button>
+                <button class="btn btn-secondary" style="width:auto; padding:10px 14px; font-size:14px; border-color:var(--accent-color); color:var(--accent-color);" onclick="window.confirmIntake('${p.id}', '${targetDateISO}')">Ã¢Å“â€œ</button>
+                <button class="btn btn-secondary" style="width:auto; padding:10px 14px; font-size:14px; border-color:#f87171; color:#f87171;" onclick="window.skipIntake('${p.id}', '${targetDateISO}')">Ã¢Å“â€¢</button>
               ` : (!isAppt && isToday && isCompleted ? `<div style="color:var(--accent-color); font-size:10px; font-weight:700;">${t('completed')}</div>` : '')}
-              <button class="btn btn-secondary" style="width:auto; padding:10px 14px; font-size:14px; border-color:rgba(255,255,255,0.15);" onclick="window._exportSingleEvent('${p.id}', '${targetDate.toISOString()}')" title="${t('addToCalendar')}">ðŸ—“ï¸</button>
+              <button class="btn btn-secondary" style="width:auto; padding:10px 14px; font-size:14px; border-color:rgba(255,255,255,0.15);" onclick="window._exportSingleEvent('${p.id}', '${targetDate.toISOString()}')" title="${t('addToCalendar')}">Ã°Å¸â€”â€œÃ¯Â¸Â</button>
             </div>
           </div>
           ${!isAppt && isToday && !isCompleted && p.linkedMetrics && p.linkedMetrics.length > 0 ? `
@@ -581,10 +583,10 @@ function renderDashboard() {
                 const p = m.plan;
                 const isAppt = p.type === 'appointment';
                 const med = !isAppt ? (state.medications.find(med => med.id === p.medicationId) || {name: t('unknown')}) : null;
-                const title = isAppt ? `ðŸ©º ${p.doctorName}` : med.name;
+                const title = isAppt ? `Ã°Å¸Â©Âº ${p.doctorName}` : med.name;
                 const subtitle = isAppt 
                   ? `${m.date.toLocaleDateString(undefined, {weekday:'short', day:'2-digit', month:'2-digit'})} | ${p.location || ''}`
-                  : `${m.date.toLocaleDateString(undefined, {weekday:'short', day:'2-digit', month:'2-digit'})} â€¢ ${t(p.timeCategory || 'morning')} | ${p.dose} ${med.unit || t('units')}`;
+                  : `${m.date.toLocaleDateString(undefined, {weekday:'short', day:'2-digit', month:'2-digit'})} Ã¢â‚¬Â¢ ${t(p.timeCategory || 'morning')} | ${p.dose} ${med.unit || t('units')}`;
                 
                 return `
                   <div class="card" style="border-left: 3px solid #f87171; margin-bottom: 8px; padding: 12px; display:flex; justify-content:space-between; align-items:center; background: rgba(248, 113, 113, 0.05);">
@@ -593,8 +595,8 @@ function renderDashboard() {
                       <div class="card-subtitle" style="font-size:11px; word-break:break-word;">${subtitle}</div>
                     </div>
                     <div style="display:flex; align-items:center; gap:8px;">
-                       <button class="btn btn-secondary" style="width:auto; padding:10px 14px; font-size:14px; border-color:var(--accent-color); color:var(--accent-color);" onclick="window.confirmIntake('${p.id}', '${m.dateISO}')">âœ“</button>
-                       <button class="btn btn-secondary" style="width:auto; padding:10px 14px; font-size:14px; border-color:#f87171; color:#f87171;" onclick="window.skipIntake('${p.id}', '${m.dateISO}')">âœ•</button>
+                       <button class="btn btn-secondary" style="width:auto; padding:10px 14px; font-size:14px; border-color:var(--accent-color); color:var(--accent-color);" onclick="window.confirmIntake('${p.id}', '${m.dateISO}')">Ã¢Å“â€œ</button>
+                       <button class="btn btn-secondary" style="width:auto; padding:10px 14px; font-size:14px; border-color:#f87171; color:#f87171;" onclick="window.skipIntake('${p.id}', '${m.dateISO}')">Ã¢Å“â€¢</button>
                     </div>
                   </div>
                 `;
@@ -678,12 +680,12 @@ window.skipIntake = async (planId, plannedDateISO) => {
 function renderMedications() {
   let listHtml = state.medications.map(m => {
     const formatIcons = {
-      'Pill': 'ðŸ’Š',
-      'Liquid': 'ðŸ’§',
-      'Injection': 'ðŸ’‰',
-      'Inhaler': 'ðŸ’¨'
+      'Pill': 'Ã°Å¸â€™Å ',
+      'Liquid': 'Ã°Å¸â€™Â§',
+      'Injection': 'Ã°Å¸â€™â€°',
+      'Inhaler': 'Ã°Å¸â€™Â¨'
     };
-    const icon = formatIcons[m.format] || 'ðŸ’Š';
+    const icon = formatIcons[m.format] || 'Ã°Å¸â€™Å ';
     const hue = [...m.name].reduce((h, c) => h + c.charCodeAt(0), 0) % 360;
     
     // Avatar: Icon on top, small dose below
@@ -790,12 +792,12 @@ function renderPlans() {
     let title, subtitle, infoLine;
 
     if (isAppt) {
-      title = `ðŸ©º ${p.doctorName || t('appointment')}`;
-      subtitle = `${p.location ? 'ðŸ“ ' + p.location : ''} ${p.phone ? ' | ðŸ“ž ' + p.phone : ''}`;
+      title = `Ã°Å¸Â©Âº ${p.doctorName || t('appointment')}`;
+      subtitle = `${p.location ? 'Ã°Å¸â€œÂ ' + p.location : ''} ${p.phone ? ' | Ã°Å¸â€œÅ¾ ' + p.phone : ''}`;
       const dt = (p.isOneTime && p.startDate) ? new Date(p.startDate) : null;
       infoLine = dt 
-        ? `ðŸ“… ${dt.toLocaleDateString()} ${t('at')} ${dt.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}` 
-        : `ðŸ“… ${t('recurring')}: ${t(p.timeCategory || 'morning')}`;
+        ? `Ã°Å¸â€œâ€¦ ${dt.toLocaleDateString()} ${t('at')} ${dt.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}` 
+        : `Ã°Å¸â€œâ€¦ ${t('recurring')}: ${t(p.timeCategory || 'morning')}`;
     } else {
       const med = state.medications.find(m => m.id === p.medicationId) || {name: t('unknown')};
       title = med.name;
@@ -896,7 +898,7 @@ function renderPlans() {
           <label>${t('doctorName')}</label>
           <div style="display:flex; gap:8px;">
             <input type="text" id="appt-doctor" placeholder="${state.lang==='de'?'Name (optional bei Fachrichtung)':'Name (optional with specialty)'}" style="flex:1;">
-            <button type="button" class="btn btn-secondary" style="width:auto; padding:0 12px;" onclick="window.searchDoctorAi()" title="${t('doctorSearch')}">ðŸ” AI</button>
+            <button type="button" class="btn btn-secondary" style="width:auto; padding:0 12px;" onclick="window.searchDoctorAi()" title="${t('doctorSearch')}">Ã°Å¸â€Â AI</button>
           </div>
           <div id="doctor-ai-results" style="display:none; margin-top:8px; padding:12px; background:rgba(0,0,0,0.2); border-radius:10px;"></div>
         </div>
@@ -907,7 +909,7 @@ function renderPlans() {
           </select>
           <div style="display:flex; flex:1; gap:4px;">
             <input type="text" id="appt-region" placeholder="${t('regionPlaceholder')}" value="${state.defaultRegion || ''}" style="width:100%; font-size:12px; padding:8px;">
-            <button class="btn btn-secondary" style="width:auto; padding:0 12px;" onclick="window._geolocate('appt-region')" title="GPS">ðŸ“</button>
+            <button class="btn btn-secondary" style="width:auto; padding:0 12px;" onclick="window._geolocate('appt-region')" title="GPS">Ã°Å¸â€œÂ</button>
           </div>
         </div>
         <div class="form-group">
@@ -1123,7 +1125,7 @@ function renderSettings() {
       </div>
 
       <div style="background: rgba(99, 102, 241, 0.05); border: 1px dashed rgba(99, 102, 241, 0.3); border-radius: 12px; padding: 16px; margin-bottom: 32px;">
-        <div class="text-h2" style="font-size:16px; margin-bottom:8px;">ðŸ› ï¸ ${t('analytics')} Playground</div>
+        <div class="text-h2" style="font-size:16px; margin-bottom:8px;">Ã°Å¸â€ºÂ Ã¯Â¸Â ${t('analytics')} Playground</div>
         <div style="font-size:11px; color:#94a3b8; margin-bottom:16px;">${t('testDataNote')}</div>
         
         <label style="font-size:12px; color:var(--accent-color); font-weight:600;">${t('testDataCount').replace('{n}', '<span id="test-count-val">200</span>')}</label>
@@ -1144,7 +1146,7 @@ function renderSettings() {
         <label>${t('defaultRegionLabel')}</label>
         <div style="display:flex; gap:8px;">
           <input type="text" id="grok-region-input" value="${state.defaultRegion}" placeholder="${t('regionPlaceholder')}" style="flex:1; font-size:12px;">
-          <button class="btn btn-secondary" style="width:auto; padding:0 12px;" onclick="window._geolocate('grok-region-input')" title="GPS">ðŸ“</button>
+          <button class="btn btn-secondary" style="width:auto; padding:0 12px;" onclick="window._geolocate('grok-region-input')" title="GPS">Ã°Å¸â€œÂ</button>
         </div>
       </div>
       <div class="form-group" style="position:relative;">
@@ -1157,7 +1159,7 @@ function renderSettings() {
                </select>`
             : `<input type="text" id="grok-model-input" value="${state.grokModel}" placeholder="grok-4.20-non-reasoning" style="flex:1;">`
           }
-          <button class="btn btn-secondary" style="width:auto; padding:0 12px; font-size:12px;" onclick="window.fetchGrokModels()" title="${t('refreshModels')}">ðŸ”„</button>
+          <button class="btn btn-secondary" style="width:auto; padding:0 12px; font-size:12px;" onclick="window.fetchGrokModels()" title="${t('refreshModels')}">Ã°Å¸â€â€ž</button>
         </div>
         <div style="font-size:10px; color:#94a3b8; margin-top:4px;">${t('modelSuggestion')}</div>
       </div>
@@ -1175,7 +1177,7 @@ function renderSettings() {
           ${t('forceUpdateBtn')}
         </button>
         <p style="font-size:10px; opacity:0.5; margin-top:8px;">
-          Current: 4.60.0 â€¢ Use if UI seems outdated.
+          Current: 4.60.0 Ã¢â‚¬Â¢ Use if UI seems outdated.
         </p>
       </div>
     </div>
@@ -1354,13 +1356,13 @@ window._parseAdverseEvents = (text) => {
   }
 
   // 2. Bullet Parsing
-  const bullets = text.split(/[â€¢\n;]|\.\s(?=[A-Z])/).map(s => s.trim()).filter(s => s.length > 5);
+  const bullets = text.split(/[Ã¢â‚¬Â¢\n;]|\.\s(?=[A-Z])/).map(s => s.trim()).filter(s => s.length > 5);
   if (bullets.length > 1) {
     return `
       <ul style="list-style: none; padding: 0;">
         ${bullets.map(b => `
           <li style="margin-bottom: 16px; display: flex; gap: 12px; font-size: 18px; line-height: 1.5; color: #f3f4f6;">
-            <span style="color:var(--accent-color); flex-shrink:0;">â€¢</span>
+            <span style="color:var(--accent-color); flex-shrink:0;">Ã¢â‚¬Â¢</span>
             <span>${b}</span>
           </li>
         `).join('')}
@@ -1506,8 +1508,8 @@ window.searchWithGrok = async () => {
   adverseEl.innerHTML = `<div style="color: var(--accent-color);">${t('aiThinking')}</div>`;
 
   try {
-    const promptText = `Identifiziere die wichtigsten Medikamente mit dem Namen oder einem Ã¤hnlichen Brand wie "${query}". 
-    Nenne die Namen in einer Liste und fÃ¼ge auch Generika an. Sortiere die Liste so, dass die Treffer, die am nÃ¤chsten mit "${query}" Ã¼bereinstimmen (inkl. korrigierter Typos), ganz oben stehen.
+    const promptText = `Identifiziere die wichtigsten Medikamente mit dem Namen oder einem ÃƒÂ¤hnlichen Brand wie "${query}". 
+    Nenne die Namen in einer Liste und fÃƒÂ¼ge auch Generika an. Sortiere die Liste so, dass die Treffer, die am nÃƒÂ¤chsten mit "${query}" ÃƒÂ¼bereinstimmen (inkl. korrigierter Typos), ganz oben stehen.
     Return as JSON array of objects in a "results" field.
     Each object must have:
     - name: string (Specific name, typo-corrected. E.g. search "Cymbalta" -> name "Cymbalta", search "Candesartan" -> name "Candesartan")
@@ -1548,7 +1550,7 @@ window.searchWithGrok = async () => {
     const result = JSON.parse(data.choices[0].message.content);
 
     if (result.error === "NOT_FOUND") {
-      adverseEl.innerHTML = `<div style="color: #64748b; font-style: italic;">âš ï¸ ${t('notFoundAiLabel')}</div>`;
+      adverseEl.innerHTML = `<div style="color: #64748b; font-style: italic;">Ã¢Å¡Â Ã¯Â¸Â ${t('notFoundAiLabel')}</div>`;
       return;
     }
 
@@ -1563,7 +1565,7 @@ window.searchWithGrok = async () => {
     state.pendingGrokResults = resultsList;
     
     if (state.pendingGrokResults.length === 0) {
-       adverseEl.innerHTML = `<div style="color: #64748b; font-style: italic;">âš ï¸ ${t('notFoundAiLabel')}</div>`;
+       adverseEl.innerHTML = `<div style="color: #64748b; font-style: italic;">Ã¢Å¡Â Ã¯Â¸Â ${t('notFoundAiLabel')}</div>`;
        return;
     }
 
@@ -1641,7 +1643,7 @@ window.translateAdverse = async (medId, text) => {
     return;
   }
   el.style.display = 'block';
-  el.innerHTML = 'Ãœbersetze...';
+  el.innerHTML = 'ÃƒÅ“bersetze...';
   try {
     const encoded = encodeURIComponent(text.substring(0, 450));
     const r = await fetch(`https://api.mymemory.translated.net/get?q=${encoded}&langpair=en|de`);
@@ -1676,7 +1678,7 @@ function _generateICS(events) {
             `DTSTAMP:${formatICSDate(new Date())}`,
             `DTSTART:${formatICSDate(e.start)}`,
             `DTEND:${formatICSDate(new Date(e.start.getTime() + 30 * 60 * 1000))}`,
-            `SUMMARY:ðŸ’Š ${e.title}`,
+            `SUMMARY:Ã°Å¸â€™Å  ${e.title}`,
             `DESCRIPTION:${desc}`,
             `LOCATION:${loc}`,
             'END:VEVENT'
@@ -1727,10 +1729,10 @@ window.searchDoctorAi = async () => {
     USER SEARCH: ${nameText}${regionText}
 
     INSTRUCTIONS:
-    1. Search for EVERYTHING matching the name/surname. If multiple doctors with the same surname exist in the region (e.g. Stöhr in Stans), YOU MUST RETURN ALL OF THEM.
+    1. Search for EVERYTHING matching the name/surname. If multiple doctors with the same surname exist in the region (e.g. StÃ¶hr in Stans), YOU MUST RETURN ALL OF THEM.
     2. GEOGRAPHICAL PRECISION & RADIUS: Prioritize the provided City and COUNTRY. However, if no matches are found in the exact city/village, YOU MUST expand the search to the immediate surrounding area (within ~15km). 
        - EXAMPLE: If 'Stans, Austria' is requested, practitioners in nearby 'Schwaz' (6130) are highly relevant and MUST be returned.
-    3. GERMAN VARIANTS: If the name contains umlaute (ä, ö, ü), also search for alternative spellings (ae, oe, ue). E.g., check both 'Stöhr' and 'Stoehr'.
+    3. GERMAN VARIANTS: If the name contains umlaute (Ã¤, Ã¶, Ã¼), also search for alternative spellings (ae, oe, ue). E.g., check both 'StÃ¶hr' and 'Stoehr'.
     4. FORMAT: Return a JSON object with a "doctors" array.
        - "name": Use 'Title Firstname Lastname'.
        - "specialty": Full medical specialty.
@@ -1781,7 +1783,7 @@ window.searchDoctorAi = async () => {
                 </div>
                 ${doc.specialty ? `<div style="font-size:10px; color:#94a3b8; font-weight:600; margin-bottom:2px;">?? ${doc.specialty}</div>` : ''}
                 <div style="font-size:10px; opacity:0.7; display:flex; gap:4px; align-items:center;">
-                  <span style="font-size:12px;">??</span> ${doc.address || '—'}
+                  <span style="font-size:12px;">??</span> ${doc.address || 'â€”'}
                 </div>
                 ${doc.phone ? `
                   <div style="font-size:10px; opacity:0.7; display:flex; gap:4px; align-items:center;">
@@ -1891,10 +1893,10 @@ window.saveSettings = async () => {
     // Auto-fetch models on success
     await window.fetchGrokModels(false);
     
-    msgEl.innerHTML = `<span style="color: #10b981;">âœ“ ${t('keyValid')}</span>`;
+    msgEl.innerHTML = `<span style="color: #10b981;">Ã¢Å“â€œ ${t('keyValid')}</span>`;
     setTimeout(() => msgEl.innerText = '', 3000);
   } catch (err) {
-    msgEl.innerHTML = `<span style="color: #ef4444;">âŒ ${t('keyInvalid')}<br><small style="font-size:10px;">${err.message}</small></span>`;
+    msgEl.innerHTML = `<span style="color: #ef4444;">Ã¢ÂÅ’ ${t('keyInvalid')}<br><small style="font-size:10px;">${err.message}</small></span>`;
   }
 };
 
@@ -2177,7 +2179,7 @@ window._exportSingleEvent = (planId, dateStr) => {
     }
 
     const title = isAppt ? p.doctorName : `${med.name} (${p.dose})`;
-    const description = isAppt ? `${p.note || ''} ${p.phone ? '\\nðŸ“ž ' + p.phone : ''}` : `${t('scheduled')}: ${t(p.timeCategory)}`;
+    const description = isAppt ? `${p.note || ''} ${p.phone ? '\\nÃ°Å¸â€œÅ¾ ' + p.phone : ''}` : `${t('scheduled')}: ${t(p.timeCategory)}`;
     const location = isAppt ? p.location : "";
 
     const icsContent = _generateICS([{
@@ -2215,7 +2217,7 @@ window._exportWeeklyEvents = () => {
             events.push({
                 title: isAppt ? p.doctorName : `${med.name} (${p.dose})`,
                 start: eventDate,
-                description: isAppt ? `${p.note || ''} ${p.phone ? '\\nðŸ“ž ' + p.phone : ''}` : `${t('scheduled')}: ${t(p.timeCategory)}`,
+                description: isAppt ? `${p.note || ''} ${p.phone ? '\\nÃ°Å¸â€œÅ¾ ' + p.phone : ''}` : `${t('scheduled')}: ${t(p.timeCategory)}`,
                 location: isAppt ? p.location : "",
                 type: p.type
             });
