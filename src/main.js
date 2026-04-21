@@ -33,6 +33,7 @@ window.state = {
   useLiveSearch: localStorage.getItem('use_live_search') === 'true',
   showMagicImport: false
 };
+const APP_VERSION = '4.77.0';
 const state = window.state;
 
 const GROK_BASE_URL = "https://api.x.ai/v1/chat/completions";
@@ -40,7 +41,7 @@ const GROK_BASE_URL = "https://api.x.ai/v1/chat/completions";
 // === i18n ===
 const i18n = {
   en: {
-    dataExports:'Data & Export', home:'Home', meds:'Medications', logAction:'Log Intake', plans:'Plans',
+    settings:'Settings', home:'Home', meds:'Medications', logAction:'Log Intake', plans:'Plans',
     dueToday:'Due Today', noPlans:'No plans found. Create one!',
     loggedActivity:'Today\'s Activity', noLogsToday:'No intake logged today.',
     recentMetrics:'Recent Metrics', noMetrics:'No metrics recorded yet.', 
@@ -175,7 +176,8 @@ const i18n = {
     autoSearchInfo: 'AI will search for the name above and find the address.'
   },
   de: {
-    dataExports:'Daten & Export', home:'Start', meds:'Medikamente', logAction:'Einnahme', plans:'Pl\u00E4ne',
+    settings:'Einstellungen',
+    home:'Start', meds:'Medikamente', logAction:'Einnahme', plans:'Pl\u00E4ne',
     dueToday:'Heute f\u00FCllig', noPlans:'Keine Pl\u00E4ne vorhanden. Erstelle einen Plan!',
     loggedActivity:'Heutige Aktivit\u00E4t', noLogsToday:'Noch keine Einnahme heute.',
     recentMetrics:'Letzte Messwerte', noMetrics:'Noch keine Messwerte eingetragen.',
@@ -423,15 +425,15 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.76.0</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.77.0</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
-        <div style="display:flex; border:1px solid rgba(255,255,255,0.15); border-radius:8px; overflow:hidden; font-size:12px; font-weight:700;">
-          <button onclick="window.toggleLang('en')" style="padding:5px 10px; background:${state.lang==='en'?'var(--accent-color)':'transparent'}; color:${state.lang==='en'?'#000':'#94a3b8'}; border:none; cursor:pointer;">EN</button>
-          <button onclick="window.toggleLang('de')" style="padding:5px 10px; background:${state.lang==='de'?'var(--accent-color)':'transparent'}; color:${state.lang==='de'?'#000':'#94a3b8'}; border:none; cursor:pointer;">DE</button>
+        <div style="display:flex; border:1px solid rgba(255,255,255,0.15); border-radius:8px; overflow:hidden; font-size:14px; font-weight:700;">
+          <button onclick="window.toggleLang('en')" style="padding:8px 12px; background:${state.lang==='en'?'var(--accent-color)':'transparent'}; color:${state.lang==='en'?'#000':'#94a3b8'}; border:none; cursor:pointer;">EN</button>
+          <button onclick="window.toggleLang('de')" style="padding:8px 12px; background:${state.lang==='de'?'var(--accent-color)':'transparent'}; color:${state.lang==='de'?'#000':'#94a3b8'}; border:none; cursor:pointer;">DE</button>
         </div>
-        <button class="header-action" onclick="window.navigate('settings')">${t('dataExports')}</button>
+        <button class="header-action" onclick="window.navigate('settings')">${t('settings')}</button>
       </div>
     </div>
     
@@ -440,19 +442,19 @@ function render() {
     </div>
     
     <div class="bottom-nav">
-      <div class="nav-item ${state.currentView === 'dashboard' ? 'active' : ''}" onclick="window.navigate('dashboard')">
+      <div class="nav-item ${state.currentView === 'dashboard' ? 'active' : ''}" onclick="window.navigate('dashboard')" style="${state.currentView === 'dashboard' ? 'filter: drop-shadow(0 0 8px var(--accent-color));' : ''}">
         <svg class="nav-icon" viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
         ${t('home')}
       </div>
-      <div class="nav-item ${state.currentView === 'medications' ? 'active' : ''}" onclick="window.navigate('medications')">
+      <div class="nav-item ${state.currentView === 'medications' ? 'active' : ''}" onclick="window.navigate('medications')" style="${state.currentView === 'medications' ? 'filter: drop-shadow(0 0 8px var(--accent-color));' : ''}">
         <svg class="nav-icon" viewBox="0 0 24 24"><path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1z"/></svg>
         ${t('meds')}
       </div>
-      <div class="nav-item ${state.currentView === 'plans' ? 'active' : ''}" onclick="window.navigate('plans')">
+      <div class="nav-item ${state.currentView === 'plans' ? 'active' : ''}" onclick="window.navigate('plans')" style="${state.currentView === 'plans' ? 'filter: drop-shadow(0 0 8px var(--accent-color));' : ''}">
         <svg class="nav-icon" viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
         ${t('plans')}
       </div>
-      <div class="nav-item ${state.currentView === 'history' ? 'active' : ''}" onclick="window.navigate('history')">
+      <div class="nav-item ${state.currentView === 'history' ? 'active' : ''}" onclick="window.navigate('history')" style="${state.currentView === 'history' ? 'filter: drop-shadow(0 0 8px var(--accent-color));' : ''}">
         <svg class="nav-icon" viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
         ${t('history')}
       </div>
@@ -503,7 +505,19 @@ function _findPastDueItems() {
       }
     }
   }
-  return missed.sort((a,b) => b.date - a.date);
+  
+  // Group shared missed events
+  const grouped = {};
+  for (const m of missed) {
+    const key = `${m.plan.id}-${m.dateISO}`;
+    if (!grouped[key]) {
+      grouped[key] = { ...m, count: 1 };
+    } else {
+      grouped[key].count++;
+    }
+  }
+  
+  return Object.values(grouped).sort((a,b) => b.date - a.date);
 }
 
 function renderDashboard() {
@@ -600,7 +614,7 @@ function renderDashboard() {
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
           ${t('upcomingEvents')}
         </div>
-        <button class="btn btn-secondary" style="width:auto; padding:6px 12px; font-size:10px; border-color:#6366f1; color:#6366f1; background:rgba(99,102,241,0.05);" onclick="window._exportWeeklyEvents()">
+        <button class="btn btn-secondary" style="width:auto; padding:6px 12px; font-size:10px; border-color:#6366f1; color:#6366f1; background:linear-gradient(135deg, rgba(99,102,241,0.1), rgba(99,102,241,0.05));" onclick="window._exportWeeklyEvents()">
           ${t('weeklyExport')}
         </button>
       </div>
@@ -1245,7 +1259,7 @@ function renderSettings() {
 
       <div style="border-top: 1px solid var(--glass-border); margin: 32px 0;"></div>
       
-      <div class="text-h2">${t('restoreData')}</div>
+      <div class="text-h2">${t('settings')}</div>
       <input type="file" id="import-file" accept=".json" style="margin-bottom: 12px;">
       <button class="btn btn-secondary" onclick="window.importData()">${t('importRestore')}</button>
       
@@ -1751,7 +1765,9 @@ window.searchDoctorSmart = async () => {
 
     listEl.style.display = 'block';
     listEl.innerHTML = `<div style="display:flex; gap:10px; align-items:center; font-size:11px; color:var(--accent-color);">
-      <div class="spinner"></div> ${t('aiThinking') || 'Suche im Internet...'}
+      <div style="width:16px; height:16px; border:2px solid var(--accent-color); border-top-color:transparent; border-radius:50%; animation: spin 0.8s linear infinite;"></div> 
+      <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+      ${t('aiThinking') || 'Suche im Internet...'}
     </div>`;
 
     try {
@@ -2222,7 +2238,8 @@ async function _initCharts() {
         chart: { type: 'bar', height: 200, toolbar: { show: false } },
         theme: { mode: 'dark' },
         colors: ['#6366f1'],
-        xaxis: { categories: dates.map(d => d.toLocaleDateString(undefined, { day: '2-digit', month: '2-digit' })) }
+        xaxis: { categories: dates.map(d => d.toLocaleDateString(undefined, { day: '2-digit', month: '2-digit' })) },
+        yaxis: { labels: { formatter: (val) => Math.floor(val) } }
     }).render();
 }
 
