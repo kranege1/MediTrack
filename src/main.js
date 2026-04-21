@@ -144,17 +144,17 @@ const i18n = {
     calendarFileName:'Medicine_Plan.ics',
     appointment:'Doctor Appointment',
     medication:'Medication',
-    doctorName:'Doctor / Clinic Name',
-    location:'Location / Address',
-    phone:'Phone Number',
-    note:'Notes',
-    oneTime:'One-time (Date & Time)',
-    recurring:'Recurring',
-    doctorSearch:'Search Doctor (AI)',
-    regionPlaceholder:'City / Region (optional)',
-    specialty:'Specialty',
-    anySpecialty:'Any Specialty',
-    doctorSelect:'Select Doctor',
+    doctorName: 'Name, Practice or Clinic (Search & Auto-Fill)',
+    location: 'Location / Address',
+    phone: 'Phone Number',
+    note: 'Notes',
+    oneTime: 'One-time (Date & Time)',
+    recurring: 'Recurring',
+    doctorSearch: '\u2728 Find Doctor Online',
+    regionPlaceholder: 'City or Postal Code',
+    specialty: 'Specialty (Urology, GP, ...)',
+    anySpecialty: 'Any Specialty',
+    doctorSelect: 'Select Doctor',
     defaultRegionLabel:'Default City / Region for AI Search',
     locating:'Locating...',
     locErr:'Location failed',
@@ -279,17 +279,18 @@ const i18n = {
     calendarFileName:'Medikamente_Plan.ics',
     appointment:'Arzt-Termin',
     medication:'Medikament',
-    doctorName:'Name des Arztes / Klinik',
+    doctorName:'Arzt, Klinik oder Praxis (Suche & Auto-Fill)',
     location:'Ort / Adresse',
     phone:'Telefonnummer',
     note:'Notizen',
     oneTime:'Einmalig (Datum & Uhrzeit)',
     recurring:'Regelm\u00E4\u00DFig',
-    doctorSearch:'Arzt suchen (KI)',
-    regionPlaceholder:'Stadt / Region (optional)',
-    specialty:'Fachrichtung',
+    doctorSearch:'\u2728 Arzt im Internet suchen',
+    regionPlaceholder:'Ort oder Postleitzahl',
+    specialty:'Fachrichtung (Urologe, Hausarzt, ...)',
     anySpecialty:'Keine Einschr\u00E4nkung (Alle)',
     doctorSelect:'Arzt w\u00E4hlen',
+    magicImportFallback: 'Manuell einf\u00FCgen (Text/Link)',
     defaultRegionLabel:'Standard Stadt / Region f\u00FCr KI-Suche',
     locating:'Ortung...',
     locErr:'Ortung fehlgeschlagen',
@@ -422,7 +423,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.73.0</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.74.0</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -946,25 +947,41 @@ function renderPlans() {
         `}
       ` : `
         <!-- Appointment Fields -->
-        <div class="form-group">
-          <label>${t('apptDoctor')}</label>
-          <div style="display:flex; gap:8px;">
-            <input type="text" id="appt-doctor" placeholder="${t('doctorPlaceholder')}" style="flex:1;">
-            <button type="button" class="btn btn-secondary" style="width:auto; padding:0 12px; font-size:16px; border-color:var(--accent-color); color:var(--accent-color);" onclick="window.state.showMagicImport=true; window.render()" title="${t('magicImportBtn')}">\u2728</button>
-            <button type="button" class="btn btn-secondary" style="width:auto; padding:0 12px;" onclick="window.searchDoctorAi()" title="${t('doctorSearch')}">\uD83D\uDD0D AI</button>
+        <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:16px; padding:16px; margin-bottom:20px;">
+          <div class="form-group">
+            <label>${t('doctorName')}</label>
+            <input type="text" id="appt-doctor" placeholder="z.B. Dr. Brigitte St\u00F6hr" style="background:rgba(255,255,255,0.05);">
           </div>
-          <div id="doctor-ai-results" style="display:none; margin-top:8px; padding:12px; background:rgba(0,0,0,0.2); border-radius:10px;"></div>
-        </div>
-        <div class="form-group" style="display:flex; gap:8px;">
-          <select id="appt-specialty" style="flex:1; font-size:12px; padding:8px;">
-            <option value="">${t('anySpecialty')}</option>
-            ${(i18n[state.lang].specialties || []).map(s => `<option value="${s}">${s}</option>`).join('')}
-          </select>
-          <div style="display:flex; flex:1; gap:4px;">
-            <input type="text" id="appt-region" placeholder="${t('regionPlaceholder')}" value="${state.defaultRegion || ''}" style="width:100%; font-size:12px; padding:8px;">
-            <button class="btn btn-secondary" style="width:auto; padding:0 12px;" onclick="window._geolocate('appt-region')" title="GPS">\uD83D\uDCCD</button>
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:12px;">
+            <div class="form-group" style="margin:0;">
+              <label>${t('specialty')}</label>
+              <select id="appt-specialty" style="font-size:12px; padding:10px;">
+                <option value="">${t('anySpecialty')}</option>
+                ${(i18n[state.lang].specialties || []).map(s => `<option value="${s}">${s}</option>`).join('')}
+              </select>
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label>${t('regionPlaceholder')}</label>
+              <div style="position:relative;">
+                <input type="text" id="appt-region" placeholder="Ort / PLZ" value="${state.defaultRegion || ''}" style="font-size:12px; padding:10px; padding-right:32px;">
+                <button type="button" class="btn btn-secondary" style="position:absolute; right:4px; top:4px; width:28px; height:28px; padding:0; border:none; background:transparent; font-size:12px;" onclick="window._geolocate('appt-region')" title="GPS">\uD83D\uDCCD</button>
+              </div>
+            </div>
+          </div>
+          
+          <button type="button" class="btn" style="background:var(--accent-color); color:#000; border:none; height:44px; font-weight:700; margin-bottom:12px;" onclick="window.searchDoctorSmart()">
+            ${t('doctorSearch')}
+          </button>
+          
+          <div id="doctor-ai-results" style="display:none; padding:12px; background:rgba(0,0,0,0.2); border-radius:10px; border:1px solid rgba(255,255,255,0.05); margin-bottom:8px;"></div>
+          
+          <div style="text-align:center;">
+             <button type="button" style="background:none; border:none; color:var(--accent-color); font-size:10px; text-decoration:underline; cursor:pointer; opacity:0.6;" onclick="window.state.showMagicImport=true; window.render()">
+               ${t('magicImportFallback') || 'Manuell einf\u00FCgen (Text/Link)'}
+             </button>
           </div>
         </div>
+
         <div class="form-group">
           <label>${t('location')}</label>
           <input type="text" id="appt-location">
@@ -1237,7 +1254,7 @@ function renderSettings() {
           ${t('forceUpdateBtn')}
         </button>
         <p style="font-size:10px; opacity:0.5; margin-top:8px;">
-          Current: 4.73.0 \u2022 Use if UI seems outdated.
+          Current: 4.74.0 \u2022 Use if UI seems outdated.
         </p>
       </div>
     </div>
@@ -1723,6 +1740,94 @@ function _generateICS(events) {
 }
 
 // AI DOCTOR SEARCH
+window.searchDoctorSmart = async () => {
+    const listEl = document.getElementById('doctor-ai-results');
+    const name = document.getElementById('appt-doctor').value;
+    const specialty = document.getElementById('appt-specialty').value;
+    const region = document.getElementById('appt-region').value;
+
+    if (!name && !specialty) return alert(t('nameAndDose'));
+    if (!state.grokKey) return alert(t('missingKeyError'));
+
+    listEl.style.display = 'block';
+    listEl.innerHTML = `<div style="display:flex; gap:10px; align-items:center; font-size:11px; color:var(--accent-color);">
+      <div class="spinner"></div> ${t('aiThinking') || 'Suche im Internet...'}
+    </div>`;
+
+    try {
+      const prompt = `Search for a medical professional matching:
+      Name: ${name || 'any'}
+      Specialty: ${specialty || 'any'}
+      City/Region: ${region || 'any'}
+      
+      INSTRUCTIONS:
+      1. Perform a live web search to identify REAL, currently practicing doctors.
+      2. If multiple are found, list up to 5 best matches.
+      3. For each one, provide the full business Name, Address, and Phone.
+      4. DO NOT hallucinate. Only return doctors you can verify online.
+      
+      RESPONSE FORMAT (JSON only):
+      {
+        "doctors": [
+          { "name": "Dr. ...", "address": "Full Address", "phone": "Phone Number", "specialty": "..." }
+        ]
+      }`;
+
+      const res = await fetch(GROK_BASE_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${state.grokKey}` },
+        body: JSON.stringify({
+          model: state.grokModel,
+          messages: [{ role: "user", content: prompt }],
+          temperature: 0,
+          tools: [{ type: "web_search" }]
+        })
+      });
+
+      if (!res.ok) throw new Error("API Error");
+
+      const d = await res.json();
+      let content = d.choices[0].message.content || "";
+      
+      // Extract JSON if model included extra text
+      if (content.includes('```json')) content = content.split('```json')[1].split('```')[0].trim();
+      else if (content.includes('{')) content = content.substring(content.indexOf('{'), content.lastIndexOf('}') + 1);
+
+      const data = JSON.parse(content);
+      const doctors = data.doctors || [];
+
+      if (doctors.length === 0) {
+        listEl.innerHTML = `<div style="font-size:11px; opacity:0.6;">${t('doctorNotFoundAi')}</div>`;
+        return;
+      }
+
+      listEl.innerHTML = `
+        <div style="font-size:10px; font-weight:700; margin-bottom:8px; opacity:0.6; color:#fde047;">\u26A0\uFE0F ${t('aiAccuracyWarning')}</div>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          ${doctors.map((doc, i) => `
+            <div style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:10px;">
+              <div style="color:var(--accent-color); font-size:12px; font-weight:700;">${doc.name}</div>
+              <div style="font-size:10px; opacity:0.7; margin:4px 0;">\uD83D\uDCCD ${doc.address || '?'}<br>\uD83D\uDCDE ${doc.phone || '?'}</div>
+              <button type="button" class="btn btn-secondary" style="height:28px; font-size:10px; background:var(--accent-color); color:#000; border:none;" onclick="window._applyDoctorSmart(${i}, ${JSON.stringify(doctors).replace(/"/g, '&quot;')})">
+                ${t('chooseOption')}
+              </button>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    } catch(err) {
+      listEl.innerHTML = `<div style="color:#f87171; font-size:10px;">Error: ${err.message}. Try refining your search.</div>`;
+    }
+};
+
+window._applyDoctorSmart = (i, list) => {
+    const doc = list[i];
+    document.getElementById('appt-doctor').value = doc.name;
+    document.getElementById('appt-location').value = doc.address || "";
+    document.getElementById('appt-phone').value = doc.phone || "";
+    document.getElementById('doctor-ai-results').style.display = 'none';
+};
+
 window.searchDoctorAi = async () => {
   const name = document.getElementById('appt-doctor').value;
   const region = document.getElementById('appt-region').value;
