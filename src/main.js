@@ -34,7 +34,7 @@ window.state = {
   showMagicImport: false,
   historyMedFilters: []
 };
-const APP_VERSION = '4.79.1';
+const APP_VERSION = '4.79.2';
 const state = window.state;
 
 const GROK_BASE_URL = "https://api.x.ai/v1/chat/completions";
@@ -426,7 +426,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.79.1</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.79.2</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -1242,7 +1242,7 @@ function _renderLogList() {
   return `
     <div class="glass-panel" style="padding-top:0;">
       <div class="card-list">
-        ${allLogs.length > 0 ? logCards : `<div class="empty-state">${t('noLogsToday')}</div>`}
+        ${stream.length > 0 ? logCards : `<div class="empty-state">${t('noLogsToday')}</div>`}
       </div>
     </div>
   `;
@@ -1328,7 +1328,7 @@ function renderSettings() {
           ${t('forceUpdateBtn')}
         </button>
         <p style="font-size:10px; opacity:0.5; margin-top:8px;">
-          Current: 4.79.1 \u2022 Use if UI seems outdated.
+          Current: 4.79.2 \u2022 Use if UI seems outdated.
         </p>
       </div>
     </div>
