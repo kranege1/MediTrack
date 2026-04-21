@@ -384,7 +384,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.60.1</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.60.2</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -1702,7 +1702,7 @@ window.searchDoctorAi = async () => {
   if (!region) {
     listEl.style.display = 'block';
     listEl.innerHTML = `<div style="font-size:11px; color:#ef4444; background:rgba(239,68,68,0.1); padding:8px; border-radius:6px;">
-      ⚠️ ${t('defaultRegionLabel')} 
+      ?? ${t('defaultRegionLabel')} 
     </div>`;
     return;
   }
@@ -1727,16 +1727,17 @@ window.searchDoctorAi = async () => {
     USER SEARCH: ${nameText}${regionText}
 
     INSTRUCTIONS:
-    1. Search for EVERYTHING matching the name/surname. If multiple doctors with the same surname exist in the region (e.g. Stöhr in Stans), YOU MUST RETURN ALL OF THEM.
-    2. GEOGRAPHICAL PRECISION: Prioritize the provided City and COUNTRY. Be aware of identical city names in different countries (e.g., Stans in Switzerland vs. Stans in Austria). Return results ONLY for the correct geopolitical region.
-    3. GERMAN VARIANTS: If the name contains umlaute (ä, ö, ü), also search for alternative spellings (ae, oe, ue). E.g., check both 'Stöhr' and 'Stoehr'.
-    3. FORMAT: Return a JSON object with a "doctors" array.
-       - "name": Use 'Title Firstname Lastname' (e.g., "Dr. Brigitte Stöhr").
+    1. Search for EVERYTHING matching the name/surname. If multiple doctors with the same surname exist in the region (e.g. St�hr in Stans), YOU MUST RETURN ALL OF THEM.
+    2. GEOGRAPHICAL PRECISION & RADIUS: Prioritize the provided City and COUNTRY. However, if no matches are found in the exact city/village, YOU MUST expand the search to the immediate surrounding area (within ~15km). 
+       - EXAMPLE: If 'Stans, Austria' is requested, practitioners in nearby 'Schwaz' (6130) are highly relevant and MUST be returned.
+    3. GERMAN VARIANTS: If the name contains umlaute (�, �, �), also search for alternative spellings (ae, oe, ue). E.g., check both 'St�hr' and 'Stoehr'.
+    4. FORMAT: Return a JSON object with a "doctors" array.
+       - "name": Use 'Title Firstname Lastname'.
        - "specialty": Full medical specialty.
        - "address": Full physical address.
        - "phone": Contact number.
-    4. ABSOLUTE ACCURACY: Do NOT guess first names. If multiple doctors are at the same address or share a surname, distinguish them by their exact names and specialties.
-    5. NO CONVERSATION: Return ONLY valid JSON.
+    5. ABSOLUTE ACCURACY: Do NOT guess first names. If multiple doctors are at the same address or share a surname, distinguish them by their exact names and specialties.
+    6. NO CONVERSATION: Return ONLY valid JSON.
 
     STRUCTURE: {"doctors": [{"name": "...", "specialty": "...", "address": "...", "phone": "..."}]}`;
 
@@ -1770,17 +1771,21 @@ window.searchDoctorAi = async () => {
       <div style="display:flex; flex-direction:column; gap:8px;">
         ${results.map((doc, i) => {
           const mapUrl = `https://www.google.com/maps/search/${encodeURIComponent(doc.name + ' ' + (doc.address || ""))}`;
+          const isNearby = doc.address && !doc.address.toLowerCase().includes(region.split(',')[0].trim().toLowerCase());
           return `
             <div style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:8px;">
               <div style="display:flex; flex-direction:column; gap:2px;">
-                <div style="color:var(--accent-color); font-size:13px; font-weight:700;">${doc.name}</div>
-                ${doc.specialty ? `<div style="font-size:10px; color:#94a3b8; font-weight:600; margin-bottom:2px;">🩺 ${doc.specialty}</div>` : ''}
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:4px;">
+                  <div style="color:var(--accent-color); font-size:13px; font-weight:700;">${doc.name}</div>
+                  ${isNearby ? `<div style="font-size:8px; background:rgba(253,224,71,0.1); color:#fde047; padding:2px 6px; border-radius:4px; white-space:nowrap; border:1px solid rgba(253,224,71,0.2);">?? nearby</div>` : ''}
+                </div>
+                ${doc.specialty ? `<div style="font-size:10px; color:#94a3b8; font-weight:600; margin-bottom:2px;">?? ${doc.specialty}</div>` : ''}
                 <div style="font-size:10px; opacity:0.7; display:flex; gap:4px; align-items:center;">
-                  <span style="font-size:12px;">📍</span> ${doc.address || '—'}
+                  <span style="font-size:12px;">??</span> ${doc.address || '�'}
                 </div>
                 ${doc.phone ? `
                   <div style="font-size:10px; opacity:0.7; display:flex; gap:4px; align-items:center;">
-                    <span style="font-size:12px;">📞</span> ${doc.phone}
+                    <span style="font-size:12px;">??</span> ${doc.phone}
                   </div>
                 ` : ''}
               </div>
@@ -1791,11 +1796,11 @@ window.searchDoctorAi = async () => {
                 </button>
                 ${doc.phone ? `
                   <a href="tel:${doc.phone.replace(/\s/g,'')}" class="btn btn-secondary" style="width:34px; height:34px; padding:0; display:flex; align-items:center; justify-content:center; border-color:rgba(255,255,255,0.1);" title="Call">
-                    📞
+                    ??
                   </a>
                 ` : ''}
                 <a href="${mapUrl}" target="_blank" class="btn btn-secondary" style="width:34px; height:34px; padding:0; display:flex; align-items:center; justify-content:center; border-color:rgba(255,255,255,0.1);" title="Google Maps">
-                  🗺️
+                  ???
                 </a>
               </div>
             </div>
@@ -1807,7 +1812,6 @@ window.searchDoctorAi = async () => {
     listEl.innerHTML = `<div style="color:#ef4444; font-size:11px;">Error: ${e.message}</div>`;
   }
 };
-
 window._applyDoctorMatch = (i, results) => {
   const doc = results[i];
   document.getElementById('appt-doctor').value = doc.name;
@@ -2252,3 +2256,4 @@ window.addEventListener('DOMContentLoaded', async () => {
     }
   }
 });
+
