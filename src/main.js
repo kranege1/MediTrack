@@ -367,7 +367,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.59</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.59.1</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -1701,14 +1701,14 @@ window.searchDoctorAi = async () => {
     USER SEARCH: ${nameText}${regionText}
 
     INSTRUCTIONS:
-    1. Search for EVERYTHING matching the name/surname. If multiple doctors with the same surname exist in the region, YOU MUST RETURN ALL OF THEM.
-    2. FORMAT: Return a JSON object with a "doctors" array.
-       - "name": Use 'Title Firstname Lastname' (e.g., "Dr. Marie Schmidt").
-       - "specialty": Full medical specialty (e.g., "Ophthalmologist", "Pediatrician").
+    1. Search for EVERYTHING matching the name/surname. If multiple doctors with the same surname exist in the region (e.g. Stöhr in Stans), YOU MUST RETURN ALL OF THEM.
+    2. GERMAN VARIANTS: If the name contains umlaute (ä, ö, ü), also search for alternative spellings (ae, oe, ue). E.g., check both 'Stöhr' and 'Stoehr'.
+    3. FORMAT: Return a JSON object with a "doctors" array.
+       - "name": Use 'Title Firstname Lastname' (e.g., "Dr. Brigitte Stöhr").
+       - "specialty": Full medical specialty.
        - "address": Full physical address.
        - "phone": Contact number.
-    3. ABSOLUTE ACCURACY: Do NOT guess first names. If multiple doctors are at the same address, distinguish them by their exact names and specialties.
-    4. LANGUAGE: Respond in the user's current context (Names/Addresses from the region).
+    4. ABSOLUTE ACCURACY: Do NOT guess first names. If multiple doctors are at the same address or share a surname, distinguish them by their exact names and specialties.
     5. NO CONVERSATION: Return ONLY valid JSON.
 
     STRUCTURE: {"doctors": [{"name": "...", "specialty": "...", "address": "...", "phone": "..."}]}`;
@@ -1725,7 +1725,8 @@ window.searchDoctorAi = async () => {
     });
     
     const d = await res.json();
-    const result = JSON.parse(d.choices[0].message.content);
+    const txt = d.choices[0].message.content;
+    const result = JSON.parse(txt);
     const results = result.doctors || [];
 
     if (results.length === 0) {
