@@ -2270,3 +2270,15 @@ window.addEventListener('DOMContentLoaded', async () => {
     await window.navigate('dashboard');
   } catch (err) { document.getElementById('app').innerHTML = `<div style="padding:40px; color:white;">Error: ${err.message}</div>`; }
 });
+
+window._forceReload = async () => {
+  if ('serviceWorker' in navigator) {
+    const regs = await navigator.serviceWorker.getRegistrations();
+    for (let r of regs) await r.unregister();
+  }
+  if ('caches' in window) {
+    const keys = await caches.keys();
+    for (let k of keys) await caches.delete(k);
+  }
+  window.location.reload(true);
+};
