@@ -170,7 +170,9 @@ const i18n = {
     magicImportBtn: 'Magic Import',
     magicImportPlaceholder: 'Paste Google results or Link here...',
     magicImportInfo: 'AI will extract name, address and phone from text or URLs.',
-    importing: 'Magic Importing...'
+    importing: 'Magic Importing...',
+    autoSearchBtn: 'Auto-Search & Fill',
+    autoSearchInfo: 'AI will search for the name above and find the address.'
   },
   de: {
     dataExports:'Daten & Export', home:'Start', meds:'Medikamente', logAction:'Einnahme', plans:'Pl\u00E4ne',
@@ -303,7 +305,9 @@ const i18n = {
     magicImportBtn: 'Magic Import',
     magicImportPlaceholder: 'Google-Ergebnis oder Link hier einf\u00FCgen...',
     magicImportInfo: 'KI extrahiert Name, Adresse und Telefon aus Text oder Links.',
-    importing: 'Magic Import läuft...'
+    importing: 'Magic Import läuft...',
+    autoSearchBtn: 'Automatisch suchen & ausf\u00FCllen',
+    autoSearchInfo: 'KI sucht nach dem oben eingegebenen Namen im Internet.'
   }
 };
 const LOCAL_DRUG_KB = {
@@ -418,7 +422,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.72.0</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.73.0</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -884,6 +888,13 @@ function renderPlans() {
           <button onclick="state.showMagicImport=false; render()" style="position:absolute; right:8px; top:8px; background:none; border:none; color:#f87171; cursor:pointer; font-size:16px;">\u00D7</button>
           <div class="text-h2" style="color:var(--accent-color);">\u2728 ${t('magicImportBtn')}</div>
           <div style="font-size:10px; opacity:0.7; margin-bottom:10px;">${t('magicImportInfo')}</div>
+          
+          <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:10px; margin-bottom:12px;">
+            <div style="font-size:11px; font-weight:700; margin-bottom:4px;">\uD83D\uDD0D ${t('autoSearchBtn')}</div>
+            <div style="font-size:9px; opacity:0.6; margin-bottom:8px;">${t('autoSearchInfo')}</div>
+            <button class="btn" onclick="window._runMagicImportAI(true)" style="background:rgba(99,102,241,0.2); color:var(--accent-color); border:1px solid var(--accent-color); font-size:11px;">\uD83D\uDE80 Start Auto-Search</button>
+          </div>
+
           <textarea id="magic-import-text" placeholder="${t('magicImportPlaceholder')}" style="width:100%; height:80px; font-size:12px; margin-bottom:10px; background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; padding:8px;"></textarea>
           <div id="magic-status"></div>
           <button class="btn" onclick="window._runMagicImportAI()" style="background:var(--accent-color); color:#000; border:none;">\u2728 ${t('magicImportBtn')}</button>
@@ -1226,7 +1237,7 @@ function renderSettings() {
           ${t('forceUpdateBtn')}
         </button>
         <p style="font-size:10px; opacity:0.5; margin-top:8px;">
-          Current: 4.72.0 \u2022 Use if UI seems outdated.
+          Current: 4.73.0 \u2022 Use if UI seems outdated.
         </p>
       </div>
     </div>
@@ -1870,8 +1881,16 @@ window.searchDoctorAi = async () => {
   }
 };
 
-window._runMagicImportAI = async () => {
-  const text = document.getElementById('magic-import-text').value;
+window._runMagicImportAI = async (isAuto = false) => {
+  let text = document.getElementById('magic-import-text')?.value || "";
+  if (isAuto) {
+      const name = document.getElementById('appt-doctor')?.value || "";
+      const specialty = document.getElementById('appt-specialty')?.value || "";
+      const region = document.getElementById('appt-region')?.value || "";
+      if (!name && !specialty) return alert("Please enter at least a name or specialty to search.");
+      text = `Search for: ${name} ${specialty} in region ${region}`;
+  }
+  
   const statusEl = document.getElementById('magic-status');
   if (!text.trim()) return;
   if (!state.grokKey) return alert(t('missingKeyError'));
@@ -1879,20 +1898,36 @@ window._runMagicImportAI = async () => {
   statusEl.innerHTML = `<div style="font-size:11px; color:var(--accent-color); margin-bottom:8px;">${t('importing')}</div>`;
   
   try {
-    const prompt = `You are a data extraction assistant. Extract professional details from the following raw text OR URL:
-    "${text}"
+    const prompt = isAuto 
+      ? `You are an automated research assistant. 
+         TASK: Search the web for a medical professional matching: "${text}".
+         
+         INSTRUCTIONS:
+         1. Use web search to find the official practice website or most reliable listing (e.g., DocFinder, Google Maps).
+         2. Visit the site and extract current contact details.
+         3. Return exactly one result in JSON format.
+         
+         RESPONSE FORMAT (JSON only):
+         {
+           "name": "Full name with Dr. title",
+           "address": "Full address",
+           "phone": "Phone number",
+           "specialty": "Medical specialty"
+         }`
+      : `You are a data extraction assistant. Extract professional details from the following raw text OR URL:
+         "${text}"
     
-    CRITICAL INSTRUCTIONS:
-    1. If the input is a URL, you MUST browse the website or search for it to find the practitioner's Name, Address, and Phone.
-    2. RESPONSE FORMAT (JSON only):
-    {
-      "name": "Full name with Dr. title",
-      "address": "Full address",
-      "phone": "Phone number",
-      "specialty": "Medical specialty"
-    }
+         CRITICAL INSTRUCTIONS:
+         1. If the input is a URL, you MUST browse the website or search for it to find the practitioner's Name, Address, and Phone.
+         2. RESPONSE FORMAT (JSON only):
+         {
+           "name": "Full name with Dr. title",
+           "address": "Full address",
+           "phone": "Phone number",
+           "specialty": "Medical specialty"
+         }
     
-    If any field is missing, use null. Return ONLY the JSON object.`;
+         If any field is missing, use null. Return ONLY the JSON object.`;
 
     const body = {
         model: state.grokModel,
