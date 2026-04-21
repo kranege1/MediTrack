@@ -151,7 +151,12 @@ const i18n = {
     doctorSelect:'Select Doctor',
     defaultRegionLabel:'Default City / Region for AI Search',
     locating:'Locating...',
-    locErr:'Location failed'
+    locErr:'Location failed',
+    specialties: [
+      'General Practitioner', 'Internist', 'Cardiologist', 'Dentist', 'Urologist', 
+      'Gynecologist', 'Orthopedist', 'Dermatologist', 'Ophthalmologist', 'ENT', 
+      'Pediatrician', 'Neurologist', 'Psychiatrist'
+    ]
   },
   de: {
     dataExports:'Daten & Export', home:'Start', meds:'Medikamente', logAction:'Einnahme', plans:'Pläne',
@@ -269,7 +274,12 @@ const i18n = {
     doctorSelect:'Arzt wählen',
     defaultRegionLabel:'Standard Stadt / Region für KI-Suche',
     locating:'Ortung...',
-    locErr:'Ortung fehlgeschlagen'
+    locErr:'Ortung fehlgeschlagen',
+    specialties: [
+      'Allgemeinmediziner', 'Internist', 'Kardiologe', 'Zahnarzt', 'Urologe', 
+      'Gynäkologe', 'Orthopäde', 'Hautarzt', 'Augenarzt', 'HNO-Arzt', 
+      'Kinderarzt', 'Neurologe', 'Psychiater'
+    ]
   }
 };
 const LOCAL_DRUG_KB = {
@@ -357,7 +367,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.57.3</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.57.4</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -876,19 +886,7 @@ function renderPlans() {
         <div class="form-group" style="display:flex; gap:8px;">
           <select id="appt-specialty" style="flex:1; font-size:12px; padding:8px;">
             <option value="">${t('anySpecialty')}</option>
-            <option value="Allgemeinmediziner">Allgemeinmediziner</option>
-            <option value="Internist">Internist</option>
-            <option value="Kardiologe">Kardiologe</option>
-            <option value="Zahnarzt">Zahnarzt</option>
-            <option value="Urologe">Urologe</option>
-            <option value="Gynäkologe">Gynäkologe</option>
-            <option value="Orthopäde">Orthopäde</option>
-            <option value="Hautarzt">Hautarzt</option>
-            <option value="Augenarzt">Augenarzt</option>
-            <option value="HNO-Arzt">HNO-Arzt</option>
-            <option value="Kinderarzt">Kinderarzt</option>
-            <option value="Neurologe">Neurologe</option>
-            <option value="Psychiater">Psychiater</option>
+            ${(i18n[state.lang].specialties || []).map(s => `<option value="${s}">${s}</option>`).join('')}
           </select>
           <div style="display:flex; flex:1; gap:4px;">
             <input type="text" id="appt-region" placeholder="${t('regionPlaceholder')}" value="${state.defaultRegion || ''}" style="width:100%; font-size:12px; padding:8px;">
@@ -1736,9 +1734,17 @@ window.searchDoctorAi = async () => {
           return `
             <div style="display:flex; gap:4px; align-items:stretch;">
               <button class="btn btn-secondary" style="flex:1; text-align:left; padding:8px; font-size:11px; background:rgba(255,255,255,0.03);" onclick="window._applyDoctorMatch(${i}, ${JSON.stringify(results).replace(/"/g, '&quot;')})">
-                <div style="color:var(--accent-color);"><strong>${doc.name}</strong></div>
-                <div style="opacity:0.6; font-size:9px;">${doc.address}</div>
+                <div style="color:var(--accent-color); display:flex; justify-content:space-between; align-items:flex-start;">
+                  <strong>${doc.name}</strong>
+                  ${doc.phone ? `<span style="opacity:0.6; font-size:9px; white-space:nowrap;">📞 ${doc.phone}</span>` : ''}
+                </div>
+                <div style="opacity:0.6; font-size:9px;">📍 ${doc.address}</div>
               </button>
+              ${doc.phone ? `
+                <a href="tel:${doc.phone.replace(/\s/g,'')}" class="btn btn-secondary" style="width:40px; padding:0; display:flex; align-items:center; justify-content:center; border-color:rgba(255,255,255,0.1);" title="Call">
+                  📞
+                </a>
+              ` : ''}
               <a href="${mapUrl}" target="_blank" class="btn btn-secondary" style="width:40px; padding:0; display:flex; align-items:center; justify-content:center; border-color:rgba(255,255,255,0.1);" title="Google Maps">
                 🗺️
               </a>
