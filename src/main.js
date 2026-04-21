@@ -407,7 +407,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.66.0</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.67.0</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -1201,7 +1201,7 @@ function renderSettings() {
           ${t('forceUpdateBtn')}
         </button>
         <p style="font-size:10px; opacity:0.5; margin-top:8px;">
-          Current: 4.66.0 \u2022 Use if UI seems outdated.
+          Current: 4.67.0 \u2022 Use if UI seems outdated.
         </p>
       </div>
     </div>
@@ -1735,13 +1735,12 @@ window.searchDoctorAi = async () => {
     const body = {
       model: state.grokModel,
       messages: [{ role: "user", content: prompt }],
-      temperature: 0.1
+      temperature: 0
     };
 
     // ENABLE LIVE WEB SEARCH TOOL
     if (state.useLiveSearch) {
       body.tools = [{ type: "web_search" }];
-      // NO response_format when tools are enabled (prevents conflict)
     } else {
       body.response_format = { type: "json_object" };
     }
@@ -1758,17 +1757,22 @@ window.searchDoctorAi = async () => {
     }
 
     const d = await res.json();
-    let content = d.choices[0].message.content;
+    let content = d.choices[0].message.content || "";
     
-    // Fallback parser: Extract JSON if model included text
-    if (content.includes('```json')) {
-      content = content.split('```json')[1].split('```')[0].trim();
-    } else if (content.includes('{')) {
-      content = content.substring(content.indexOf('{'), content.lastIndexOf('}') + 1);
+    if (!content && d.choices[0].message.tool_calls) {
+        throw new Error("The model requested a tool call but did not provide a final answer. Please ensure you are using a reasoning model like grok-4.20-reasoning.");
     }
 
-    const result = JSON.parse(content);
-    const results = result.doctors || [];
+    try {
+      // Fallback parser: Extract JSON if model included text
+      if (content.includes('```json')) {
+        content = content.split('```json')[1].split('```')[0].trim();
+      } else if (content.includes('{')) {
+        content = content.substring(content.indexOf('{'), content.lastIndexOf('}') + 1);
+      }
+      
+      const result = JSON.parse(content);
+      const results = result.doctors || [];
 
     if (results.length === 0) {
       const googleQuery = encodeURIComponent(`${name} ${specialty || ''} ${region}`);
@@ -1825,8 +1829,19 @@ window.searchDoctorAi = async () => {
         }).join('')}
       </div>
     `;
+    } catch(parseErr) {
+      throw new Error(`Data format error. Raw message from AI: "${content.substring(0, 500)}..."`);
+    }
   } catch(e) {
-    listEl.innerHTML = `<div style="color:#ef4444; font-size:11px;">Error: ${e.message}</div>`;
+    listEl.innerHTML = `
+      <div style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.2); border-radius:12px; padding:12px; color:#f87171; font-size:11px;">
+        <div style="font-weight:700; margin-bottom:4px;">Search Error</div>
+        ${e.message}
+        <div style="margin-top:8px; opacity:0.8; font-size:10px;">
+          \uD83D\uDCA1 Tip: Try disabling "Live Web Search" or changing the model to "grok-4.20-reasoning".
+        </div>
+      </div>
+    `;
   }
 };
 
