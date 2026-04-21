@@ -1,5 +1,17 @@
 import { openDB } from 'idb';
 
+// Polyfill: crypto.randomUUID() requires secure context + Safari 15.4+
+// Older iPhones crash silently without this fallback
+function _uuid() {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    try { return crypto.randomUUID(); } catch(e) { /* fall through */ }
+  }
+  // Fallback using crypto.getRandomValues (Safari 11+)
+  return '10000000-1000-4000-8000-100000000000'.replace(/[018]/g, c =>
+    (+c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (+c / 4)))).toString(16)
+  );
+}
+
 const DB_NAME = 'medicatrack_db';
 const DB_VERSION = 2;
 
@@ -50,7 +62,7 @@ export const API = {
   },
   async addMedication(med) {
     const db = await initDB();
-    med.id = med.id || crypto.randomUUID();
+    med.id = med.id || _uuid();
     await db.put('medications', med);
     return med;
   },
@@ -66,7 +78,7 @@ export const API = {
   },
   async addLog(log) {
     const db = await initDB();
-    log.id = log.id || crypto.randomUUID();
+    log.id = log.id || _uuid();
     log.timestamp = log.timestamp || Date.now();
     await db.put('logs', log);
     return log;
@@ -82,7 +94,7 @@ export const API = {
   },
   async addMetric(metric) {
     const db = await initDB();
-    metric.id = metric.id || crypto.randomUUID();
+    metric.id = metric.id || _uuid();
     metric.timestamp = metric.timestamp || Date.now();
     await db.put('metrics', metric);
     return metric;
@@ -95,7 +107,7 @@ export const API = {
   },
   async addPlan(plan) {
     const db = await initDB();
-    plan.id = plan.id || crypto.randomUUID();
+    plan.id = plan.id || _uuid();
     await db.put('plans', plan);
     return plan;
   },

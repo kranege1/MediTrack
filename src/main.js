@@ -1,6 +1,16 @@
 import './style.css';
 import { API } from './db.js';
 
+// Polyfill: crypto.randomUUID() needs secure context + Safari 15.4+
+function _uuid() {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    try { return crypto.randomUUID(); } catch(e) { /* fall through */ }
+  }
+  return '10000000-1000-4000-8000-100000000000'.replace(/[018]/g, c =>
+    (+c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (+c / 4)))).toString(16)
+  );
+}
+
 // --- App State ---
 window.state = {
   currentView: 'dashboard',
@@ -341,11 +351,11 @@ window._geolocate = (inputId) => {
   });
 };
 
-function _showFilePicker() {
+function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.56</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.57</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -1540,7 +1550,7 @@ function _generateICS(events) {
         const loc = (e.location || '').replace(/\n/g, '\\n');
         return [
             'BEGIN:VEVENT',
-            `UID:${crypto.randomUUID()}`,
+            `UID:${_uuid()}`,
             `DTSTAMP:${formatICSDate(new Date())}`,
             `DTSTART:${formatICSDate(e.start)}`,
             `DTEND:${formatICSDate(new Date(e.start.getTime() + 30 * 60 * 1000))}`,
@@ -2036,9 +2046,30 @@ window._exportWeeklyEvents = () => {
 };
 
 // --- INIT ---
-window.addEventListener('DOMContentLoaded', () => {
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js').catch(err => console.error("SW Registration failed", err));
+window.addEventListener('DOMContentLoaded', async () => {
+  try {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(err => console.error("SW Registration failed", err));
+    }
+    await window.navigate('dashboard');
+  } catch (err) {
+    console.error('MedicaTrack init failed:', err);
+    // Show a visible error instead of black screen
+    const app = document.getElementById('app');
+    if (app) {
+      app.innerHTML = `
+        <div style="padding:40px 20px; text-align:center; color:#f87171; font-family:system-ui;">
+          <h2 style="color:#fff; margin-bottom:16px;">MedicaTrack</h2>
+          <p style="margin-bottom:12px;">Failed to load. Please try:</p>
+          <ul style="text-align:left; max-width:300px; margin:0 auto 20px; line-height:1.8; color:#94a3b8;">
+            <li>Close all tabs and reopen</li>
+            <li>Clear Safari website data</li>
+            <li>Disable Private Browsing</li>
+          </ul>
+          <p style="font-size:11px; color:#64748b; word-break:break-all;">${err.message || err}</p>
+          <button onclick="location.reload()" style="margin-top:20px; padding:12px 24px; background:#4ade80; color:#000; border:none; border-radius:12px; font-weight:700; font-size:16px;">Retry</button>
+        </div>
+      `;
+    }
   }
-  window.navigate('dashboard');
 });
