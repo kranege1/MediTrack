@@ -30,7 +30,8 @@ window.state = {
   historyView: 'list',
   analyticsRange: 7,
   showAddPlanPanel: false,
-  useLiveSearch: localStorage.getItem('use_live_search') === 'true'
+  useLiveSearch: localStorage.getItem('use_live_search') === 'true',
+  showMagicImport: false
 };
 const state = window.state;
 
@@ -165,7 +166,11 @@ const i18n = {
     searchGoogle: 'Search on Google',
     aiAccuracyWarning: '\u26A0\uFE0F AI data can be hallucinated or outdated. Always verify before visiting!',
     liveSearchLabel: 'Enable Live AI Web Search',
-    liveSearchSub: 'Requires grok-4.20-reasoning or grok-2. Provides 100% current data.'
+    liveSearchSub: 'Requires grok-4.20-reasoning or grok-2. Provides 100% current data.',
+    magicImportBtn: 'Magic Import',
+    magicImportPlaceholder: 'Paste Google results here...',
+    magicImportInfo: 'AI will extract name, address and phone.',
+    importing: 'Importing...'
   },
   de: {
     dataExports:'Daten & Export', home:'Start', meds:'Medikamente', logAction:'Einnahme', plans:'Pl\u00E4ne',
@@ -294,7 +299,11 @@ const i18n = {
     searchGoogle: 'Auf Google suchen',
     aiAccuracyWarning: '\u26A0\uFE0F KI-Daten k\u00F6nnen erfunden oder veraltet sein. Bitte vor dem Besuch immer pr\u00FCfen!',
     liveSearchLabel: 'Live KI-Websuche aktivieren',
-    liveSearchSub: 'Erfordert grok-4.20-reasoning oder grok-2. Sorgt f\u00FCr 100% aktuelle Daten.'
+    liveSearchSub: 'Erfordert grok-4.20-reasoning oder grok-2. Sorgt f\u00FCr 100% aktuelle Daten.',
+    magicImportBtn: 'Magic Import',
+    magicImportPlaceholder: 'Google-Ergebnisse hier einf\u00FCgen...',
+    magicImportInfo: 'KI extrahiert Name, Adresse und Telefon.',
+    importing: 'Importiere...'
   }
 };
 const LOCAL_DRUG_KB = {
@@ -407,7 +416,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.67.0</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.68.0</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -913,9 +922,10 @@ function renderPlans() {
       ` : `
         <!-- Appointment Fields -->
         <div class="form-group">
-          <label>${t('doctorName')}</label>
+          <label>${t('apptDoctor')}</label>
           <div style="display:flex; gap:8px;">
-            <input type="text" id="appt-doctor" placeholder="${state.lang==='de'?'Name (optional bei Fachrichtung)':'Name (optional with specialty)'}" style="flex:1;">
+            <input type="text" id="appt-doctor" placeholder="${t('doctorPlaceholder')}" style="flex:1;">
+            <button type="button" class="btn btn-secondary" style="width:auto; padding:0 12px; font-size:16px; border-color:var(--accent-color); color:var(--accent-color);" onclick="state.showMagicImport=true; render()" title="${t('magicImportBtn')}">\u2728</button>
             <button type="button" class="btn btn-secondary" style="width:auto; padding:0 12px;" onclick="window.searchDoctorAi()" title="${t('doctorSearch')}">\uD83D\uDD0D AI</button>
           </div>
           <div id="doctor-ai-results" style="display:none; margin-top:8px; padding:12px; background:rgba(0,0,0,0.2); border-radius:10px;"></div>
@@ -998,6 +1008,17 @@ function _renderSharedPlanFields() {
       <label>${t('anchorDate')}</label>
       <input type="date" id="plan-start-date" value="${new Date().toISOString().split('T')[0]}" onchange="window._syncPlanAnchors(this.value)">
     </div>
+    ${state.showMagicImport ? `
+      <div class="panel" style="margin-bottom:20px; border-color:var(--accent-color); background:rgba(99,102,241,0.05); position:relative;">
+        <button onclick="state.showMagicImport=false; render()" style="position:absolute; right:8px; top:8px; background:none; border:none; color:#f87171; cursor:pointer; font-size:16px;">\u00D7</button>
+        <div class="text-h2" style="color:var(--accent-color);">\u2728 ${t('magicImportBtn')}</div>
+        <div style="font-size:10px; opacity:0.7; margin-bottom:10px;">${t('magicImportInfo')}</div>
+        <textarea id="magic-import-text" placeholder="${t('magicImportPlaceholder')}" style="width:100%; height:80px; font-size:12px; margin-bottom:10px; background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; padding:8px;"></textarea>
+        <div id="magic-status"></div>
+        <button class="btn" onclick="window._runMagicImportAI()" style="background:var(--accent-color); color:#000; border:none;">\u2728 ${t('magicImportBtn')}</button>
+      </div>
+    ` : ''}
+    <div id="navigation-content"></div>
     <div id="plan-weekday-row" style="display:none;">
       <div class="form-group">
         <label>${t('startWeekday')}</label>
@@ -1201,7 +1222,7 @@ function renderSettings() {
           ${t('forceUpdateBtn')}
         </button>
         <p style="font-size:10px; opacity:0.5; margin-top:8px;">
-          Current: 4.67.0 \u2022 Use if UI seems outdated.
+          Current: 4.68.0 \u2022 Use if UI seems outdated.
         </p>
       </div>
     </div>
@@ -1842,6 +1863,59 @@ window.searchDoctorAi = async () => {
         </div>
       </div>
     `;
+  }
+};
+
+window._runMagicImportAI = async () => {
+  const text = document.getElementById('magic-import-text').value;
+  const statusEl = document.getElementById('magic-status');
+  if (!text.trim()) return;
+  if (!state.grokKey) return alert(t('missingKeyError'));
+
+  statusEl.innerHTML = `<div style="font-size:11px; color:var(--accent-color); margin-bottom:8px;">${t('importing')}</div>`;
+  
+  try {
+    const prompt = `You are a data extraction assistant. Extract professional details from the following raw text:
+    "${text}"
+    
+    RESPONSE FORMAT (JSON only):
+    {
+      "name": "Full name with Dr. title",
+      "address": "Full address",
+      "phone": "Phone number",
+      "specialty": "Medical specialty"
+    }
+    
+    If any field is missing, use null. Return ONLY the JSON object.`;
+
+    const res = await fetch(GROK_BASE_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${state.grokKey}` },
+      body: JSON.stringify({
+        model: state.grokModel,
+        messages: [{ role: "user", content: prompt }],
+        response_format: { type: "json_object" },
+        temperature: 0
+      })
+    });
+    
+    const d = await res.json();
+    const result = JSON.parse(d.choices[0].message.content);
+    
+    document.getElementById('appt-doctor').value = result.name || "";
+    document.getElementById('appt-location').value = result.address || "";
+    if (result.phone) {
+        // Find existing phone input or just add to address
+        document.getElementById('appt-location').value += ` (Tel: ${result.phone})`;
+    }
+    if (result.specialty) {
+        // Handle specialty if needed
+    }
+    
+    state.showMagicImport = false;
+    render();
+  } catch(e) {
+    statusEl.innerHTML = `<div style="color:#f87171; font-size:10px; margin-bottom:8px;">Error: ${e.message}</div>`;
   }
 };
 
