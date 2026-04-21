@@ -407,7 +407,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.65.0</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.66.0</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -1201,7 +1201,7 @@ function renderSettings() {
           ${t('forceUpdateBtn')}
         </button>
         <p style="font-size:10px; opacity:0.5; margin-top:8px;">
-          Current: 4.65.0 \u2022 Use if UI seems outdated.
+          Current: 4.66.0 \u2022 Use if UI seems outdated.
         </p>
       </div>
     </div>
@@ -1728,19 +1728,22 @@ window.searchDoctorAi = async () => {
     1. NEVER invent data. If you know a Dr. with the matching surname exists but don't know the first name, return "Dr. [Surname]".
     2. If you find NO matches for the name, you MUST return other available "${specialty || 'medical professionals'}" in "${region}".
     3. RADIUS: Search within ~15km if no exact city match.
-    4. RESPONSE FORMAT: JSON {"doctors": [{"name": "...", "specialty": "...", "address": "...", "phone": "..."}]}.
-    5. Language: ${state.lang === 'de' ? 'German' : 'English'}.`;
+    4. RESPONSE FORMAT: Return ONLY a valid JSON object: {"doctors": [{"name": "...", "specialty": "...", "address": "...", "phone": "..."}]}.
+    5. NO CONVERSATION: Return only the JSON object, nothing else.
+    6. Language: ${state.lang === 'de' ? 'German' : 'English'}.`;
 
     const body = {
       model: state.grokModel,
       messages: [{ role: "user", content: prompt }],
-      response_format: { type: "json_object" },
       temperature: 0.1
     };
 
-    // ENABLE LIVE WEB SEARCH TOOL IF TOGGLED
+    // ENABLE LIVE WEB SEARCH TOOL
     if (state.useLiveSearch) {
       body.tools = [{ type: "web_search" }];
+      // NO response_format when tools are enabled (prevents conflict)
+    } else {
+      body.response_format = { type: "json_object" };
     }
 
     const res = await fetch(GROK_BASE_URL, {
@@ -1749,8 +1752,22 @@ window.searchDoctorAi = async () => {
       body: JSON.stringify(body)
     });
     
+    if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.error ? errData.error.message : `API Error ${res.status}`);
+    }
+
     const d = await res.json();
-    const result = JSON.parse(d.choices[0].message.content);
+    let content = d.choices[0].message.content;
+    
+    // Fallback parser: Extract JSON if model included text
+    if (content.includes('```json')) {
+      content = content.split('```json')[1].split('```')[0].trim();
+    } else if (content.includes('{')) {
+      content = content.substring(content.indexOf('{'), content.lastIndexOf('}') + 1);
+    }
+
+    const result = JSON.parse(content);
     const results = result.doctors || [];
 
     if (results.length === 0) {
