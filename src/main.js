@@ -31,9 +31,10 @@ window.state = {
   analyticsRange: 7,
   showAddPlanPanel: false,
   useLiveSearch: localStorage.getItem('use_live_search') === 'true',
-  showMagicImport: false
+  showMagicImport: false,
+  historyMedFilters: []
 };
-const APP_VERSION = '4.77.0';
+const APP_VERSION = '4.78.0';
 const state = window.state;
 
 const GROK_BASE_URL = "https://api.x.ai/v1/chat/completions";
@@ -1139,7 +1140,16 @@ function renderLog() {
 }
 
 function renderHistory() {
+  const medFiltersHtml = state.medications.map(m => {
+    const active = state.historyMedFilters.includes(m.id);
+    return `<div onclick="window._toggleHistoryFilter('${m.id}')" style="flex-shrink:0; padding:6px 12px; border-radius:30px; font-size:12px; font-weight:700; cursor:pointer; background:${active?'var(--accent-color)':'rgba(255,255,255,0.05)'}; color:${active?'#000':'#94a3b8'}; border:1px solid ${active?'var(--accent-color)':'rgba(255,255,255,0.1)'}; transition:all 0.2s;">${m.name}</div>`;
+  }).join('');
+
   return `
+    <div style="display:flex; gap:8px; overflow-x:auto; padding:8px 0; margin-bottom:12px; scrollbar-width:none; -ms-overflow-style:none;">
+      <div onclick="window._clearHistoryFilters()" style="flex-shrink:0; padding:6px 12px; border-radius:30px; font-size:12px; font-weight:700; cursor:pointer; background:${state.historyMedFilters.length===0?'rgba(255,255,255,0.2)':'rgba(255,255,255,0.05)'}; color:#fff; border:1px solid rgba(255,255,255,0.1);">${t('allMeds') || 'Alle'}</div>
+      ${medFiltersHtml}
+    </div>
     <div style="padding: 16px 0; display: flex; gap: 8px; margin-bottom: 8px;">
       <button class="btn" style="flex:1; font-weight:700; height:44px; border-radius:12px; background:${state.historyView==='list'?'var(--accent-color)':'rgba(0,0,0,0.2)'}; color:${state.historyView==='list'?'#000':'#94a3b8'}; border:none;" onclick="window._setHistoryView('list')">${t('list')}</button>
       <button class="btn" style="flex:1; font-weight:700; height:44px; border-radius:12px; background:${state.historyView==='charts'?'var(--accent-color)':'rgba(0,0,0,0.2)'}; color:${state.historyView==='charts'?'#000':'#94a3b8'}; border:none;" onclick="window._setHistoryView('charts')">${t('charts')}</button>
@@ -1148,38 +1158,83 @@ function renderHistory() {
   `;
 }
 
-function _renderLogList() {
-  const allLogs = [...state.logs].sort((a,b) => b.timestamp - a.timestamp);
-  const logCards = allLogs.map(l => {
-    const med = state.medications.find(m => m.id === l.medicationId) || {name: t('unknown')};
-    const time = new Date(l.timestamp).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' });
-    
-    let metricsHtml = '';
-    if (l.linkedMetricIds && l.linkedMetricIds.length > 0) {
-      const linkedMetrics = l.linkedMetricIds.map(id => state.metrics.find(m => m.id === id)).filter(Boolean);
-      if (linkedMetrics.length > 0) {
-        metricsHtml = `
-          <div style="margin-top:10px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.05); display:flex; flex-wrap:wrap; gap:12px;">
-            ${linkedMetrics.map(m => `
-              <div style="font-size:12px; color:var(--accent-color);">
-                <span style="opacity:0.6;">${t(m.type === 'weight' ? 'weight' : (m.type === 'bp' ? 'bloodPressure' : m.type))}:</span> ${m.value}
-              </div>
-            `).join('')}
-          </div>
-        `;
-      }
-    }
+window._toggleHistoryFilter = (id) => {
+  const idx = state.historyMedFilters.indexOf(id);
+  if (idx > -1) state.historyMedFilters.splice(idx, 1);
+  else state.historyMedFilters.push(id);
+  render();
+};
 
+window._clearHistoryFilters = () => {
+  state.historyMedFilters = [];
+  render();
+};
+
+function _generateFullHistoryStream() {
+  const daysLimit = 14;
+  const stream = [];
+  const now = new Date();
+  
+  // 1. Add actual logs
+  state.logs.forEach(l => {
+    stream.push({ ...l, date: new Date(l.timestamp), type: 'log', status: l.amount_taken > 0 ? 'taken' : 'skipped' });
+  });
+  
+  // 2. Generate missed events from plans
+  for (let i = 0; i < daysLimit; i++) {
+    const d = new Date(); d.setDate(d.getDate() - i); d.setHours(0,0,0,0);
+    const dateStr = d.toDateString();
+    
+    state.plans.forEach(p => {
+      if (p.type !== 'medication') return;
+      if (!window._isPlanDueOnDate(p, d)) return;
+      
+      // Check if we have a log for this med on this day
+      const hasLog = state.logs.some(l => 
+        l.medicationId === p.medicationId && 
+        new Date(l.timestamp).toDateString() === dateStr
+      );
+      
+      if (!hasLog && d < now) {
+        stream.push({
+          medicationId: p.medicationId,
+          timestamp: d.getTime(),
+          date: d,
+          type: 'missed',
+          amount_taken: 0,
+          status: 'missed'
+        });
+      }
+    });
+  }
+  
+  return stream.sort((a,b) => b.timestamp - a.timestamp);
+}
+
+function _renderLogList() {
+  let stream = _generateFullHistoryStream();
+  
+  // Apply Filter
+  if (state.historyMedFilters.length > 0) {
+    stream = stream.filter(s => state.historyMedFilters.includes(s.medicationId));
+  }
+
+  const logCards = stream.map(l => {
+    const med = state.medications.find(m => m.id === l.medicationId) || {name: t('unknown')};
+    const time = new Date(l.timestamp).toLocaleString([], { dateStyle: 'short', timeStyle: l.type === 'log' ? 'short' : undefined });
+    const isRed = l.status === 'skipped' || l.status === 'missed';
+    
     return `
-      <div class="card" style="display:block; padding: 16px;">
+      <div class="card" style="display:block; padding: 16px; border-left: 3px solid ${isRed ? '#ef4444' : 'transparent'}; background: ${isRed ? 'rgba(239, 68, 68, 0.05)' : 'rgba(255,255,255,0.03)'}">
         <div style="display:flex; justify-content:space-between; align-items:flex-start;">
           <div>
-            <div class="card-title">${med.name}</div>
-            <div class="card-subtitle">${l.amount_taken} ${med.unit || t('units')} ${t('taken')}</div>
+            <div class="card-title" style="color: ${isRed ? '#f87171' : 'inherit'}">${med.name}</div>
+            <div class="card-subtitle" style="color: ${isRed ? '#f87171' : 'inherit'}">
+               ${l.status === 'missed' ? (t('missed') || 'Nicht eingenommen') : (l.amount_taken + ' ' + (med.unit || t('units')) + ' ' + t('taken'))}
+            </div>
           </div>
           <div style="font-size:12px; color:#94a3b8; text-align:right;">${time}</div>
         </div>
-        ${metricsHtml}
       </div>
     `;
   }).join('');
@@ -2232,10 +2287,20 @@ async function _initCharts() {
         const d = new Date(); d.setDate(d.getDate() - i); d.setHours(0,0,0,0);
         dates.push(d);
     }
+    
     const adherenceData = dates.map(date => {
-        const due = state.plans.filter(p => window._isPlanDueOnDate(p, date)).length;
+        let plans = state.plans.filter(p => window._isPlanDueOnDate(p, date));
+        let logs = state.logs.filter(l => new Date(l.timestamp).toDateString() === date.toDateString());
+        
+        // Filter by history selection if in history view
+        if (state.currentView === 'history' && state.historyMedFilters.length > 0) {
+          plans = plans.filter(p => state.historyMedFilters.includes(p.medicationId));
+          logs = logs.filter(l => state.historyMedFilters.includes(l.medicationId));
+        }
+        
+        const due = plans.length;
         if (due === 0) return 0;
-        const taken = state.logs.filter(l => new Date(l.timestamp).toDateString() === date.toDateString()).length;
+        const taken = logs.filter(l => l.amount_taken > 0).length;
         return Math.min(100, Math.round((taken / due) * 100));
     });
     new ApexCharts(document.querySelector("#chart-adherence"), {
