@@ -357,7 +357,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.57.2</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.57.3</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -1698,7 +1698,7 @@ window.searchDoctorAi = async () => {
        - "name": Use 'Title Firstname Lastname' (e.g., "Dr. John Doe"). Do NOT mix names.
        - "address": Full physical address including street, ZIP, and city.
        - "phone": Contact number. (CRITICAL: Do NOT use placeholder numbers like "12345" or "555-5555". If no real number is found, return empty string).
-    3. ABSOLUTE ACCURACY: Ensure the address matches the doctor's real office.
+    3. ABSOLUTE ACCURACY: Ensure the address matches the doctor's real office. Verify the EXACT First Name. Do NOT guess or hallucinate common first names. If uncertain, return only 'Dr. [Lastname]' or the clinic name.
     4. LANGUAGE: Respond with names and addresses as they appear in the local region.
     5. NO CONVERSATION: Return ONLY valid JSON.
 
