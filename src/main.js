@@ -402,7 +402,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.63.0</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.64.0</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -1187,7 +1187,7 @@ function renderSettings() {
           ${t('forceUpdateBtn')}
         </button>
         <p style="font-size:10px; opacity:0.5; margin-top:8px;">
-          Current: 4.63.0 \u2022 Use if UI seems outdated.
+          Current: 4.64.0 \u2022 Use if UI seems outdated.
         </p>
       </div>
     </div>
@@ -1704,17 +1704,18 @@ window.searchDoctorAi = async () => {
     const regionText = region ? ` in "${region}"` : '';
     const nameText = name ? (specialty ? `named "${name}" specializing in "${specialty}"` : `named "${name}"`) : `specializing in "${specialty}"`;
     
-    // STRICT ANTI-HALLUCINATION PROMPT
-    const prompt = `You are a medical directory assistant. Find ALL REAL medical professionals matching: ${nameText}${regionText}.
+    // HELPFUL BUT CAUTIOUS PROMPT
+    const prompt = `You are a medical directory assistant. Find medical professionals matching: ${nameText}${regionText}.
     
-    CRITICAL RULES:
-    1. NEVER invent first names, surnames, or phone numbers. If not absolutely sure, leave them empty or use only the provided surname.
-    2. NEVER invent addresses. Use only REAL, verifiable locations.
-    3. SEARCH RADIUS: If no exact city match exists, you MUST check nearby towns (~15km).
-    4. GERMAN NAMES: Check both "${name}" and alternative spellings (e.g. ae for \u00E4).
-    5. RESPONSE FORMAT: Return valid JSON {"doctors": [{"name": "...", "specialty": "...", "address": "...", "phone": "..."}]}.
-    6. IF IN DOUBT: If you cannot find a verified REAL doctor matching the criteria, return {"doctors": []}. Better no result than a fake one.
-    7. Language: ${state.lang === 'de' ? 'German' : 'English'}.`;
+    PRIMARY GOAL: Find the specific person requested.
+    FALLBACK GOAL: If you cannot find the specific person, find OTHER REAL medical professionals of the same specialty in that region.
+    
+    ACCURACY RULES:
+    1. NEVER invent data. If you know a Dr. with the matching surname exists but don't know the first name, return "Dr. [Surname]".
+    2. If you find NO matches for the name, you MUST return other available "${specialty || 'medical professionals'}" in "${region}".
+    3. RADIUS: Search within ~15km if no exact city match.
+    4. RESPONSE FORMAT: JSON {"doctors": [{"name": "...", "specialty": "...", "address": "...", "phone": "..."}]}.
+    5. Language: ${state.lang === 'de' ? 'German' : 'English'}.`;
 
     const res = await fetch(GROK_BASE_URL, {
       method: "POST",
@@ -1723,7 +1724,7 @@ window.searchDoctorAi = async () => {
         model: state.grokModel,
         messages: [{ role: "user", content: prompt }],
         response_format: { type: "json_object" },
-        temperature: 0
+        temperature: 0.1 // Slightly higher temperature for better fallback retrieval
       })
     });
     
@@ -1732,7 +1733,13 @@ window.searchDoctorAi = async () => {
     const results = result.doctors || [];
 
     if (results.length === 0) {
-      listEl.innerHTML = `<div style="font-size:11px; color:#94a3b8;">${t('doctorNotFoundAi')}</div>`;
+      const googleQuery = encodeURIComponent(`${name} ${specialty || ''} ${region}`);
+      listEl.innerHTML = `
+        <div style="font-size:11px; color:#94a3b8; margin-bottom:12px;">${t('doctorNotFoundAi')}</div>
+        <a href="https://www.google.com/search?q=${googleQuery}" target="_blank" class="btn btn-secondary" style="display:flex; align-items:center; justify-content:center; gap:8px; font-size:12px; border-color:var(--accent-color); color:var(--accent-color);">
+          \uD83D\uDD0D ${t('searchGoogle')}
+        </a>
+      `;
       return;
     }
 
