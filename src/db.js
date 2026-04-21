@@ -83,6 +83,10 @@ export const API = {
     await db.put('logs', log);
     return log;
   },
+  async deleteLog(id) {
+    const db = await initDB();
+    await db.delete('logs', id);
+  },
 
   // --- Metrics ---
   async getMetrics(type) {

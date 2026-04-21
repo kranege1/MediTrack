@@ -276,6 +276,37 @@ input:focus, select:focus {
   color: var(--text-secondary);
 }
 
+/* Swipe-to-Delete */
+.swipe-item {
+  position: relative;
+  overflow: hidden;
+  border-radius: 14px;
+  margin-bottom: 8px;
+  background: #ef4444; /* Reveal red behind */
+  touch-action: pan-y;
+}
+
+.swipe-action {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 80px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  z-index: 1;
+}
+
+.swipe-content {
+  position: relative;
+  z-index: 2;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  background: var(--bg-color); /* Ensure content has bg to hide button */
+  will-change: transform;
+}
+
 /* Scanner */
 #reader {
   width: 100%;

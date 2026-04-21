@@ -34,7 +34,7 @@ window.state = {
   showMagicImport: false,
   historyMedFilters: []
 };
-const APP_VERSION = '4.79.2';
+const APP_VERSION = '4.80.0';
 const state = window.state;
 
 const GROK_BASE_URL = "https://api.x.ai/v1/chat/completions";
@@ -426,7 +426,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.79.2</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.80.0</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -1219,21 +1219,26 @@ function _renderLogList() {
     stream = stream.filter(s => state.historyMedFilters.includes(s.medicationId));
   }
 
-  const logCards = stream.map(l => {
-    const med = state.medications.find(m => m.id === l.medicationId) || {name: t('unknown')};
-    const time = new Date(l.timestamp).toLocaleString([], { dateStyle: 'short', timeStyle: l.type === 'log' ? 'short' : undefined });
-    const isRed = l.status === 'skipped' || l.status === 'missed';
-    
     return `
-      <div class="card" style="display:block; padding: 16px; border-left: 3px solid ${isRed ? '#ef4444' : 'transparent'}; background: ${isRed ? 'rgba(239, 68, 68, 0.05)' : 'rgba(255,255,255,0.03)'}">
-        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-          <div>
-            <div class="card-title" style="color: ${isRed ? '#f87171' : 'inherit'}">${med.name}</div>
-            <div class="card-subtitle" style="color: ${isRed ? '#f87171' : 'inherit'}">
-               ${l.status === 'missed' ? (t('missed') || 'Nicht eingenommen') : (l.amount_taken + ' ' + (med.unit || t('units')) + ' ' + t('taken'))}
+      <div class="swipe-item" id="swipe-${l.id}">
+        <div class="swipe-action" onclick="window._deleteHistoryLog('${l.id}')">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            <line x1="10" y1="11" x2="10" y2="17"></line>
+            <line x1="14" y1="11" x2="14" y2="17"></line>
+          </svg>
+        </div>
+        <div class="swipe-content card" style="display:block; padding: 16px; border-left: 3px solid ${isRed ? '#ef4444' : 'transparent'}; background: ${isRed ? 'rgba(239, 68, 68, 0.05)' : 'var(--bg-color)'}">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <div>
+              <div class="card-title" style="color: ${isRed ? '#f87171' : 'inherit'}">${med.name}</div>
+              <div class="card-subtitle" style="color: ${isRed ? '#f87171' : 'inherit'}">
+                 ${l.status === 'missed' ? (t('missed') || 'Nicht eingenommen') : (l.amount_taken + ' ' + (med.unit || t('units')) + ' ' + t('taken'))}
+              </div>
             </div>
+            <div style="font-size:12px; color:#94a3b8; text-align:right;">${time}</div>
           </div>
-          <div style="font-size:12px; color:#94a3b8; text-align:right;">${time}</div>
         </div>
       </div>
     `;
@@ -1328,7 +1333,7 @@ function renderSettings() {
           ${t('forceUpdateBtn')}
         </button>
         <p style="font-size:10px; opacity:0.5; margin-top:8px;">
-          Current: 4.79.2 \u2022 Use if UI seems outdated.
+          Current: 4.80.0 \u2022 Use if UI seems outdated.
         </p>
       </div>
     </div>
@@ -2385,3 +2390,60 @@ window._forceReload = async () => {
   }
   window.location.reload(true);
 };
+
+window._deleteHistoryLog = async (id) => {
+  if (confirm(t('confirmDeleteLogs'))) {
+    await API.deleteLog(id);
+    await loadData();
+    render();
+  }
+};
+
+// Global Swipe Handler
+let touchStartX = 0;
+let touchCurrentX = 0;
+let activeSwipeItem = null;
+
+document.addEventListener('touchstart', (e) => {
+  const content = e.target.closest('.swipe-content');
+  if (!content) {
+    if (activeSwipeItem) {
+       activeSwipeItem.style.transform = 'translateX(0)';
+       activeSwipeItem = null;
+    }
+    return;
+  }
+  
+  if (activeSwipeItem && activeSwipeItem !== content) {
+    activeSwipeItem.style.transform = 'translateX(0)';
+  }
+  
+  touchStartX = e.touches[0].clientX;
+  activeSwipeItem = content;
+  content.style.transition = 'none';
+}, { passive: true });
+
+document.addEventListener('touchmove', (e) => {
+  if (!activeSwipeItem) return;
+  touchCurrentX = e.touches[0].clientX;
+  const diff = touchCurrentX - touchStartX;
+  
+  if (diff < 0 && diff > -100) {
+    activeSwipeItem.style.transform = `translateX(${diff}px)`;
+  }
+}, { passive: true });
+
+document.addEventListener('touchend', (e) => {
+  if (!activeSwipeItem) return;
+  activeSwipeItem.style.transition = 'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)';
+  const diff = touchCurrentX - touchStartX;
+  
+  if (diff < -50) {
+    activeSwipeItem.style.transform = 'translateX(-80px)';
+  } else {
+    activeSwipeItem.style.transform = 'translateX(0)';
+    activeSwipeItem = null;
+  }
+  touchStartX = 0;
+  touchCurrentX = 0;
+});
