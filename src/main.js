@@ -160,7 +160,9 @@ const i18n = {
       'General Practitioner', 'Internist', 'Cardiologist', 'Dentist', 'Urologist', 
       'Gynecologist', 'Orthopedist', 'Dermatologist', 'Ophthalmologist', 'ENT', 
       'Pediatrician', 'Neurologist', 'Psychiatrist'
-    ]
+    ],
+    searchGoogle: 'Search on Google',
+    aiAccuracyWarning: '\u26A0\uFE0F AI data can be hallucinated or outdated. Always verify before visiting!'
   },
   de: {
     dataExports:'Daten & Export', home:'Start', meds:'Medikamente', logAction:'Einnahme', plans:'Pl\u00E4ne',
@@ -285,7 +287,9 @@ const i18n = {
       'Allgemeinmediziner', 'Internist', 'Kardiologe', 'Zahnarzt', 'Urologe', 
       'Gyn\u00E4kologe', 'Orthop\u00E4de', 'Hautarzt', 'Augenarzt', 'HNO-Arzt', 
       'Kinderarzt', 'Neurologe', 'Psychiater'
-    ]
+    ],
+    searchGoogle: 'Auf Google suchen',
+    aiAccuracyWarning: '\u26A0\uFE0F KI-Daten k\u00F6nnen erfunden oder veraltet sein. Bitte vor dem Besuch immer pr\u00FCfen!'
   }
 };
 const LOCAL_DRUG_KB = {
@@ -398,7 +402,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.62.0</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.63.0</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -1183,7 +1187,7 @@ function renderSettings() {
           ${t('forceUpdateBtn')}
         </button>
         <p style="font-size:10px; opacity:0.5; margin-top:8px;">
-          Current: 4.62.0 \u2022 Use if UI seems outdated.
+          Current: 4.63.0 \u2022 Use if UI seems outdated.
         </p>
       </div>
     </div>
@@ -1699,7 +1703,18 @@ window.searchDoctorAi = async () => {
   try {
     const regionText = region ? ` in "${region}"` : '';
     const nameText = name ? (specialty ? `named "${name}" specializing in "${specialty}"` : `named "${name}"`) : `specializing in "${specialty}"`;
-    const prompt = `Find ALL REAL medical professionals matching: ${nameText}${regionText}. Radius search within 15km if no exact city match. Return JSON {"doctors": [...]}. Language: ${state.lang === 'de' ? 'German' : 'English'}.`;
+    
+    // STRICT ANTI-HALLUCINATION PROMPT
+    const prompt = `You are a medical directory assistant. Find ALL REAL medical professionals matching: ${nameText}${regionText}.
+    
+    CRITICAL RULES:
+    1. NEVER invent first names, surnames, or phone numbers. If not absolutely sure, leave them empty or use only the provided surname.
+    2. NEVER invent addresses. Use only REAL, verifiable locations.
+    3. SEARCH RADIUS: If no exact city match exists, you MUST check nearby towns (~15km).
+    4. GERMAN NAMES: Check both "${name}" and alternative spellings (e.g. ae for \u00E4).
+    5. RESPONSE FORMAT: Return valid JSON {"doctors": [{"name": "...", "specialty": "...", "address": "...", "phone": "..."}]}.
+    6. IF IN DOUBT: If you cannot find a verified REAL doctor matching the criteria, return {"doctors": []}. Better no result than a fake one.
+    7. Language: ${state.lang === 'de' ? 'German' : 'English'}.`;
 
     const res = await fetch(GROK_BASE_URL, {
       method: "POST",
@@ -1722,11 +1737,18 @@ window.searchDoctorAi = async () => {
     }
 
     listEl.innerHTML = `
+      <div style="font-size:10px; font-weight:700; margin-bottom:12px; opacity:0.6; display:flex; align-items:center; gap:6px; color:#fde047;">
+        \u26A0\uFE0F ${t('aiAccuracyWarning')}
+      </div>
       <div style="font-size:10px; font-weight:700; margin-bottom:4px; opacity:0.6;">${t('doctorSelect')}:</div>
       <div style="display:flex; flex-direction:column; gap:8px;">
         ${results.map((doc, i) => {
-          const mapUrl = `https://www.google.com/maps/search/${encodeURIComponent(doc.name + ' ' + (doc.address || ""))}`;
-          const isNearby = doc.address && !doc.address.toLowerCase().includes(region.split(',')[0].trim().toLowerCase());
+          const cleanName = doc.name.replace(/ Dr\. med\./i, '').replace(/Dr\. /i, '');
+          const googleQuery = encodeURIComponent(`${doc.name} ${doc.specialty || ''} ${doc.address || ''}`);
+          const googleUrl = `https://www.google.com/search?q=${googleQuery}`;
+          const mapUrl = `https://www.google.com/maps/search/${googleQuery}`;
+          const isNearby = doc.address && region && !doc.address.toLowerCase().includes(region.split(',')[0].trim().toLowerCase());
+          
           return `
             <div style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:8px;">
               <div style="display:flex; flex-direction:column; gap:2px;">
@@ -1748,6 +1770,9 @@ window.searchDoctorAi = async () => {
                 <button type="button" class="btn btn-secondary" style="flex:2; height:34px; padding:0; font-size:11px; background:var(--accent-color); color:#111; border:none;" onclick="window._applyDoctorMatch(${i}, ${JSON.stringify(results).replace(/"/g, '&quot;')})">
                   ${t('chooseOption')}
                 </button>
+                <a href="${googleUrl}" target="_blank" class="btn btn-secondary" style="flex:1; height:34px; padding:0; display:flex; align-items:center; justify-content:center; border-color:rgba(255,255,255,0.1); font-size:10px; gap:4px;" title="${t('searchGoogle')}">
+                  \uD83D\uDD0D Check
+                </a>
                 <a href="${mapUrl}" target="_blank" class="btn btn-secondary" style="width:34px; height:34px; padding:0; display:flex; align-items:center; justify-content:center; border-color:rgba(255,255,255,0.1);" title="Maps">\uD83D\uDDFA\uFE0F</a>
               </div>
             </div>
