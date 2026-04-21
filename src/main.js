@@ -168,9 +168,9 @@ const i18n = {
     liveSearchLabel: 'Enable Live AI Web Search',
     liveSearchSub: 'Requires grok-4.20-reasoning or grok-2. Provides 100% current data.',
     magicImportBtn: 'Magic Import',
-    magicImportPlaceholder: 'Paste Google results here...',
-    magicImportInfo: 'AI will extract name, address and phone.',
-    importing: 'Importing...'
+    magicImportPlaceholder: 'Paste Google results or Link here...',
+    magicImportInfo: 'AI will extract name, address and phone from text or URLs.',
+    importing: 'Magic Importing...'
   },
   de: {
     dataExports:'Daten & Export', home:'Start', meds:'Medikamente', logAction:'Einnahme', plans:'Pl\u00E4ne',
@@ -301,9 +301,9 @@ const i18n = {
     liveSearchLabel: 'Live KI-Websuche aktivieren',
     liveSearchSub: 'Erfordert grok-4.20-reasoning oder grok-2. Sorgt f\u00FCr 100% aktuelle Daten.',
     magicImportBtn: 'Magic Import',
-    magicImportPlaceholder: 'Google-Ergebnisse hier einf\u00FCgen...',
-    magicImportInfo: 'KI extrahiert Name, Adresse und Telefon.',
-    importing: 'Importiere...'
+    magicImportPlaceholder: 'Google-Ergebnis oder Link hier einf\u00FCgen...',
+    magicImportInfo: 'KI extrahiert Name, Adresse und Telefon aus Text oder Links.',
+    importing: 'Magic Import läuft...'
   }
 };
 const LOCAL_DRUG_KB = {
@@ -416,7 +416,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.68.0</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.69.0</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -1222,7 +1222,7 @@ function renderSettings() {
           ${t('forceUpdateBtn')}
         </button>
         <p style="font-size:10px; opacity:0.5; margin-top:8px;">
-          Current: 4.68.0 \u2022 Use if UI seems outdated.
+          Current: 4.69.0 \u2022 Use if UI seems outdated.
         </p>
       </div>
     </div>
@@ -1875,10 +1875,12 @@ window._runMagicImportAI = async () => {
   statusEl.innerHTML = `<div style="font-size:11px; color:var(--accent-color); margin-bottom:8px;">${t('importing')}</div>`;
   
   try {
-    const prompt = `You are a data extraction assistant. Extract professional details from the following raw text:
+    const prompt = `You are a data extraction assistant. Extract professional details from the following raw text OR URL:
     "${text}"
     
-    RESPONSE FORMAT (JSON only):
+    CRITICAL INSTRUCTIONS:
+    1. If the input is a URL, you MUST browse the website or search for it to find the practitioner's Name, Address, and Phone.
+    2. RESPONSE FORMAT (JSON only):
     {
       "name": "Full name with Dr. title",
       "address": "Full address",
@@ -1888,19 +1890,41 @@ window._runMagicImportAI = async () => {
     
     If any field is missing, use null. Return ONLY the JSON object.`;
 
+    const body = {
+        model: state.grokModel,
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0
+    };
+
+    // ENABLE WEB SEARCH FOR URL BROWSING
+    body.tools = [{ type: "web_search" }];
+
     const res = await fetch(GROK_BASE_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json", "Authorization": `Bearer ${state.grokKey}` },
-      body: JSON.stringify({
-        model: state.grokModel,
-        messages: [{ role: "user", content: prompt }],
-        response_format: { type: "json_object" },
-        temperature: 0
-      })
+      body: JSON.stringify(body)
     });
     
+    if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error?.message || `API Error ${res.status}`);
+    }
+
     const d = await res.json();
-    const result = JSON.parse(d.choices[0].message.content);
+    let content = d.choices[0].message.content || "";
+    
+    if (!content && d.choices[0].message.tool_calls) {
+        throw new Error("Web search tool was used but no final answer was returned. Ensure you are using a reasoning model.");
+    }
+
+    // Fallback parser: Extract JSON if model included text
+    if (content.includes('```json')) {
+      content = content.split('```json')[1].split('```')[0].trim();
+    } else if (content.includes('{')) {
+      content = content.substring(content.indexOf('{'), content.lastIndexOf('}') + 1);
+    }
+    
+    const result = JSON.parse(content);
     
     document.getElementById('appt-doctor').value = result.name || "";
     document.getElementById('appt-location').value = result.address || "";
