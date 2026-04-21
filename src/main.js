@@ -34,7 +34,6 @@ window.state = {
   showMagicImport: false
 };
 const state = window.state;
-const appDiv = document.getElementById('app');
 
 const GROK_BASE_URL = "https://api.x.ai/v1/chat/completions";
 
@@ -414,11 +413,12 @@ window._geolocate = (inputId) => {
 };
 
 function render() {
+  const appDiv = document.getElementById('app');
   if (!appDiv) return;
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.71.0</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.72.0</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -1226,7 +1226,7 @@ function renderSettings() {
           ${t('forceUpdateBtn')}
         </button>
         <p style="font-size:10px; opacity:0.5; margin-top:8px;">
-          Current: 4.71.0 \u2022 Use if UI seems outdated.
+          Current: 4.72.0 \u2022 Use if UI seems outdated.
         </p>
       </div>
     </div>
