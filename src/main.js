@@ -423,7 +423,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.74.0</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.75.0</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -1254,7 +1254,7 @@ function renderSettings() {
           ${t('forceUpdateBtn')}
         </button>
         <p style="font-size:10px; opacity:0.5; margin-top:8px;">
-          Current: 4.74.0 \u2022 Use if UI seems outdated.
+          Current: 4.75.0 \u2022 Use if UI seems outdated.
         </p>
       </div>
     </div>
@@ -1784,10 +1784,17 @@ window.searchDoctorSmart = async () => {
         })
       });
 
-      if (!res.ok) throw new Error("API Error");
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error?.message || `API Error ${res.status}`);
+      }
 
       const d = await res.json();
       let content = d.choices[0].message.content || "";
+      
+      if (!content && d.choices[0].message.tool_calls) {
+         throw new Error("Web search tool was triggered but no results were returned. Please try a different model (e.g. grok-2 or reasoning models).");
+      }
       
       // Extract JSON if model included extra text
       if (content.includes('```json')) content = content.split('```json')[1].split('```')[0].trim();
