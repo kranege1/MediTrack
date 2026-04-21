@@ -152,6 +152,8 @@ const i18n = {
     defaultRegionLabel:'Default City / Region for AI Search',
     locating:'Locating...',
     locErr:'Location failed',
+    doctorNotFoundAi: 'No doctor matching your criteria was found.',
+    forceUpdateBtn: '🔄 Force App Update (Clear Cache)',
     specialties: [
       'General Practitioner', 'Internist', 'Cardiologist', 'Dentist', 'Urologist', 
       'Gynecologist', 'Orthopedist', 'Dermatologist', 'Ophthalmologist', 'ENT', 
@@ -253,6 +255,8 @@ const i18n = {
     testDataCount:'Anzahl: {n}',
     testDataNote:'Testdaten sind markiert. Deine persönlichen Einträge bleiben beim Löschen sicher.',
     upcomingEvents:'Anstehende Termine',
+    doctorNotFoundAi: 'Kein Arzt passend zu Ihren Kriterien gefunden.',
+    forceUpdateBtn: '🔄 App-Update erzwingen (Cache leeren)',
     today:'Heute',
     tomorrow:'Morgen',
     noUpcoming:'Keine anstehenden Medikamente.',
@@ -327,6 +331,18 @@ async function loadData() {
   state.plans = await API.getPlans();
 }
 
+window._forceReload = async () => {
+  if (confirm(t('confirmDeleteAll').split(':')[0] + '? (Page will reload)')) {
+    if ('serviceWorker' in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      for (let r of regs) await r.unregister();
+    }
+    const keys = await caches.keys();
+    for (let k of keys) await caches.delete(k);
+    window.location.reload(true);
+  }
+};
+
 window.navigate = async (view) => {
   state.currentView = view;
   await loadData();
@@ -367,7 +383,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.59.1</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.60.0</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -1152,6 +1168,15 @@ function renderSettings() {
       <div class="text-h2">${t('restoreData')}</div>
       <input type="file" id="import-file" accept=".json" style="margin-bottom: 12px;">
       <button class="btn btn-secondary" onclick="window.importData()">${t('importRestore')}</button>
+      
+      <div style="margin-top:32px; padding-top:20px; border-top:1px solid var(--glass-border); text-align:center;">
+        <button class="btn btn-secondary" style="background:rgba(74,222,128,0.1); border-color:var(--accent-color); color:var(--accent-color);" onclick="window._forceReload()">
+          ${t('forceUpdateBtn')}
+        </button>
+        <p style="font-size:10px; opacity:0.5; margin-top:8px;">
+          Current: 4.60.0 • Use if UI seems outdated.
+        </p>
+      </div>
     </div>
     </div>
   `;
@@ -1731,9 +1756,9 @@ window.searchDoctorAi = async () => {
 
     if (results.length === 0) {
       listEl.innerHTML = `
-        <div style="font-size:11px; color:#94a3b8; margin-bottom:8px;">${t('notFoundAiLabel')}</div>
-        <div style="font-size:10px; color:#ef4444; background:rgba(239,68,68,0.1); padding:8px; border-radius:6px; max-height:80px; overflow-y:auto;">
-          <strong>AI Status:</strong> ${txt.substring(0, 300).replace(/</g, "&lt;").replace(/>/g, "&gt;")}
+        <div style="font-size:11px; color:#94a3b8; margin-bottom:8px;">${t('doctorNotFoundAi')}</div>
+        <div style="font-size:10px; color:#94a3b8; background:rgba(255,255,255,0.05); padding:8px; border-radius:6px; max-height:80px; overflow-y:auto;">
+          <strong>Debug:</strong> No results found in the AI response.
         </div>`;
       return;
     }
