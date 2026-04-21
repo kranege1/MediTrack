@@ -29,7 +29,8 @@ window.state = {
   pendingGrokResults: [],
   historyView: 'list',
   analyticsRange: 7,
-  showAddPlanPanel: false
+  showAddPlanPanel: false,
+  useLiveSearch: localStorage.getItem('use_live_search') === 'true'
 };
 const state = window.state;
 
@@ -162,7 +163,9 @@ const i18n = {
       'Pediatrician', 'Neurologist', 'Psychiatrist'
     ],
     searchGoogle: 'Search on Google',
-    aiAccuracyWarning: '\u26A0\uFE0F AI data can be hallucinated or outdated. Always verify before visiting!'
+    aiAccuracyWarning: '\u26A0\uFE0F AI data can be hallucinated or outdated. Always verify before visiting!',
+    liveSearchLabel: 'Enable Live AI Web Search',
+    liveSearchSub: 'Requires grok-4.20-reasoning or grok-2. Provides 100% current data.'
   },
   de: {
     dataExports:'Daten & Export', home:'Start', meds:'Medikamente', logAction:'Einnahme', plans:'Pl\u00E4ne',
@@ -289,7 +292,9 @@ const i18n = {
       'Kinderarzt', 'Neurologe', 'Psychiater'
     ],
     searchGoogle: 'Auf Google suchen',
-    aiAccuracyWarning: '\u26A0\uFE0F KI-Daten k\u00F6nnen erfunden oder veraltet sein. Bitte vor dem Besuch immer pr\u00FCfen!'
+    aiAccuracyWarning: '\u26A0\uFE0F KI-Daten k\u00F6nnen erfunden oder veraltet sein. Bitte vor dem Besuch immer pr\u00FCfen!',
+    liveSearchLabel: 'Live KI-Websuche aktivieren',
+    liveSearchSub: 'Erfordert grok-4.20-reasoning oder grok-2. Sorgt f\u00FCr 100% aktuelle Daten.'
   }
 };
 const LOCAL_DRUG_KB = {
@@ -402,7 +407,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.64.0</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.65.0</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -1173,6 +1178,15 @@ function renderSettings() {
         </div>
         <div style="font-size:10px; color:#94a3b8; margin-top:4px;">${t('modelSuggestion')}</div>
       </div>
+      
+      <div class="form-group" style="background:rgba(99,102,241,0.1); padding:12px; border-radius:10px; border:1px solid rgba(99,102,241,0.2);">
+        <label style="display:flex; justify-content:space-between; align-items:center; color:#818cf8; font-weight:700;">
+          ${t('liveSearchLabel')}
+          <input type="checkbox" id="grok-livesearch-input" ${state.useLiveSearch ? 'checked' : ''} style="width:20px; height:20px; accent-color:var(--accent-color);">
+        </label>
+        <div style="font-size:9px; opacity:0.8; margin-top:4px;">${t('liveSearchSub')}</div>
+      </div>
+
       <button class="btn" onclick="window.saveSettings()">${t('saveSettingsBtn')}</button>
       <div id="settings-msg" style="margin-top: 12px; color: var(--accent-color);"></div>
 
@@ -1187,7 +1201,7 @@ function renderSettings() {
           ${t('forceUpdateBtn')}
         </button>
         <p style="font-size:10px; opacity:0.5; margin-top:8px;">
-          Current: 4.64.0 \u2022 Use if UI seems outdated.
+          Current: 4.65.0 \u2022 Use if UI seems outdated.
         </p>
       </div>
     </div>
@@ -1717,15 +1731,22 @@ window.searchDoctorAi = async () => {
     4. RESPONSE FORMAT: JSON {"doctors": [{"name": "...", "specialty": "...", "address": "...", "phone": "..."}]}.
     5. Language: ${state.lang === 'de' ? 'German' : 'English'}.`;
 
+    const body = {
+      model: state.grokModel,
+      messages: [{ role: "user", content: prompt }],
+      response_format: { type: "json_object" },
+      temperature: 0.1
+    };
+
+    // ENABLE LIVE WEB SEARCH TOOL IF TOGGLED
+    if (state.useLiveSearch) {
+      body.tools = [{ type: "web_search" }];
+    }
+
     const res = await fetch(GROK_BASE_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json", "Authorization": `Bearer ${state.grokKey}` },
-      body: JSON.stringify({
-        model: state.grokModel,
-        messages: [{ role: "user", content: prompt }],
-        response_format: { type: "json_object" },
-        temperature: 0.1 // Slightly higher temperature for better fallback retrieval
-      })
+      body: JSON.stringify(body)
     });
     
     const d = await res.json();
@@ -1815,8 +1836,11 @@ window.saveSettings = async () => {
   const key = document.getElementById('grok-api-key-input').value;
   const model = document.getElementById('grok-model-input').value;
   const region = document.getElementById('grok-region-input').value;
+  const liveSearch = document.getElementById('grok-livesearch-input').checked;
   state.defaultRegion = region;
   localStorage.setItem('default_region', region);
+  state.useLiveSearch = liveSearch;
+  localStorage.setItem('use_live_search', liveSearch);
   if (!key || !model) return alert(t('enteringApiKey'));
   state.grokKey = key;
   state.grokModel = model;
