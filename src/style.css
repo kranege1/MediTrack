@@ -42,11 +42,21 @@ body {
   -webkit-overflow-scrolling: touch;
   display: flex;
   flex-direction: column;
-  padding-bottom: 90px; /* Essential space for fixed nav */
+  padding-bottom: 90px; /* Space for Safari UI */
   max-width: 600px;
   margin: 0 auto;
   width: 100%;
   position: relative;
+  transition: padding-bottom 0.3s;
+}
+
+body.is-pwa #app {
+  padding-bottom: 72px; /* Less space needed without Safari bars */
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 h1, h2, h3 {

@@ -34,7 +34,7 @@ window.state = {
   showMagicImport: false,
   historyMedFilters: []
 };
-const APP_VERSION = '4.81.4';
+const APP_VERSION = '4.81.5';
 const state = window.state;
 
 const GROK_BASE_URL = "https://api.x.ai/v1/chat/completions";
@@ -426,7 +426,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.81.4</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.81.5</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -445,6 +445,7 @@ function render() {
     
     <div id="view-container" class="page">
       ${getViewHTML()}
+      ${_renderInstallPrompt()}
     </div>
     </div>
   `;
@@ -1323,7 +1324,7 @@ function renderSettings() {
           ${t('forceUpdateBtn')}
         </button>
         <p style="font-size:10px; opacity:0.5; margin-top:8px;">
-          Current: 4.81.4 \u2022 Use if UI seems outdated.
+          Current: 4.81.5 \u2022 Use if UI seems outdated.
         </p>
       </div>
     </div>
@@ -2441,6 +2442,10 @@ document.addEventListener('touchend', (e) => {
   touchCurrentX = 0;
 });
 function _updateNavUI() {
+  const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+  if (isStandalone) document.body.classList.add('is-pwa');
+  else document.body.classList.remove('is-pwa');
+
   const views = ['dashboard', 'medications', 'plans', 'history'];
   views.forEach(v => {
     const el = document.getElementById(`nav-${v}`);
@@ -2464,5 +2469,40 @@ function _updateNavUI() {
   });
 }
 
-// Initial call
+function _renderInstallPrompt() {
+  const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+  const hasBeenDismissed = localStorage.getItem('med_install_dismissed');
+  
+  if (isiOS && !isStandalone && !hasBeenDismissed) {
+    return `
+      <div id="install-prompt" class="glass-panel" style="margin-top:20px; padding:16px; border:1px solid var(--accent-color); animation: slideUp 0.5s ease-out;">
+        <div style="display:flex; justify-content:space-between; align-items:start;">
+          <div style="display:flex; gap:12px; align-items:center;">
+             <div style="background:var(--accent-color); width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; color:#000;">
+               <svg style="width:20px;height:20px;" viewBox="0 0 24 24"><path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+             </div>
+             <div>
+               <div style="font-weight:600; font-size:14px;">Als App installieren</div>
+               <div style="font-size:12px; color:var(--text-secondary);">Keine Safari-Leisten & mehr Platz</div>
+             </div>
+          </div>
+          <button onclick="window._dismissInstall()" style="background:none; border:none; color:var(--text-secondary); cursor:pointer;">✕</button>
+        </div>
+        <div style="margin-top:12px; font-size:12px; line-height:1.4;">
+          Tippe auf das <svg style="width:16px;height:16px;vertical-align:middle;display:inline;" viewBox="0 0 24 24"><path fill="currentColor" d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg> <b>Teilen-Symbol</b> und wähle <b>"Zum Home-Bildschirm"</b>.
+        </div>
+      </div>
+    `;
+  }
+  return '';
+}
+
+window._dismissInstall = () => {
+  localStorage.setItem('med_install_dismissed', '1');
+  const el = document.getElementById('install-prompt');
+  if (el) el.style.display = 'none';
+};
+
+// Start detection
 _updateNavUI();
