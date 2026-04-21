@@ -34,7 +34,7 @@ window.state = {
   showMagicImport: false,
   historyMedFilters: []
 };
-const APP_VERSION = '4.80.2';
+const APP_VERSION = '4.81.0';
 const state = window.state;
 
 const GROK_BASE_URL = "https://api.x.ai/v1/chat/completions";
@@ -426,7 +426,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.80.2</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.81.0</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -446,26 +446,11 @@ function render() {
     <div id="view-container" class="page">
       ${getViewHTML()}
     </div>
-    
-    <div class="bottom-nav">
-      <div class="nav-item ${state.currentView === 'dashboard' ? 'active' : ''}" onclick="window.navigate('dashboard')" style="${state.currentView === 'dashboard' ? 'filter: drop-shadow(0 0 8px var(--accent-color));' : ''}">
-        <svg class="nav-icon" viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
-        ${t('home')}
-      </div>
-      <div class="nav-item ${state.currentView === 'medications' ? 'active' : ''}" onclick="window.navigate('medications')" style="${state.currentView === 'medications' ? 'filter: drop-shadow(0 0 8px var(--accent-color));' : ''}">
-        <svg class="nav-icon" viewBox="0 0 24 24"><path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1z"/></svg>
-        ${t('meds')}
-      </div>
-      <div class="nav-item ${state.currentView === 'plans' ? 'active' : ''}" onclick="window.navigate('plans')" style="${state.currentView === 'plans' ? 'filter: drop-shadow(0 0 8px var(--accent-color));' : ''}">
-        <svg class="nav-icon" viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
-        ${t('plans')}
-      </div>
-      <div class="nav-item ${state.currentView === 'history' ? 'active' : ''}" onclick="window.navigate('history')" style="${state.currentView === 'history' ? 'filter: drop-shadow(0 0 8px var(--accent-color));' : ''}">
-        <svg class="nav-icon" viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
-        ${t('history')}
-      </div>
     </div>
   `;
+
+  // Update persistent nav state
+  _updateNavUI();
 
   if (state.currentView === 'history' && state.historyView === 'charts') {
     _initCharts();
@@ -1338,7 +1323,7 @@ function renderSettings() {
           ${t('forceUpdateBtn')}
         </button>
         <p style="font-size:10px; opacity:0.5; margin-top:8px;">
-          Current: 4.80.2 \u2022 Use if UI seems outdated.
+          Current: 4.81.0 \u2022 Use if UI seems outdated.
         </p>
       </div>
     </div>
@@ -2455,3 +2440,29 @@ document.addEventListener('touchend', (e) => {
   touchStartX = 0;
   touchCurrentX = 0;
 });
+function _updateNavUI() {
+  const views = ['dashboard', 'medications', 'plans', 'history'];
+  views.forEach(v => {
+    const el = document.getElementById(`nav-${v}`);
+    if (!el) return;
+    
+    // Set Active
+    if (state.currentView === v) {
+      el.classList.add('active');
+      el.style.filter = 'drop-shadow(0 0 8px var(--accent-color))';
+    } else {
+      el.classList.remove('active');
+      el.style.filter = '';
+    }
+    
+    // Set text (i18n)
+    const textEl = el.querySelector('.nav-text');
+    if (textEl) {
+      const key = textEl.getAttribute('data-key');
+      textEl.innerText = t(key);
+    }
+  });
+}
+
+// Initial call
+_updateNavUI();
