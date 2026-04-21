@@ -321,6 +321,9 @@ input:focus, select:focus {
   background: #ef4444; 
   z-index: 1;
   cursor: pointer;
+  border: none; /* Reset for button */
+  padding: 0;    /* Reset for button */
+  font-family: inherit;
 }
 
 .swipe-content {

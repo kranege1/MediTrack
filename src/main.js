@@ -34,7 +34,7 @@ window.state = {
   showMagicImport: false,
   historyMedFilters: []
 };
-const APP_VERSION = '4.81.6';
+const APP_VERSION = '4.81.7';
 const state = window.state;
 
 const GROK_BASE_URL = "https://api.x.ai/v1/chat/completions";
@@ -426,7 +426,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.81.6</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.81.7</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -1212,14 +1212,14 @@ function _renderLogList() {
     
     return `
       <div class="swipe-item">
-        <div class="swipe-action" onclick="window._deleteHistoryLog('${l.id}')">
+        <button class="swipe-action" onclick="window._deleteHistoryLog('${l.id}')">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="3 6 5 6 21 6"></polyline>
             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
             <line x1="10" y1="11" x2="10" y2="17"></line>
             <line x1="14" y1="11" x2="14" y2="17"></line>
           </svg>
-        </div>
+        </button>
         <div class="swipe-content card" style="display:block; padding: 16px; border-left: 3px solid ${isRed ? '#ef4444' : 'transparent'};">
           <div style="display:flex; justify-content:space-between; align-items:flex-start;">
             <div>
@@ -1324,7 +1324,7 @@ function renderSettings() {
           ${t('forceUpdateBtn')}
         </button>
         <p style="font-size:10px; opacity:0.5; margin-top:8px;">
-          Current: 4.81.6 \u2022 Use if UI seems outdated.
+          Current: 4.81.7 \u2022 Use if UI seems outdated.
         </p>
       </div>
     </div>
@@ -2379,13 +2379,12 @@ window._deleteHistoryLog = async (id) => {
 
 // Global Swipe Handler
 let touchStartX = 0;
+let touchStartY = 0;
 let touchCurrentX = 0;
 let activeSwipeItem = null;
+let isScrolling = false;
 
 document.addEventListener('touchstart', (e) => {
-  const action = e.target.closest('.swipe-action');
-  if (action) return; // Don't block delete button clicks
-  
   const content = e.target.closest('.swipe-content');
   if (!content) {
     if (activeSwipeItem) {
@@ -2400,33 +2399,51 @@ document.addEventListener('touchstart', (e) => {
   }
   
   touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
   activeSwipeItem = content;
   content.style.transition = 'none';
+  isScrolling = false;
 }, { passive: true });
 
 document.addEventListener('touchmove', (e) => {
-  if (!activeSwipeItem) return;
-  touchCurrentX = e.touches[0].clientX;
-  const diff = touchCurrentX - touchStartX;
+  if (!activeSwipeItem || isScrolling) return;
   
-  if (diff < 0 && diff > -100) {
-    activeSwipeItem.style.transform = `translateX(${diff}px)`;
+  touchCurrentX = e.touches[0].clientX;
+  const touchCurrentY = e.touches[0].clientY;
+  
+  const diffX = touchCurrentX - touchStartX;
+  const diffY = touchCurrentY - touchStartY;
+  
+  // Decide if scrolling or swiping
+  if (!isScrolling && Math.abs(diffY) > Math.abs(diffX) && Math.abs(diffY) > 5) {
+    isScrolling = true;
+    activeSwipeItem.style.transform = 'translateX(0)';
+    return;
   }
-}, { passive: true });
+
+  // Only start swiping if horizontal intent is clear (threshold)
+  if (diffX < -15 && Math.abs(diffX) > Math.abs(diffY)) {
+    // Prevent accidental scroll once swiping starts
+    if (e.cancelable) e.preventDefault(); 
+    activeSwipeItem.style.transform = `translateX(${diffX}px)`;
+  }
+}, { passive: false });
 
 document.addEventListener('touchend', (e) => {
   if (!activeSwipeItem) return;
   activeSwipeItem.style.transition = 'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)';
   const diff = touchCurrentX - touchStartX;
   
-  if (diff < -50) {
+  if (diff < -65) {
     activeSwipeItem.style.transform = 'translateX(-80px)';
   } else {
     activeSwipeItem.style.transform = 'translateX(0)';
     activeSwipeItem = null;
   }
   touchStartX = 0;
+  touchStartY = 0;
   touchCurrentX = 0;
+  isScrolling = false;
 });
 function _updateNavUI() {
   const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
