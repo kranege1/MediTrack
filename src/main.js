@@ -34,7 +34,7 @@ window.state = {
   showMagicImport: false,
   historyMedFilters: []
 };
-const APP_VERSION = '4.81.5';
+const APP_VERSION = '4.81.6';
 const state = window.state;
 
 const GROK_BASE_URL = "https://api.x.ai/v1/chat/completions";
@@ -426,7 +426,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.81.5</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.81.6</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -1324,7 +1324,7 @@ function renderSettings() {
           ${t('forceUpdateBtn')}
         </button>
         <p style="font-size:10px; opacity:0.5; margin-top:8px;">
-          Current: 4.81.5 \u2022 Use if UI seems outdated.
+          Current: 4.81.6 \u2022 Use if UI seems outdated.
         </p>
       </div>
     </div>
@@ -1907,7 +1907,7 @@ window._applyDoctorSmart = (i, list) => {
     document.getElementById('doctor-ai-results').style.display = 'none';
 };
 
-window.searchDoctorAi = async () => {
+window.searchDoctorSmart = async () => {
   const name = document.getElementById('appt-doctor').value;
   const region = document.getElementById('appt-region').value;
   const specialty = document.getElementById('appt-specialty').value;
@@ -1938,18 +1938,15 @@ window.searchDoctorAi = async () => {
     const regionText = region ? ` in "${region}"` : '';
     const nameText = name ? (specialty ? `named "${name}" specializing in "${specialty}"` : `named "${name}"`) : `specializing in "${specialty}"`;
     
-    // HELPFUL BUT CAUTIOUS PROMPT
-    const prompt = `You are a medical directory assistant. Find medical professionals matching: ${nameText}${regionText}.
-    
-    PRIMARY GOAL: Find the specific person requested.
-    FALLBACK GOAL: If you cannot find the specific person, find OTHER REAL medical professionals of the same specialty in that region.
+    // HIGH ACCURACY SEARCH PROMPT
+    const prompt = `You are a medical directory expert. TASK: Find the official and verified contact details for: ${nameText}${regionText}.
     
     ACCURACY RULES:
-    1. NEVER invent data. If you know a Dr. with the matching surname exists but don't know the first name, return "Dr. [Surname]".
-    2. If you find NO matches for the name, you MUST return other available "${specialty || 'medical professionals'}" in "${region}".
-    3. RADIUS: Search within ~15km if no exact city match.
-    4. RESPONSE FORMAT: Return ONLY a valid JSON object: {"doctors": [{"name": "...", "specialty": "...", "address": "...", "phone": "..."}]}.
-    5. NO CONVERSATION: Return only the JSON object, nothing else.
+    1. SEARCH FIRST: Use the web to find the EXACT professional requested.
+    2. VERIFY: Ensure the address and phone number are currently active.
+    3. FALLBACK: If the specific doctor is not found, list up to 3 real alternatives of the same specialty in "${region}".
+    4. DATA QUALITY: No placeholder data. Return only if reasonably certain.
+    5. RESPONSE FORMAT: Return ONLY a valid JSON object: {"doctors": [{"name": "...", "specialty": "...", "address": "...", "phone": "..."}]}.
     6. Language: ${state.lang === 'de' ? 'German' : 'English'}.`;
 
     const body = {
@@ -2012,10 +2009,6 @@ window.searchDoctorAi = async () => {
       <div style="font-size:10px; font-weight:700; margin-bottom:4px; opacity:0.6;">${t('doctorSelect')}:</div>
       <div style="display:flex; flex-direction:column; gap:8px;">
         ${results.map((doc, i) => {
-          const cleanName = doc.name.replace(/ Dr\. med\./i, '').replace(/Dr\. /i, '');
-          const googleQuery = encodeURIComponent(`${doc.name} ${doc.specialty || ''} ${doc.address || ''}`);
-          const googleUrl = `https://www.google.com/search?q=${googleQuery}`;
-          const mapUrl = `https://www.google.com/maps/search/${googleQuery}`;
           const isNearby = doc.address && region && !doc.address.toLowerCase().includes(region.split(',')[0].trim().toLowerCase());
           
           return `
@@ -2035,15 +2028,9 @@ window.searchDoctorAi = async () => {
                   </div>
                 ` : ''}
               </div>
-              <div style="display:flex; gap:6px; margin-top:4px;">
-                <button type="button" class="btn btn-secondary" style="flex:2; height:34px; padding:0; font-size:11px; background:var(--accent-color); color:#111; border:none;" onclick="window._applyDoctorMatch(${i}, ${JSON.stringify(results).replace(/"/g, '&quot;')})">
-                  ${t('chooseOption')}
-                </button>
-                <a href="${googleUrl}" target="_blank" class="btn btn-secondary" style="flex:1; height:34px; padding:0; display:flex; align-items:center; justify-content:center; border-color:rgba(255,255,255,0.1); font-size:10px; gap:4px;" title="${t('searchGoogle')}">
-                  \uD83D\uDD0D Check
-                </a>
-                <a href="${mapUrl}" target="_blank" class="btn btn-secondary" style="width:34px; height:34px; padding:0; display:flex; align-items:center; justify-content:center; border-color:rgba(255,255,255,0.1);" title="Maps">\uD83D\uDDFA\uFE0F</a>
-              </div>
+              <button type="button" class="btn" style="height:38px; padding:0; font-size:12px; background:var(--accent-color); color:#000; border:none; font-weight:700;" onclick="window._applyDoctorMatch(${i}, ${JSON.stringify(results).replace(/"/g, '&quot;')})">
+                ${t('chooseOption')}
+              </button>
             </div>
           `;
         }).join('')}
