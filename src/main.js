@@ -42,7 +42,8 @@ const i18n = {
     dueToday:'Due Today', noPlans:'No scheduled plans. Set one up in the Plans tab!',
     loggedActivity:'Logged Activity', noLogsToday:'No medications logged yet today.',
     recentMetrics:'Recent Metrics', noMetrics:'No metrics logged yet.',
-    scheduled:'Scheduled', completed:'✓ Completed', dueTodayBadge:'• Due Today', taken:'taken', weight:'Weight',
+    scheduled:'Scheduled', completed:'✓ Completed', skipped:'✕ Skipped', skip:'Skip', dueTodayBadge:'• Due Today', taken:'taken', weight:'Weight',
+    pastDue:'Past Due', missedTitle:'Missed Items',
     addMedication:'Add Medication', nameLbl:'Name', defaultDose:'Default Dose', unitLbl:'Unit', formatLbl:'Format',
     saveMedication:'Save Medication', cancel:'Cancel', yourMedications:'Your Medications',
     noMedsFound:'No medications found. Add one to start!', delete:'Delete', addBtn:'+ Add',
@@ -157,7 +158,8 @@ const i18n = {
     dueToday:'Heute fällig', noPlans:'Keine Pläne vorhanden. Erstelle einen Plan!',
     loggedActivity:'Heutige Aktivität', noLogsToday:'Noch keine Einnahme heute.',
     recentMetrics:'Letzte Messwerte', noMetrics:'Noch keine Messwerte eingetragen.',
-    scheduled:'Geplant', completed:'✓ Eingenommen', dueTodayBadge:'• Heute fällig', taken:'eingenommen', weight:'Gewicht',
+    scheduled:'Geplant', completed:'✓ Eingenommen', skipped:'✕ Übersprungen', skip:'Überspringen', dueTodayBadge:'• Heute fällig', taken:'eingenommen', weight:'Gewicht',
+    pastDue:'Überfällig', missedTitle:'Verpasste Termine',
     addMedication:'Medikament hinzufügen', nameLbl:'Name', defaultDose:'Standarddosis', unitLbl:'Einheit', formatLbl:'Format',
     saveMedication:'Medikament speichern', cancel:'Abbrechen', yourMedications:'Ihre Medikamente',
     noMedsFound:'Keine Medikamente gefunden. Fügen Sie eines hinzu!', delete:'Löschen', addBtn:'+ Hinzufügen',
@@ -411,6 +413,34 @@ function getViewHTML() {
 // === VIEWS ===
 
 // 1. Dashboard
+
+function _findPastDueItems() {
+  const missed = [];
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  
+  // Look back 7 days for missed items
+  for (let i = 1; i <= 7; i++) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const dISO = d.toISOString().split('T')[0];
+    
+    const duePlans = state.plans.filter(p => window._isPlanDueOnDate(p, d));
+    for (const p of duePlans) {
+      // Check if this occurrence was handled (taken or skipped)
+      // We use a fallback check for older logs that might not have planId/plannedDate
+      const handled = state.logs.some(l => 
+        (l.planId === p.id && l.plannedDate === dISO) || 
+        (!l.planId && l.medicationId === p.medicationId && new Date(l.timestamp).setHours(0,0,0,0) === d.getTime())
+      );
+      if (!handled) {
+        missed.push({ plan: p, date: d, dateISO: dISO });
+      }
+    }
+  }
+  return missed.sort((a,b) => b.date - a.date); // Most recent missed first
+}
+
 function renderDashboard() {
   const todayStart = new Date().setHours(0,0,0,0);
   const todaysLogs = state.logs.filter(l => new Date(l.timestamp).setHours(0,0,0,0) === todayStart).reverse();
@@ -433,10 +463,16 @@ function renderDashboard() {
       const itemsHtml = duePlans.map(p => {
         const isAppt = p.type === 'appointment';
         const med = !isAppt ? (state.medications.find(m => m.id === p.medicationId) || {name: t('unknown')}) : null;
-        const isCompleted = !isAppt && isToday && todaysLogs.some(l => l.medicationId === p.medicationId);
         
+        const targetDateISO = targetDate.toISOString().split('T')[0];
+        const logEntry = todaysLogs.find(l => l.planId === p.id && l.plannedDate === targetDateISO);
+        const isCompleted = !isAppt && logEntry && logEntry.status === 'taken';
+        const isSkipped = !isAppt && logEntry && logEntry.status === 'skipped';
+        
+        if (isSkipped) return ''; // Don't show skipped items in the normal forecast
+
         let statusColor = isCompleted ? 'var(--accent-color)' : (isToday ? '#ef4444' : 'rgba(255,255,255,0.2)');
-        if (isAppt) statusColor = '#8b5cf6'; // Unified color for appointments
+        if (isAppt) statusColor = '#8b5cf6';
 
         const opacity = isCompleted ? '0.6' : '1';
         
@@ -454,9 +490,10 @@ function renderDashboard() {
             </div>
             <div style="display:flex; align-items:center; gap:8px;">
               ${!isAppt && isToday && !isCompleted ? `
-                <button class="btn btn-secondary" style="width:auto; padding:6px 10px; font-size:10px;" onclick="window.confirmIntake('${p.id}')">✓</button>
+                <button class="btn btn-secondary" style="width:auto; padding:10px 14px; font-size:14px; border-color:var(--accent-color); color:var(--accent-color);" onclick="window.confirmIntake('${p.id}', '${targetDateISO}')">✓</button>
+                <button class="btn btn-secondary" style="width:auto; padding:10px 14px; font-size:14px; border-color:#f87171; color:#f87171;" onclick="window.skipIntake('${p.id}', '${targetDateISO}')">✕</button>
               ` : (!isAppt && isToday && isCompleted ? `<div style="color:var(--accent-color); font-size:10px; font-weight:700;">${t('completed')}</div>` : '')}
-              <button class="btn btn-secondary" style="width:auto; padding:6px 10px; font-size:10px; border-color:rgba(255,255,255,0.15);" onclick="window._exportSingleEvent('${p.id}', '${targetDate.toISOString()}')" title="${t('addToCalendar')}">🗓️</button>
+              <button class="btn btn-secondary" style="width:auto; padding:10px 14px; font-size:14px; border-color:rgba(255,255,255,0.15);" onclick="window._exportSingleEvent('${p.id}', '${targetDate.toISOString()}')" title="${t('addToCalendar')}">🗓️</button>
             </div>
           </div>
           ${!isAppt && isToday && !isCompleted && p.linkedMetrics && p.linkedMetrics.length > 0 ? `
@@ -503,6 +540,43 @@ function renderDashboard() {
         </button>
       </div>
       <div style="max-height: 55vh; overflow-y:auto; padding-right:8px; margin-bottom:24px;">
+        <!-- Past Due Section -->
+        ${(() => {
+          const missed = _findPastDueItems();
+          if (missed.length === 0) return '';
+          return `
+            <div style="margin-bottom: 24px;">
+              <div style="font-size:13px; font-weight:700; color:#f87171; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                ${t('pastDue')}
+              </div>
+              ${missed.map(m => {
+                const p = m.plan;
+                const isAppt = p.type === 'appointment';
+                const med = !isAppt ? (state.medications.find(med => med.id === p.medicationId) || {name: t('unknown')}) : null;
+                const title = isAppt ? `🩺 ${p.doctorName}` : med.name;
+                const subtitle = isAppt 
+                  ? `${m.date.toLocaleDateString(undefined, {weekday:'short', day:'2-digit', month:'2-digit'})} | ${p.location || ''}`
+                  : `${m.date.toLocaleDateString(undefined, {weekday:'short', day:'2-digit', month:'2-digit'})} • ${t(p.timeCategory || 'morning')} | ${p.dose} ${med.unit || t('units')}`;
+                
+                return `
+                  <div class="card" style="border-left: 3px solid #f87171; margin-bottom: 8px; padding: 12px; display:flex; justify-content:space-between; align-items:center; background: rgba(248, 113, 113, 0.05);">
+                    <div style="flex:1; min-width:0;">
+                      <div class="card-title" style="font-size:14px; margin-bottom:0; color:#fca5a5;">${title}</div>
+                      <div class="card-subtitle" style="font-size:11px; word-break:break-word;">${subtitle}</div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                       <button class="btn btn-secondary" style="width:auto; padding:10px 14px; font-size:14px; border-color:var(--accent-color); color:var(--accent-color);" onclick="window.confirmIntake('${p.id}', '${m.dateISO}')">✓</button>
+                       <button class="btn btn-secondary" style="width:auto; padding:10px 14px; font-size:14px; border-color:#f87171; color:#f87171;" onclick="window.skipIntake('${p.id}', '${m.dateISO}')">✕</button>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+            <div style="border-top: 1px dashed rgba(255,255,255,0.1); margin-bottom: 24px;"></div>
+          `;
+        })()}
+
         ${forecastHtml || `<div class="empty-state">${t('noUpcoming')}</div>`}
       </div>
 
@@ -514,9 +588,11 @@ function renderDashboard() {
   `;
 }
 
-window.confirmIntake = async (planId) => {
+window.confirmIntake = async (planId, plannedDateISO) => {
   const plan = state.plans.find(p => p.id === planId);
   if (!plan) return;
+  
+  const plannedDate = plannedDateISO || new Date().toISOString().split('T')[0];
   
   const linkedMetricIds = [];
   if (plan.linkedMetrics) {
@@ -541,13 +617,34 @@ window.confirmIntake = async (planId) => {
   
   await API.addLog({
     medicationId: plan.medicationId,
+    planId: plan.id,
+    plannedDate: plannedDate,
+    status: 'taken',
     amount_taken: plan.dose,
     linkedMetricIds,
     timestamp: Date.now()
   });
   
   alert(t('loggedSuccess'));
-  window.navigate('dashboard');
+  render();
+};
+
+window.skipIntake = async (planId, plannedDateISO) => {
+  const plan = state.plans.find(p => p.id === planId);
+  if (!plan) return;
+  
+  const plannedDate = plannedDateISO || new Date().toISOString().split('T')[0];
+  
+  await API.addLog({
+    medicationId: plan.medicationId,
+    planId: plan.id,
+    plannedDate: plannedDate,
+    status: 'skipped',
+    amount_taken: 0,
+    timestamp: Date.now()
+  });
+  
+  render();
 };
 
 // 2. Medications
@@ -1259,6 +1356,7 @@ window._isPlanDueOnDate = (p, targetDate) => {
   start.setHours(0,0,0,0);
   
   if (d < start) return false;
+  if (p.isOneTime && d.getTime() !== start.getTime()) return false;
 
   const diffDays = Math.round((d - start) / (1000 * 60 * 60 * 24));
 
