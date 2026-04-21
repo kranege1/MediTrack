@@ -363,8 +363,9 @@ window._geolocate = (inputId) => {
       });
       const data = await res.json();
       const city = data.address.city || data.address.town || data.address.village || data.address.county || '';
+      const country = data.address.country || '';
       if (city) {
-        el.value = city;
+        el.value = country ? `${city}, ${country}` : city;
       } else {
         el.value = originalVal;
         alert(t('locErr'));
@@ -383,7 +384,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.60.0</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.60.1</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -1727,7 +1728,8 @@ window.searchDoctorAi = async () => {
 
     INSTRUCTIONS:
     1. Search for EVERYTHING matching the name/surname. If multiple doctors with the same surname exist in the region (e.g. Stöhr in Stans), YOU MUST RETURN ALL OF THEM.
-    2. GERMAN VARIANTS: If the name contains umlaute (ä, ö, ü), also search for alternative spellings (ae, oe, ue). E.g., check both 'Stöhr' and 'Stoehr'.
+    2. GEOGRAPHICAL PRECISION: Prioritize the provided City and COUNTRY. Be aware of identical city names in different countries (e.g., Stans in Switzerland vs. Stans in Austria). Return results ONLY for the correct geopolitical region.
+    3. GERMAN VARIANTS: If the name contains umlaute (ä, ö, ü), also search for alternative spellings (ae, oe, ue). E.g., check both 'Stöhr' and 'Stoehr'.
     3. FORMAT: Return a JSON object with a "doctors" array.
        - "name": Use 'Title Firstname Lastname' (e.g., "Dr. Brigitte Stöhr").
        - "specialty": Full medical specialty.
