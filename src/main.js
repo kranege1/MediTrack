@@ -365,9 +365,21 @@ window._geolocate = (inputId) => {
       });
       const data = await res.json();
       const city = data.address.city || data.address.town || data.address.village || data.address.county || '';
+      const postcode = data.address.postcode || '';
       const country = data.address.country || '';
+      
       if (city) {
-        el.value = country ? `${city}, ${country}` : city;
+        let locParts = [city];
+        if (postcode) locParts.push(postcode);
+        if (country) locParts.push(country);
+        const finalLoc = locParts.join(', ');
+        
+        el.value = finalLoc;
+        // If this is the settings input, auto-save state
+        if (inputId === 'grok-region-input') {
+          state.defaultRegion = finalLoc;
+          localStorage.setItem('default_region', finalLoc);
+        }
       } else {
         el.value = originalVal;
         alert(t('locErr'));
@@ -1895,6 +1907,29 @@ window._exportWeeklyEvents = () => { alert("Exporting..."); };
 window.addEventListener('DOMContentLoaded', async () => {
   try {
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
+    
+    // Auto-identify location on first start if not set
+    if (!state.defaultRegion && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(async (pos) => {
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json`);
+          const data = await res.json();
+          const city = data.address.city || data.address.town || data.address.village || data.address.county || '';
+          const postcode = data.address.postcode || '';
+          const country = data.address.country || '';
+          if (city) {
+            let locParts = [city];
+            if (postcode) locParts.push(postcode);
+            if (country) locParts.push(country);
+            state.defaultRegion = locParts.join(', ');
+            localStorage.setItem('default_region', state.defaultRegion);
+            // Render to update Settings view if user happens to be there
+            if (state.currentView === 'settings') render();
+          }
+        } catch (e) { console.warn("Auto-location failed", e); }
+      }, (err) => { console.warn("Geolocation permission denied or failed", err); }, { timeout: 5000 });
+    }
+    
     await window.navigate('dashboard');
   } catch (err) { document.getElementById('app').innerHTML = `<div style="padding:40px; color:white;">Error: ${err.message}</div>`; }
 });
