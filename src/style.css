@@ -282,7 +282,7 @@ input:focus, select:focus {
   overflow: hidden;
   border-radius: 14px;
   margin-bottom: 8px;
-  background: #ef4444; /* Reveal red behind */
+  background: transparent; 
   touch-action: pan-y;
 }
 
@@ -296,14 +296,16 @@ input:focus, select:focus {
   justify-content: center;
   align-items: center;
   color: white;
+  background: #ef4444; 
   z-index: 1;
+  cursor: pointer;
 }
 
 .swipe-content {
   position: relative;
   z-index: 2;
   transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  background: var(--bg-color); /* Ensure content has bg to hide button */
+  background: #191c24; 
   will-change: transform;
 }
 

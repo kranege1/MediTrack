@@ -34,7 +34,7 @@ window.state = {
   showMagicImport: false,
   historyMedFilters: []
 };
-const APP_VERSION = '4.80.1';
+const APP_VERSION = '4.80.2';
 const state = window.state;
 
 const GROK_BASE_URL = "https://api.x.ai/v1/chat/completions";
@@ -426,7 +426,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.80.1</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.80.2</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -1225,7 +1225,7 @@ function _renderLogList() {
     const isRed = l.status === 'skipped' || l.status === 'missed';
     
     return `
-      <div class="swipe-item" id="swipe-${l.id}">
+      <div class="swipe-item">
         <div class="swipe-action" onclick="window._deleteHistoryLog('${l.id}')">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="3 6 5 6 21 6"></polyline>
@@ -1234,7 +1234,7 @@ function _renderLogList() {
             <line x1="14" y1="11" x2="14" y2="17"></line>
           </svg>
         </div>
-        <div class="swipe-content card" style="display:block; padding: 16px; border-left: 3px solid ${isRed ? '#ef4444' : 'transparent'}; background: ${isRed ? 'rgba(239, 68, 68, 0.05)' : 'var(--bg-color)'}">
+        <div class="swipe-content card" style="display:block; padding: 16px; border-left: 3px solid ${isRed ? '#ef4444' : 'transparent'};">
           <div style="display:flex; justify-content:space-between; align-items:flex-start;">
             <div>
               <div class="card-title" style="color: ${isRed ? '#f87171' : 'inherit'}">${med.name}</div>
@@ -1338,7 +1338,7 @@ function renderSettings() {
           ${t('forceUpdateBtn')}
         </button>
         <p style="font-size:10px; opacity:0.5; margin-top:8px;">
-          Current: 4.80.1 \u2022 Use if UI seems outdated.
+          Current: 4.80.2 \u2022 Use if UI seems outdated.
         </p>
       </div>
     </div>
@@ -2410,6 +2410,9 @@ let touchCurrentX = 0;
 let activeSwipeItem = null;
 
 document.addEventListener('touchstart', (e) => {
+  const action = e.target.closest('.swipe-action');
+  if (action) return; // Don't block delete button clicks
+  
   const content = e.target.closest('.swipe-content');
   if (!content) {
     if (activeSwipeItem) {
