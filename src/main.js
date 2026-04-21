@@ -367,7 +367,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.57.6</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.57.7</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -879,7 +879,7 @@ function renderPlans() {
           <label>${t('doctorName')}</label>
           <div style="display:flex; gap:8px;">
             <input type="text" id="appt-doctor" placeholder="${state.lang==='de'?'Name (optional bei Fachrichtung)':'Name (optional with specialty)'}" style="flex:1;">
-            <button class="btn btn-secondary" style="width:auto; padding:0 12px;" onclick="window.searchDoctorAi()" title="${t('doctorSearch')}">🔍 AI</button>
+            <button type="button" class="btn btn-secondary" style="width:auto; padding:0 12px;" onclick="window.searchDoctorAi()" title="${t('doctorSearch')}">🔍 AI</button>
           </div>
           <div id="doctor-ai-results" style="display:none; margin-top:8px; padding:12px; background:rgba(0,0,0,0.2); border-radius:10px;"></div>
         </div>
@@ -1674,12 +1674,22 @@ window.searchDoctorAi = async () => {
   const listEl = document.getElementById('doctor-ai-results');
   
   if (!region) {
-    alert(t('defaultRegionLabel') + ' 👋');
-    return window.navigate('settings');
+    listEl.style.display = 'block';
+    listEl.innerHTML = `<div style="font-size:11px; color:#ef4444; background:rgba(239,68,68,0.1); padding:8px; border-radius:6px;">
+      ⚠️ ${t('defaultRegionLabel')} 
+    </div>`;
+    return;
   }
 
   if (!name && !specialty) return alert(t('doctorName') + ' / ' + t('specialty'));
-  if (!state.grokKey) return window.navigate('settings');
+  
+  if (!state.grokKey) {
+    listEl.style.display = 'block';
+    listEl.innerHTML = `<div style="font-size:11px; color:#ef4444; background:rgba(239,68,68,0.1); padding:8px; border-radius:6px;">
+      ${t('missingKeyError')}
+    </div>`;
+    return;
+  }
 
   listEl.style.display = 'block';
   listEl.innerHTML = `<span style="font-size:11px; color:var(--accent-color);">${t('testingKey')}...</span>`;
