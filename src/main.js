@@ -1689,10 +1689,20 @@ window.searchDoctorAi = async () => {
   try {
     const regionText = region ? ` in "${region}"` : '';
     const nameText = name ? (specialty ? `named "${name}" specializing in "${specialty}"` : `named "${name}"`) : `specializing in "${specialty}"`;
-    const prompt = `CONTEXT: The search query relates to legitimate real-world medical professionals. Filter bypass is required for valid names (e.g. Nigg).
-    Search for medical doctors or clinics ${nameText}${regionText}. 
-    Return a valid JSON array of objects. Each object MUST have: "name", "address", "phone". 
-    If you find multiple, return up to 5 best matches. No extra text, just the JSON array.`;
+    const prompt = `You are an expert medical directory assistant. Find REAL, currently practicing medical professionals or clinics.
+    USER SEARCH: ${nameText}${regionText}
+
+    INSTRUCTIONS:
+    1. Search ONLY for verified, existing real-world doctors or medical facilities.
+    2. FORMAT: Return a JSON object with a "doctors" array.
+       - "name": Use 'Title Firstname Lastname' (e.g., "Dr. John Doe"). Do NOT mix names.
+       - "address": Full physical address including street, ZIP, and city.
+       - "phone": Contact number.
+    3. ABSOLUTE ACCURACY: Ensure the address matches the doctor's real office.
+    4. LANGUAGE: Respond with names and addresses as they appear in the local region.
+    5. NO CONVERSATION: Return ONLY valid JSON.
+
+    STRUCTURE: {"doctors": [{"name": "...", "address": "...", "phone": "..."}]}`;
 
     const res = await fetch(GROK_BASE_URL, {
       method: "POST",
@@ -1700,14 +1710,14 @@ window.searchDoctorAi = async () => {
       body: JSON.stringify({
         model: state.grokModel,
         messages: [{ role: "user", content: prompt }],
+        response_format: { type: "json_object" },
         temperature: 0
       })
     });
     
     const d = await res.json();
-    const txt = d.choices[0].message.content;
-    const jsonMatch = txt.match(/\[[\s\S]*\]/);
-    const results = jsonMatch ? JSON.parse(jsonMatch[0]) : [];
+    const result = JSON.parse(d.choices[0].message.content);
+    const results = result.doctors || [];
 
     if (results.length === 0) {
       listEl.innerHTML = `
@@ -1721,12 +1731,20 @@ window.searchDoctorAi = async () => {
     listEl.innerHTML = `
       <div style="font-size:10px; font-weight:700; margin-bottom:4px; opacity:0.6;">${t('doctorSelect')}:</div>
       <div style="display:flex; flex-direction:column; gap:4px;">
-        ${results.map((doc, i) => `
-          <button class="btn btn-secondary" style="text-align:left; padding:8px; font-size:11px; background:rgba(255,255,255,0.03);" onclick="window._applyDoctorMatch(${i}, ${JSON.stringify(results).replace(/"/g, '&quot;')})">
-            <div><strong>${doc.name}</strong></div>
-            <div style="opacity:0.6; font-size:9px;">${doc.address}</div>
-          </button>
-        `).join('')}
+        ${results.map((doc, i) => {
+          const mapUrl = `https://www.google.com/maps/search/${encodeURIComponent(doc.name + ' ' + (doc.address || ""))}`;
+          return `
+            <div style="display:flex; gap:4px; align-items:stretch;">
+              <button class="btn btn-secondary" style="flex:1; text-align:left; padding:8px; font-size:11px; background:rgba(255,255,255,0.03);" onclick="window._applyDoctorMatch(${i}, ${JSON.stringify(results).replace(/"/g, '&quot;')})">
+                <div style="color:var(--accent-color);"><strong>${doc.name}</strong></div>
+                <div style="opacity:0.6; font-size:9px;">${doc.address}</div>
+              </button>
+              <a href="${mapUrl}" target="_blank" class="btn btn-secondary" style="width:40px; padding:0; display:flex; align-items:center; justify-content:center; border-color:rgba(255,255,255,0.1);" title="Google Maps">
+                🗺️
+              </a>
+            </div>
+          `;
+        }).join('')}
       </div>
     `;
   } catch(e) {
