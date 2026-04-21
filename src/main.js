@@ -34,6 +34,7 @@ window.state = {
   showMagicImport: false
 };
 const state = window.state;
+const appDiv = document.getElementById('app');
 
 const GROK_BASE_URL = "https://api.x.ai/v1/chat/completions";
 
@@ -413,10 +414,11 @@ window._geolocate = (inputId) => {
 };
 
 function render() {
+  if (!appDiv) return;
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.70.0</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.71.0</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -456,6 +458,7 @@ function render() {
     _initCharts();
   }
 }
+window.render = render;
 
 function getViewHTML() {
   switch(state.currentView) {
@@ -936,7 +939,7 @@ function renderPlans() {
           <label>${t('apptDoctor')}</label>
           <div style="display:flex; gap:8px;">
             <input type="text" id="appt-doctor" placeholder="${t('doctorPlaceholder')}" style="flex:1;">
-            <button type="button" class="btn btn-secondary" style="width:auto; padding:0 12px; font-size:16px; border-color:var(--accent-color); color:var(--accent-color);" onclick="state.showMagicImport=true; render()" title="${t('magicImportBtn')}">\u2728</button>
+            <button type="button" class="btn btn-secondary" style="width:auto; padding:0 12px; font-size:16px; border-color:var(--accent-color); color:var(--accent-color);" onclick="window.state.showMagicImport=true; window.render()" title="${t('magicImportBtn')}">\u2728</button>
             <button type="button" class="btn btn-secondary" style="width:auto; padding:0 12px;" onclick="window.searchDoctorAi()" title="${t('doctorSearch')}">\uD83D\uDD0D AI</button>
           </div>
           <div id="doctor-ai-results" style="display:none; margin-top:8px; padding:12px; background:rgba(0,0,0,0.2); border-radius:10px;"></div>
@@ -1223,7 +1226,7 @@ function renderSettings() {
           ${t('forceUpdateBtn')}
         </button>
         <p style="font-size:10px; opacity:0.5; margin-top:8px;">
-          Current: 4.70.0 \u2022 Use if UI seems outdated.
+          Current: 4.71.0 \u2022 Use if UI seems outdated.
         </p>
       </div>
     </div>
