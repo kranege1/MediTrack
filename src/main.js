@@ -367,7 +367,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.58</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.59</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -1697,22 +1697,21 @@ window.searchDoctorAi = async () => {
   try {
     const regionText = region ? ` in "${region}"` : '';
     const nameText = name ? (specialty ? `named "${name}" specializing in "${specialty}"` : `named "${name}"`) : `specializing in "${specialty}"`;
-    const prompt = `You are an expert medical directory assistant. Find REAL, currently practicing medical professionals or clinics.
+    const prompt = `You are an expert medical directory assistant. Find ALL REAL, currently practicing medical professionals or clinics matching the request.
     USER SEARCH: ${nameText}${regionText}
 
     INSTRUCTIONS:
-    1. Search ONLY for verified, existing real-world doctors or medical facilities.
+    1. Search for EVERYTHING matching the name/surname. If multiple doctors with the same surname exist in the region, YOU MUST RETURN ALL OF THEM.
     2. FORMAT: Return a JSON object with a "doctors" array.
-       - "name": Use 'Title Firstname Lastname' (e.g., "Dr. John Doe"). Do NOT mix names.
-       - "address": Full physical address including street, ZIP, and city.
-       - "phone": Contact number. (CRITICAL: Do NOT use placeholder numbers like "12345" or "555-5555". If no real number is found, return empty string).
-    3. ABSOLUTE ACCURACY: Ensure the address matches the doctor's real office. Verify the EXACT First Name.
-       - IMPORTANT: Medical practices often house multiple doctors (e.g., family practices). Ensure the first name is precisely accurate. If unsure of the first name, provide only 'Dr. [Lastname]' or the clinic's name (e.g. 'Gruppenpraxis Stöhr').
-       - Prioritize the primary practitioner or the one matching the specialty.
-    4. LANGUAGE: Respond with names and addresses as they appear in the local region.
+       - "name": Use 'Title Firstname Lastname' (e.g., "Dr. Marie Schmidt").
+       - "specialty": Full medical specialty (e.g., "Ophthalmologist", "Pediatrician").
+       - "address": Full physical address.
+       - "phone": Contact number.
+    3. ABSOLUTE ACCURACY: Do NOT guess first names. If multiple doctors are at the same address, distinguish them by their exact names and specialties.
+    4. LANGUAGE: Respond in the user's current context (Names/Addresses from the region).
     5. NO CONVERSATION: Return ONLY valid JSON.
 
-    STRUCTURE: {"doctors": [{"name": "...", "address": "...", "phone": "..."}]}`;
+    STRUCTURE: {"doctors": [{"name": "...", "specialty": "...", "address": "...", "phone": "..."}]}`;
 
     const res = await fetch(GROK_BASE_URL, {
       method: "POST",
@@ -1747,6 +1746,7 @@ window.searchDoctorAi = async () => {
             <div style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:8px;">
               <div style="display:flex; flex-direction:column; gap:2px;">
                 <div style="color:var(--accent-color); font-size:13px; font-weight:700;">${doc.name}</div>
+                ${doc.specialty ? `<div style="font-size:10px; color:#94a3b8; font-weight:600; margin-bottom:2px;">🩺 ${doc.specialty}</div>` : ''}
                 <div style="font-size:10px; opacity:0.7; display:flex; gap:4px; align-items:center;">
                   <span style="font-size:12px;">📍</span> ${doc.address || '—'}
                 </div>
@@ -1758,7 +1758,7 @@ window.searchDoctorAi = async () => {
               </div>
               
               <div style="display:flex; gap:6px; margin-top:4px;">
-                <button class="btn btn-secondary" style="flex:2; height:34px; padding:0; font-size:11px; background:var(--accent-color); color:#111; border:none;" onclick="window._applyDoctorMatch(${i}, ${JSON.stringify(results).replace(/"/g, '&quot;')})">
+                <button type="button" class="btn btn-secondary" style="flex:2; height:34px; padding:0; font-size:11px; background:var(--accent-color); color:#111; border:none;" onclick="window._applyDoctorMatch(${i}, ${JSON.stringify(results).replace(/"/g, '&quot;')})">
                   ${t('chooseOption')}
                 </button>
                 ${doc.phone ? `
@@ -1785,6 +1785,13 @@ window._applyDoctorMatch = (i, results) => {
   document.getElementById('appt-doctor').value = doc.name;
   document.getElementById('appt-location').value = doc.address || "";
   document.getElementById('appt-phone').value = doc.phone || "";
+  if (doc.specialty) {
+    const notesEl = document.getElementById('appt-note');
+    if (notesEl) {
+      const current = notesEl.value;
+      notesEl.value = current ? `${doc.specialty}\n${current}` : doc.specialty;
+    }
+  }
   document.getElementById('doctor-ai-results').style.display = 'none';
 };
 
