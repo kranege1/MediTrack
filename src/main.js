@@ -34,7 +34,7 @@ window.state = {
   showMagicImport: false,
   historyMedFilters: []
 };
-const APP_VERSION = '4.80.0';
+const APP_VERSION = '4.80.1';
 const state = window.state;
 
 const GROK_BASE_URL = "https://api.x.ai/v1/chat/completions";
@@ -426,7 +426,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.80.0</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.80.1</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -1219,6 +1219,11 @@ function _renderLogList() {
     stream = stream.filter(s => state.historyMedFilters.includes(s.medicationId));
   }
 
+  const logCards = stream.map(l => {
+    const med = state.medications.find(m => m.id === l.medicationId) || {name: t('unknown')};
+    const time = new Date(l.timestamp).toLocaleString([], { dateStyle: 'short', timeStyle: l.type === 'log' ? 'short' : undefined });
+    const isRed = l.status === 'skipped' || l.status === 'missed';
+    
     return `
       <div class="swipe-item" id="swipe-${l.id}">
         <div class="swipe-action" onclick="window._deleteHistoryLog('${l.id}')">
@@ -1333,7 +1338,7 @@ function renderSettings() {
           ${t('forceUpdateBtn')}
         </button>
         <p style="font-size:10px; opacity:0.5; margin-top:8px;">
-          Current: 4.80.0 \u2022 Use if UI seems outdated.
+          Current: 4.80.1 \u2022 Use if UI seems outdated.
         </p>
       </div>
     </div>
