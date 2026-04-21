@@ -34,7 +34,7 @@ window.state = {
   showMagicImport: false,
   historyMedFilters: []
 };
-const APP_VERSION = '4.81.7';
+const APP_VERSION = '4.81.8';
 const state = window.state;
 
 const GROK_BASE_URL = "https://api.x.ai/v1/chat/completions";
@@ -373,6 +373,8 @@ window._forceReload = async () => {
 
 window.navigate = async (view) => {
   state.currentView = view;
+  state.showAddPlanPanel = false;
+  state.showMagicImport = false;
   await loadData();
   render();
 };
@@ -426,7 +428,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.81.7</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.81.8</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -1252,52 +1254,59 @@ window._setHistoryView = (view) => {
 function renderSettings() {
   return `
     <div class="glass-panel">
-      <div class="text-h2">${t('dataManagement')}</div>
-      <p class="text-body" style="margin-bottom: 20px;">${t('dataNote')}</p>
+      <div class="text-h2">${t('settings')}</div>
       
-      <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px;">
-        <button class="btn" onclick="window.exportData()">${t('exportData')}</button>
-        <button class="btn btn-secondary" onclick="window.confirmClearLogs()" style="border-color: #f59e0b; color: #f59e0b; background: rgba(245, 158, 11, 0.05);">${t('deleteLogs')}</button>
-        <button class="btn btn-secondary" onclick="window.resetToday()" style="border-color: var(--accent-color); color: var(--accent-color); background: rgba(99, 102, 241, 0.05);">${t('resetTodayLbl')}</button>
-        <button class="btn btn-danger" onclick="window.confirmClearAll()" style="margin-top: 8px;">${t('deleteAllData')}</button>
-      </div>
-
-      <div style="background: rgba(99, 102, 241, 0.05); border: 1px dashed rgba(99, 102, 241, 0.3); border-radius: 12px; padding: 16px; margin-bottom: 32px;">
-        <div class="text-h2" style="font-size:16px; margin-bottom:8px;">\uD83D\uDEE0\uFE0F ${t('analytics')} Playground</div>
-        <div style="font-size:11px; color:#94a3b8; margin-bottom:16px;">${t('testDataNote')}</div>
-        
-        <label style="font-size:12px; color:var(--accent-color); font-weight:600;">${t('testDataCount').replace('{n}', '<span id="test-count-val">200</span>')}</label>
-        <input type="range" id="test-data-slider" min="1" max="500" value="200" style="width:100%; margin-bottom:16px;" oninput="document.getElementById('test-count-val').innerText = this.value">
-        
-        <div style="display: flex; gap: 8px;">
-          <button class="btn btn-secondary" style="font-size:12px; flex:1;" onclick="window.generateTestData(document.getElementById('test-data-slider').value)">${t('generateTestBtn')}</button>
-          <button class="btn btn-secondary" style="font-size:12px; flex:1; border-color:#f87171; color:#f87171; background:rgba(239,68,68,0.05);" onclick="window.confirmClearTestData()">${t('clearTestBtn')}</button>
-        </div>
-      </div>
-      
-      <div class="text-h2">AI Configuration</div>
       <div class="form-group">
         <label>${t('enteringApiKey')}</label>
-        <input type="password" id="grok-api-key-input" value="${state.grokKey}" placeholder="xai-...">
+        <input type="password" id="grok-api-key-input" value="${state.grokKey}" placeholder="xai-..." style="margin-bottom:8px;">
       </div>
+
       <div class="form-group">
         <label>${t('defaultRegionLabel')}</label>
-        <div style="display:flex; gap:8px;">
-          <input type="text" id="grok-region-input" value="${state.defaultRegion}" placeholder="${t('regionPlaceholder')}" style="flex:1; font-size:12px;">
+        <div style="display:flex; gap:8px; margin-bottom:8px;">
+          <input type="text" id="grok-region-input" value="${state.defaultRegion || ''}" placeholder="${t('regionPlaceholder')}" style="flex:1; font-size:12px;">
           <button class="btn btn-secondary" style="width:auto; padding:0 12px;" onclick="window._geolocate('grok-region-input')" title="GPS">\uD83D\uDCCD</button>
         </div>
+        <div style="font-size:10px; opacity:0.6;">${t('defaultRegionInfo') || 'Wird f\u00FCr die Arztsuche verwendet.'}</div>
       </div>
-      <div class="form-group" style="position:relative;">
+
+      <div class="form-group">
         <label>${t('modelIdLabel')}</label>
-        <div style="display:flex; gap:8px;">
+        <div style="display:flex; gap:8px; margin-bottom:12px;">
           ${state.availableModels.length > 0 
             ? `<select id="grok-model-input" style="flex:1;">
                 ${state.availableModels.map(m => `<option value="${m}" ${state.grokModel === m ? 'selected' : ''}>${m}</option>`).join('')}
                 <option value="custom">${t('customModel')}</option>
                </select>`
-            : `<input type="text" id="grok-model-input" value="${state.grokModel}" placeholder="grok-4.20-non-reasoning" style="flex:1;">`
+            : `<input type="text" id="grok-model-input" value="${state.grokModel}" placeholder="grok-beta" style="flex:1;">`
           }
           <button class="btn btn-secondary" style="width:auto; padding:0 12px; font-size:12px;" onclick="window.fetchGrokModels()" title="${t('refreshModels')}">\uD83D\uDDD8</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+          <input type="checkbox" id="grok-livesearch-input" ${state.useLiveSearch ? 'checked' : ''} style="width:18px; height:18px; accent-color:var(--accent-color);">
+          <span>${t('enableLiveSearch') || 'Live Web-Suche aktivieren'}</span>
+        </label>
+      </div>
+
+      <div id="settings-msg" style="margin-top:12px; font-size:14px; font-weight:600;"></div>
+      <button class="btn" style="margin-top:16px;" onclick="window.saveSettings()">${t('saveSettings') || 'Einstellungen speichern'}</button>
+    </div>
+
+    <div class="glass-panel">
+      <div class="text-h2">${t('dataManagement')}</div>
+      <p class="text-body" style="margin-bottom: 20px;">${t('dataNote')}</p>
+      
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <button class="btn btn-secondary" style="border-color:var(--accent-color); color:var(--accent-color);" onclick="window.exportData()">${t('exportData')}</button>
+        <button class="btn btn-secondary" onclick="window.confirmClearLogs()" style="border-color: #f59e0b; color: #f59e0b; background: rgba(245, 158, 11, 0.05);">${t('deleteLogs')}</button>
+        <button class="btn btn-danger" onclick="window.confirmClearAll()" style="margin-top: 8px;">${t('deleteAllData')}</button>
+      </div>
+    </div>
+  `;
+}
         </div>
         <div style="font-size:10px; color:#94a3b8; margin-top:4px;">${t('modelSuggestion')}</div>
       </div>
@@ -1324,7 +1333,7 @@ function renderSettings() {
           ${t('forceUpdateBtn')}
         </button>
         <p style="font-size:10px; opacity:0.5; margin-top:8px;">
-          Current: 4.81.7 \u2022 Use if UI seems outdated.
+          Current: 4.81.8 \u2022 Use if UI seems outdated.
         </p>
       </div>
     </div>
@@ -1575,52 +1584,56 @@ window.saveLog = async () => {
   await API.addLog({ medicationId, amount_taken: amount });
   window.navigate('dashboard');
 };
-
 window.savePlan = async () => {
-  const type = state.planType || 'medication';
-  const medicationId = type === 'medication' ? document.getElementById('plan-med').value : null;
-  const doctorName = type === 'appointment' ? document.getElementById('appt-doctor').value : null;
-  const location = type === 'appointment' ? document.getElementById('appt-location').value : null;
-  const phone = type === 'appointment' ? document.getElementById('appt-phone').value : null;
-  const note = type === 'appointment' ? document.getElementById('appt-note').value : null;
-  const isOneTime = type === 'appointment' ? document.getElementById('appt-one-time').checked : false;
-  
-  const timeCategory = type === 'medication' ? document.getElementById('plan-category').value : (isOneTime ? null : document.getElementById('appt-category').value);
-  const dose = type === 'medication' ? document.getElementById('plan-dose').value : null;
-  
-  const frequency = document.getElementById('plan-freq').value;
-  const intervalX = document.getElementById('plan-interval-x').value;
-  const startDateRaw = isOneTime ? document.getElementById('appt-date').value : document.getElementById('plan-start-date').value;
-  const startWeekday = document.getElementById('plan-weekday').value;
-  const startDayOfMonth = document.getElementById('plan-day-of-month').value;
-  
-  if (type === 'medication' && (!medicationId || !dose)) return alert(t('medAndTime'));
-  if (type === 'appointment' && !doctorName) return alert(t('doctorName'));
-  if (isOneTime && !startDateRaw) return alert(t('oneTime'));
-
-  const linkedMetrics = type === 'medication' ? Array.from(document.querySelectorAll('input[name="link-metric"]:checked')).map(cb => cb.value) : [];
-  
-  const plan = { 
-    type,
-    medicationId, 
-    doctorName,
-    location,
-    phone,
-    note,
-    isOneTime,
-    timeCategory, 
-    dose, 
-    frequency, 
-    intervalX, 
-    linkedMetrics,
-    startDate: new Date(startDateRaw).toISOString(),
-    startWeekday,
-    startDayOfMonth
-  };
-  await API.addPlan(plan);
-  state.showAddPlanPanel = false;
-  window.navigate('plans');
+  try {
+    const type = state.planType || 'medication';
+    const medicationId = type === 'medication' ? document.getElementById('plan-med')?.value : null;
+    const doctorName = type === 'appointment' ? document.getElementById('appt-doctor')?.value : null;
+    const location = type === 'appointment' ? document.getElementById('appt-location')?.value : null;
+    const phone = type === 'appointment' ? document.getElementById('appt-phone')?.value : null;
+    const note = type === 'appointment' ? document.getElementById('appt-note')?.value : null;
+    const isOneTime = type === 'appointment' ? document.getElementById('appt-one-time')?.checked : false;
+    
+    const timeCategory = type === 'medication' ? document.getElementById('plan-category')?.value : (isOneTime ? null : document.getElementById('appt-category')?.value);
+    const dose = type === 'medication' ? document.getElementById('plan-dose')?.value : null;
+    
+    const frequency = document.getElementById('plan-freq')?.value || 'daily';
+    const intervalX = document.getElementById('plan-interval-x')?.value || 1;
+    const startDateRaw = isOneTime ? document.getElementById('appt-date')?.value : document.getElementById('plan-start-date')?.value;
+    const startWeekday = document.getElementById('plan-weekday')?.value || 1;
+    const startDayOfMonth = document.getElementById('plan-day-of-month')?.value || 1;
+    
+    if (type === 'medication' && (!medicationId || !dose)) return alert(t('medAndTime') || 'Select Med and dose');
+    if (type === 'appointment' && !doctorName) return alert(t('doctorName') || 'Enter Doctor name');
+    
+    const linkedMetrics = type === 'medication' ? Array.from(document.querySelectorAll('input[name="link-metric"]:checked')).map(cb => cb.value) : [];
+    
+    const plan = { 
+      type,
+      medicationId, 
+      doctorName,
+      location,
+      phone,
+      note,
+      isOneTime,
+      timeCategory, 
+      dose, 
+      frequency, 
+      intervalX, 
+      linkedMetrics,
+      startDate: startDateRaw ? new Date(startDateRaw).toISOString() : new Date().toISOString(),
+      startWeekday,
+      startDayOfMonth
+    };
+    await API.addPlan(plan);
+    state.showAddPlanPanel = false;
+    render();
+  } catch (err) {
+    console.error("Save Plan Error:", err);
+    alert("Error saving: " + err.message);
+  }
 };
+
 
 window.deletePlan = async (id) => {
   if(confirm(t('removeScheduleConfirm'))) {
@@ -2028,8 +2041,8 @@ window.searchDoctorSmart = async () => {
                   </div>
                 ` : ''}
               </div>
-              <button type="button" class="btn" style="height:38px; padding:0; font-size:12px; background:var(--accent-color); color:#000; border:none; font-weight:700;" onclick="window._applyDoctorMatch(${i}, ${JSON.stringify(results).replace(/"/g, '&quot;')})">
-                ${t('chooseOption')}
+              <button type="button" class="btn" style="height:42px; padding:0; font-size:14px; background:var(--accent-color); color:#000; border:none; font-weight:700;" onclick="window._applyDoctorMatch(${i}, ${JSON.stringify(results).replace(/"/g, '&quot;')})">
+                \u2705 \u00DCbernehmen
               </button>
             </div>
           `;
