@@ -367,7 +367,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.57.4</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.57.6</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -1696,7 +1696,9 @@ window.searchDoctorAi = async () => {
        - "name": Use 'Title Firstname Lastname' (e.g., "Dr. John Doe"). Do NOT mix names.
        - "address": Full physical address including street, ZIP, and city.
        - "phone": Contact number. (CRITICAL: Do NOT use placeholder numbers like "12345" or "555-5555". If no real number is found, return empty string).
-    3. ABSOLUTE ACCURACY: Ensure the address matches the doctor's real office. Verify the EXACT First Name. Do NOT guess or hallucinate common first names. If uncertain, return only 'Dr. [Lastname]' or the clinic name.
+    3. ABSOLUTE ACCURACY: Ensure the address matches the doctor's real office. Verify the EXACT First Name.
+       - IMPORTANT: Medical practices often house multiple doctors (e.g., family practices). Ensure the first name is precisely accurate. If unsure of the first name, provide only 'Dr. [Lastname]' or the clinic's name (e.g. 'Gruppenpraxis Stöhr').
+       - Prioritize the primary practitioner or the one matching the specialty.
     4. LANGUAGE: Respond with names and addresses as they appear in the local region.
     5. NO CONVERSATION: Return ONLY valid JSON.
 
@@ -1728,26 +1730,36 @@ window.searchDoctorAi = async () => {
 
     listEl.innerHTML = `
       <div style="font-size:10px; font-weight:700; margin-bottom:4px; opacity:0.6;">${t('doctorSelect')}:</div>
-      <div style="display:flex; flex-direction:column; gap:4px;">
+      <div style="display:flex; flex-direction:column; gap:8px;">
         ${results.map((doc, i) => {
           const mapUrl = `https://www.google.com/maps/search/${encodeURIComponent(doc.name + ' ' + (doc.address || ""))}`;
           return `
-            <div style="display:flex; gap:4px; align-items:stretch;">
-              <button class="btn btn-secondary" style="flex:1; text-align:left; padding:8px; font-size:11px; background:rgba(255,255,255,0.03);" onclick="window._applyDoctorMatch(${i}, ${JSON.stringify(results).replace(/"/g, '&quot;')})">
-                <div style="color:var(--accent-color); display:flex; justify-content:space-between; align-items:flex-start;">
-                  <strong>${doc.name}</strong>
-                  ${doc.phone ? `<span style="opacity:0.6; font-size:9px; white-space:nowrap;">📞 ${doc.phone}</span>` : ''}
+            <div style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:8px;">
+              <div style="display:flex; flex-direction:column; gap:2px;">
+                <div style="color:var(--accent-color); font-size:13px; font-weight:700;">${doc.name}</div>
+                <div style="font-size:10px; opacity:0.7; display:flex; gap:4px; align-items:center;">
+                  <span style="font-size:12px;">📍</span> ${doc.address || '—'}
                 </div>
-                <div style="opacity:0.6; font-size:9px;">📍 ${doc.address}</div>
-              </button>
-              ${doc.phone ? `
-                <a href="tel:${doc.phone.replace(/\s/g,'')}" class="btn btn-secondary" style="width:40px; padding:0; display:flex; align-items:center; justify-content:center; border-color:rgba(255,255,255,0.1);" title="Call">
-                  📞
+                ${doc.phone ? `
+                  <div style="font-size:10px; opacity:0.7; display:flex; gap:4px; align-items:center;">
+                    <span style="font-size:12px;">📞</span> ${doc.phone}
+                  </div>
+                ` : ''}
+              </div>
+              
+              <div style="display:flex; gap:6px; margin-top:4px;">
+                <button class="btn btn-secondary" style="flex:2; height:34px; padding:0; font-size:11px; background:var(--accent-color); color:#111; border:none;" onclick="window._applyDoctorMatch(${i}, ${JSON.stringify(results).replace(/"/g, '&quot;')})">
+                  ${t('chooseOption')}
+                </button>
+                ${doc.phone ? `
+                  <a href="tel:${doc.phone.replace(/\s/g,'')}" class="btn btn-secondary" style="width:34px; height:34px; padding:0; display:flex; align-items:center; justify-content:center; border-color:rgba(255,255,255,0.1);" title="Call">
+                    📞
+                  </a>
+                ` : ''}
+                <a href="${mapUrl}" target="_blank" class="btn btn-secondary" style="width:34px; height:34px; padding:0; display:flex; align-items:center; justify-content:center; border-color:rgba(255,255,255,0.1);" title="Google Maps">
+                  🗺️
                 </a>
-              ` : ''}
-              <a href="${mapUrl}" target="_blank" class="btn btn-secondary" style="width:40px; padding:0; display:flex; align-items:center; justify-content:center; border-color:rgba(255,255,255,0.1);" title="Google Maps">
-                🗺️
-              </a>
+              </div>
             </div>
           `;
         }).join('')}
