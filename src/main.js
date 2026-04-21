@@ -423,7 +423,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.75.0</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.76.0</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -1254,7 +1254,7 @@ function renderSettings() {
           ${t('forceUpdateBtn')}
         </button>
         <p style="font-size:10px; opacity:0.5; margin-top:8px;">
-          Current: 4.75.0 \u2022 Use if UI seems outdated.
+          Current: 4.76.0 \u2022 Use if UI seems outdated.
         </p>
       </div>
     </div>
@@ -2241,6 +2241,21 @@ window._exportSingleEvent = (planId, dateStr) => {
 
 window._exportWeeklyEvents = () => { alert("Exporting..."); };
 
+window._autoUpdateCheck = async () => {
+  try {
+    const res = await fetch(`/version.json?t=${Date.now()}`);
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data.version && data.version !== APP_VERSION) {
+      if (!sessionStorage.getItem('medica_updated')) {
+        console.log(`Auto-Updating: ${APP_VERSION} -> ${data.version}`);
+        sessionStorage.setItem('medica_updated', 'true');
+        await window._forceReload();
+      }
+    }
+  } catch (e) { console.warn("Auto-update check failed", e); }
+};
+
 window.addEventListener('DOMContentLoaded', async () => {
   try {
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
@@ -2268,6 +2283,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     }
     
     await window.navigate('dashboard');
+    window._autoUpdateCheck();
   } catch (err) { document.getElementById('app').innerHTML = `<div style="padding:40px; color:white;">Error: ${err.message}</div>`; }
 });
 
