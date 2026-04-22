@@ -35,7 +35,7 @@ window.state = {
   historyMedFilters: [],
   localDrugs: []
 };
-const APP_VERSION = '4.82.6';
+const APP_VERSION = '4.82.7';
 const state = window.state;
 
 const GROK_BASE_URL = "https://api.x.ai/v1/chat/completions";
@@ -439,7 +439,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.82.6</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.82.7</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -789,8 +789,7 @@ function renderMedications() {
     <div class="glass-panel" id="add-med-panel" style="display: none;">
       <div class="text-h2" id="add-med-title">${t('addMedication')}</div>
       <input type="hidden" id="med-id">
-      <input type="hidden" id="med-hersteller">
-      <input type="hidden" id="med-einsatzgebiet">
+      
       <div class="form-group" style="position: relative;">
         <label>${t('nameLbl')}</label>
         <div style="display:flex; gap:8px;">
@@ -802,6 +801,29 @@ function renderMedications() {
         <div id="local-search-results" style="display:none; position:absolute; top:100%; left:0; right:0; z-index:100; background:rgba(15, 17, 21, 0.95); backdrop-filter:blur(10px); border:1px solid var(--glass-border); border-radius:12px; margin-top:4px; max-height:200px; overflow-y:auto; box-shadow:0 10px 25px rgba(0,0,0,0.5);"></div>
         <div id="med-fda-adverse" style="display:none; margin-top: 8px; font-size: 11px; color: #f87171; background: rgba(0,0,0,0.2); border: 1px solid rgba(239, 68, 68, 0.2); padding: 8px; border-radius: 6px; line-height: 1.4;"></div>
       </div>
+
+      <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 12px; margin-bottom: 20px;">
+        <div style="font-size: 10px; font-weight: 700; color: var(--accent-color); margin-bottom: 8px; text-transform: uppercase;">${t('extendedInfo') || 'Erweiterte Infos'}</div>
+        <div style="display: flex; gap: 12px; margin-bottom: 8px;">
+          <div class="form-group" style="flex:1; margin:0;">
+            <label>${t('hersteller') || 'Hersteller'}</label>
+            <input type="text" id="med-hersteller" placeholder="z.B. G.L. Pharma" style="font-size: 12px;">
+          </div>
+          <div class="form-group" style="flex:1; margin:0;">
+            <label>${t('einsatzgebiet') || 'Einsatzgebiet'}</label>
+            <input type="text" id="med-einsatzgebiet" placeholder="z.B. Blutdruck" style="font-size: 12px;">
+          </div>
+        </div>
+        
+        <div class="form-group" style="margin-top:12px;">
+          <label style="font-size:11px; opacity:0.7;">${t('quickSelectArea') || 'Nach Einsatzgebiet suchen:'}</label>
+          <select id="area-search-select" onchange="window.searchByArea(this.value)" style="font-size:12px; height:36px; border-color:rgba(255,255,255,0.1);">
+            <option value="">${t('chooseArea') || '-- Gebiet wählen --'}</option>
+            ${Array.from(new Set(state.localDrugs.map(d => d.einsatzgebiet || d.bereich))).sort().map(a => `<option value="${a}">${a}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+
       <div style="display: flex; gap: 12px;">
         <div class="form-group" style="flex:1;">
           <label>${t('defaultDose')}</label>
@@ -1681,12 +1703,35 @@ window.searchMedicationLocal = (query) => {
   resultsEl.style.display = 'block';
 };
 
+window.searchByArea = (area) => {
+  if (!area) {
+    document.getElementById('local-search-results').style.display = 'none';
+    return;
+  }
+  
+  const matches = state.localDrugs.filter(d => (d.einsatzgebiet || d.bereich) === area).slice(0, 20);
+  const resultsEl = document.getElementById('local-search-results');
+  
+  resultsEl.innerHTML = matches.map(m => `
+    <div style="padding:10px 14px; cursor:pointer; border-bottom:1px solid rgba(255,255,255,0.05); transition:background 0.2s;" 
+         onmouseover="this.style.background='rgba(255,255,255,0.05)'" 
+         onmouseout="this.style.background='transparent'"
+         onclick="window.applyLocalDrug(${JSON.stringify(m).replace(/"/g, '&quot;')})">
+      <div style="font-weight:700; color:var(--accent-color); font-size:13px;">${m.name}</div>
+      <div style="font-size:10px; opacity:0.6; margin-top:2px;">${m.wirkstoff} \u2022 ${m.hersteller}</div>
+    </div>
+  `).join('');
+  resultsEl.style.display = 'block';
+};
+
 window.applyLocalDrug = (drug) => {
   document.getElementById('med-name').value = drug.name;
   document.getElementById('med-dose').value = drug.standard_dosis.split(' ')[0].replace(/[^0-9,-]/g, '') || "";
   document.getElementById('med-hersteller').value = drug.hersteller || "";
   document.getElementById('med-einsatzgebiet').value = drug.einsatzgebiet || "";
   document.getElementById('local-search-results').style.display = 'none';
+  const areaSelect = document.getElementById('area-search-select');
+  if (areaSelect) areaSelect.value = "";
 };
 
 window.searchWithGrok = async () => {
