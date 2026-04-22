@@ -36,7 +36,7 @@ window.state = {
   localDrugs: [],
   localDoctors: []
 };
-const APP_VERSION = '4.82.15';
+const APP_VERSION = '4.82.16';
 const state = window.state;
 
 const GROK_BASE_URL = "https://api.x.ai/v1/chat/completions";
@@ -450,7 +450,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.82.15</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.82.16</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -1787,12 +1787,12 @@ window.searchDoctorLocal = (query) => {
          onclick="window.applyLocalDoctor(${JSON.stringify(m).replace(/"/g, '&quot;')})">
       <div style="display:flex; justify-content:space-between; align-items:flex-start;">
         <div style="font-weight:700; color:var(--accent-color); font-size:13px;">${m.name}</div>
-        ${m.kasse ? \`<div style="font-size:8px; background:rgba(74,222,128,0.1); color:var(--accent-color); padding:1px 5px; border-radius:4px; border:1px solid rgba(74,222,128,0.2);">Kasse</div>\` : ''}
+        ${m.kasse ? '<div style="font-size:8px; background:rgba(74,222,128,0.1); color:var(--accent-color); padding:1px 5px; border-radius:4px; border:1px solid rgba(74,222,128,0.2);">Kasse</div>' : ''}
       </div>
-      <div style="font-size:10px; opacity:0.8; margin-top:2px;">\${m.fachrichtung}</div>
-      <div style="font-size:9px; opacity:0.5; margin-top:2px;">\uD83D\uDCCD \${m.adresse}</div>
+      <div style="font-size:10px; opacity:0.8; margin-top:2px;">${m.fachrichtung}</div>
+      <div style="font-size:9px; opacity:0.5; margin-top:2px;">\uD83D\uDCCD ${m.adresse}</div>
     </div>
-  \`).join('');
+  `).join('');
   resultsEl.style.display = 'block';
 };
 
