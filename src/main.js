@@ -35,7 +35,7 @@ window.state = {
   historyMedFilters: [],
   localDrugs: []
 };
-const APP_VERSION = '4.82.8';
+const APP_VERSION = '4.82.9';
 const state = window.state;
 
 const GROK_BASE_URL = "https://api.x.ai/v1/chat/completions";
@@ -184,8 +184,8 @@ const i18n = {
     extendedInfo: 'Extended Info',
     hersteller: 'Manufacturer',
     einsatzgebiet: 'Area of Use',
-    quickSelectArea: 'Search by Area:',
-    chooseArea: '-- Choose Area --'
+    quickSelectArea: 'Search by Class:',
+    chooseArea: '-- Choose Class --'
   },
   de: {
     settings:'Einstellungen',
@@ -311,8 +311,8 @@ const i18n = {
     extendedInfo: 'Erweiterte Infos',
     hersteller: 'Hersteller',
     einsatzgebiet: 'Einsatzgebiet',
-    quickSelectArea: 'Nach Einsatzgebiet suchen:',
-    chooseArea: '-- Gebiet w\u00E4hlen --',
+    quickSelectArea: 'Nach Klasse suchen:',
+    chooseArea: '-- Klasse w\u00E4hlen --',
     specialties: [
       'Allgemeinmediziner', 'Internist', 'Kardiologe', 'Zahnarzt', 'Urologe', 
       'Gyn\u00E4kologe', 'Orthop\u00E4de', 'Hautarzt', 'Augenarzt', 'HNO-Arzt', 
@@ -449,7 +449,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.82.8</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.82.9</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -829,9 +829,9 @@ function renderMedications() {
         
         <div class="form-group" style="margin:0;">
           <label style="font-size: 12px; opacity: 0.8; font-weight: 600; margin-bottom: 8px; display: block;">${t('quickSelectArea')}</label>
-          <select id="area-search-select" onchange="window.searchByArea(this.value)" style="font-size: 14px; height: 48px; border-color: rgba(255,255,255,0.15); padding: 0 12px; border-radius: 10px;">
+          <select id="area-search-select" onchange="window.searchByClass(this.value)" style="font-size: 14px; height: 48px; border-color: rgba(255,255,255,0.15); padding: 0 12px; border-radius: 10px;">
             <option value="">${t('chooseArea')}</option>
-            ${Array.from(new Set(state.localDrugs.map(d => d.einsatzgebiet || d.bereich))).sort().map(a => `<option value="${a}">${a}</option>`).join('')}
+            ${Array.from(new Set(state.localDrugs.map(d => d.klasse))).sort().map(k => `<option value="${k}">${k}</option>`).join('')}
           </select>
         </div>
       </div>
@@ -1695,7 +1695,8 @@ window.searchMedicationLocal = (query) => {
   const matches = state.localDrugs.filter(d => 
     d.name.toLowerCase().includes(q) || 
     d.wirkstoff.toLowerCase().includes(q) || 
-    (d.einsatzgebiet && d.einsatzgebiet.toLowerCase().includes(q))
+    (d.einsatzgebiet && d.einsatzgebiet.toLowerCase().includes(q)) ||
+    (d.klasse && d.klasse.toLowerCase().includes(q))
   ).slice(0, 10);
 
   if (matches.length === 0) {
@@ -1715,13 +1716,13 @@ window.searchMedicationLocal = (query) => {
   resultsEl.style.display = 'block';
 };
 
-window.searchByArea = (area) => {
-  if (!area) {
+window.searchByClass = (klasse) => {
+  if (!klasse) {
     document.getElementById('local-search-results').style.display = 'none';
     return;
   }
   
-  const matches = state.localDrugs.filter(d => (d.einsatzgebiet || d.bereich) === area).slice(0, 20);
+  const matches = state.localDrugs.filter(d => d.klasse === klasse).slice(0, 30);
   const resultsEl = document.getElementById('local-search-results');
   
   resultsEl.innerHTML = matches.map(m => `
@@ -1730,7 +1731,7 @@ window.searchByArea = (area) => {
          onmouseout="this.style.background='transparent'"
          onclick="window.applyLocalDrug(${JSON.stringify(m).replace(/"/g, '&quot;')})">
       <div style="font-weight:700; color:var(--accent-color); font-size:13px;">${m.name}</div>
-      <div style="font-size:10px; opacity:0.6; margin-top:2px;">${m.wirkstoff} \u2022 ${m.hersteller}</div>
+      <div style="font-size:10px; opacity:0.6; margin-top:2px;">${m.wirkstoff} \u2022 ${m.einsatzgebiet || m.klasse}</div>
     </div>
   `).join('');
   resultsEl.style.display = 'block';
