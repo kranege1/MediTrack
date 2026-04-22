@@ -36,7 +36,7 @@ window.state = {
   localDrugs: [],
   localDoctors: []
 };
-const APP_VERSION = '4.82.17';
+const APP_VERSION = '4.82.18';
 const state = window.state;
 
 const GROK_BASE_URL = "https://api.x.ai/v1/chat/completions";
@@ -450,7 +450,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.82.17</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.82.18</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -584,8 +584,8 @@ function renderDashboard() {
             </div>
             <div style="display:flex; align-items:center; gap:8px;">
               ${!isAppt && isToday && !isCompleted ? `
-                <button class="btn btn-secondary" style="width:auto; padding:10px 14px; font-size:14px; border-color:var(--accent-color); color:var(--accent-color); position:relative; z-index:5;" onclick="window.confirmIntake('${p.id}', '${targetDateISO}')">\u2713</button>
-                <button class="btn btn-secondary" style="width:auto; padding:10px 14px; font-size:14px; border-color:#f87171; color:#f87171; position:relative; z-index:5;" onclick="window.skipIntake('${p.id}', '${targetDateISO}')">\u2715</button>
+                <button class="btn btn-secondary" style="width:auto; padding:10px 14px; font-size:14px; border-color:var(--accent-color); color:var(--accent-color);" onclick="window.confirmIntake('${p.id}', '${targetDateISO}')">\u2713</button>
+                <button class="btn btn-secondary" style="width:auto; padding:10px 14px; font-size:14px; border-color:#f87171; color:#f87171;" onclick="window.skipIntake('${p.id}', '${targetDateISO}')">\u2715</button>
               ` : (!isAppt && isToday && isCompleted ? `<div style="color:var(--accent-color); font-size:10px; font-weight:700;">${t('completed')}</div>` : '')}
               <button class="btn btn-secondary" style="width:auto; padding:10px 14px; font-size:14px; border-color:rgba(255,255,255,0.15);" onclick="window._exportSingleEvent('${p.id}', '${targetDate.toISOString()}')" title="${t('addToCalendar')}">\uD83D\uDDD3\uFE0F</button>
             </div>
@@ -1492,9 +1492,7 @@ window.showAdverseOverlay = (id, rawText, name) => {
       padding: 24px; padding-top: max(24px, env(safe-area-inset-top));
       overflow-y: auto; background: rgba(15, 17, 21, 0.95);
       backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-      user-select: auto;
-      border-radius: 0;
-      touch-action: pan-y;
+      border: none; border-radius: 0;
     `;
     app.appendChild(overlay);
   }
