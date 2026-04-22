@@ -1121,6 +1121,14 @@
                     "standard_dosis": "Tabletten",
                     "einsatzgebiet": "Starker Juckreiz/Allergie",
                     "klasse": "Allergie"
+                },
+                {
+                    "name": "Cetirizin HEXAL",
+                    "wirkstoff": "Cetirizin",
+                    "hersteller": "Hexal",
+                    "standard_dosis": "10mg",
+                    "einsatzgebiet": "Heuschnupfen/Nesselsucht",
+                    "klasse": "Allergie"
                 }
             ]
         }
