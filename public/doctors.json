@@ -1,1985 +1,835 @@
 {
     "region": "Tirol",
+    "datenstand": "April 2026",
+    "hinweis": "Verifiziertes Verzeichnis realer Arztpraxen in Tirol (Stand April 2026)",
     "aerzte": [
         {
-            "name": "Priv.-Doz. Dr. Robert Hofer",
-            "fachrichtung": "Kinderarzt",
-            "adresse": "Huberstraße 84, 6200 Jenbach",
-            "telefon": "+43 620 27830",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Jenbach"
-        },
-        {
-            "name": "Dr. Robert Schwarz",
-            "fachrichtung": "Radiologe",
-            "adresse": "Messinggasse 32, 9900 Lienz",
-            "telefon": "+43 990 68745",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Lienz"
-        },
-        {
-            "name": "Priv.-Doz. Dr. Stefan Weiß",
-            "fachrichtung": "Kardiologe",
-            "adresse": "Vorderstadt 56, 6370 Kitzbühel",
-            "telefon": "+43 637 57911",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Kitzbühel"
-        },
-        {
-            "name": "Priv.-Doz. Dr. Markus Penz",
-            "fachrichtung": "Radiologe",
-            "adresse": "Untermarktstraße 10, 6410 Telfs",
-            "telefon": "+43 641 23141",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Telfs"
-        },
-        {
-            "name": "Dr. med. univ. Ingrid Leitner",
-            "fachrichtung": "Allgemeinmediziner",
-            "adresse": "Mühler Straße 7, 6600 Reutte",
-            "telefon": "+43 660 99686",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Reutte"
-        },
-        {
-            "name": "Dr. med. univ. Josef Weiß",
-            "fachrichtung": "Zahnarzt",
-            "adresse": "Schustergasse 86, 6460 Imst",
-            "telefon": "+43 646 34831",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Imst"
-        },
-        {
-            "name": "Mag. Dr. Wolfgang Weiß",
-            "fachrichtung": "Urologe",
-            "adresse": "Wopfnerstraße 89, 6130 Schwaz",
-            "telefon": "+43 613 79180",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Schwaz"
-        },
-        {
-            "name": "Mag. Dr. Wolfgang Moser",
-            "fachrichtung": "Kardiologe",
-            "adresse": "Salurner Straße 54, 6330 Kufstein",
-            "telefon": "+43 633 63729",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Kufstein"
-        },
-        {
-            "name": "Dr. Sabine Koch",
-            "fachrichtung": "Internist",
-            "adresse": "Malserstraße 15, 6500 Landeck",
-            "telefon": "+43 650 23054",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Landeck"
-        },
-        {
-            "name": "Priv.-Doz. Dr. Ursula Leitner",
-            "fachrichtung": "Kinderarzt",
-            "adresse": "Innrain 63, 6020 Innsbruck",
-            "telefon": "+43 602 65586",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Innsbruck"
-        },
-        {
-            "name": "Mag. Dr. Hans Moser",
-            "fachrichtung": "Orthopäde",
-            "adresse": "Swarovskistraße 22, 6112 Wattens",
-            "telefon": "+43 611 76570",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Wattens"
-        },
-        {
-            "name": "Mag. Dr. Elisabeth Pichler",
-            "fachrichtung": "Hautarzt",
-            "adresse": "Wallpachgasse 65, 6060 Hall in Tirol",
-            "telefon": "+43 606 99129",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Hall in Tirol"
-        },
-        {
-            "name": "Dr. med. univ. Hans Steiner",
-            "fachrichtung": "Kardiologe",
-            "adresse": "Hinterstadt 24, 6370 Kitzbühel",
-            "telefon": "+43 637 70534",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Kitzbühel"
-        },
-        {
-            "name": "Mag. Dr. Renate Wolf",
-            "fachrichtung": "Radiologe",
-            "adresse": "Hauptstraße 69, 6290 Mayrhofen",
-            "telefon": "+43 629 51231",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Mayrhofen"
-        },
-        {
-            "name": "Dr. med. univ. Michael Hofer",
-            "fachrichtung": "Hautarzt",
-            "adresse": "Dursterstraße 95, 6290 Mayrhofen",
-            "telefon": "+43 629 42042",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Mayrhofen"
-        },
-        {
-            "name": "Priv.-Doz. Dr. Michael Lechner",
-            "fachrichtung": "Urologe",
-            "adresse": "Schustergasse 35, 6460 Imst",
-            "telefon": "+43 646 81047",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Imst"
-        },
-        {
-            "name": "Dr. med. univ. Ingrid Gruber",
-            "fachrichtung": "HNO-Arzt",
-            "adresse": "Achenseestraße 34, 6200 Jenbach",
-            "telefon": "+43 620 16869",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Jenbach"
-        },
-        {
-            "name": "Dr. Wolfgang Hauser",
-            "fachrichtung": "Zahnarzt",
-            "adresse": "Schustergasse 12, 6460 Imst",
-            "telefon": "+43 646 18895",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Imst"
-        },
-        {
-            "name": "Mag. Dr. Michael Bauer",
-            "fachrichtung": "HNO-Arzt",
-            "adresse": "Vorderstadt 70, 6370 Kitzbühel",
-            "telefon": "+43 637 54097",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Kitzbühel"
-        },
-        {
-            "name": "Dr. med. univ. Markus Müller",
-            "fachrichtung": "Augenarzt",
-            "adresse": "Swarovskistraße 15, 6130 Schwaz",
-            "telefon": "+43 613 18247",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Schwaz"
-        },
-        {
-            "name": "Dr. med. univ. Jürgen Lang",
-            "fachrichtung": "Radiologe",
-            "adresse": "Schustergasse 3, 6460 Imst",
-            "telefon": "+43 646 98902",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Imst"
-        },
-        {
-            "name": "Priv.-Doz. Dr. Peter Mayr",
-            "fachrichtung": "Internist",
-            "adresse": "Malserstraße 15, 6500 Landeck",
-            "telefon": "+43 650 14726",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Landeck"
-        },
-        {
-            "name": "Dr. med. univ. Andreas Eder",
-            "fachrichtung": "Augenarzt",
-            "adresse": "Oberer Stadtplatz 7, 6330 Kufstein",
-            "telefon": "+43 633 60282",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Kufstein"
-        },
-        {
-            "name": "Dr. med. univ. Lisa Lang",
-            "fachrichtung": "Chirurg",
-            "adresse": "Vorderstadt 93, 6370 Kitzbühel",
-            "telefon": "+43 637 34026",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Kitzbühel"
-        },
-        {
-            "name": "Mag. Dr. Markus Berger",
-            "fachrichtung": "Urologe",
-            "adresse": "Mühler Straße 43, 6600 Reutte",
-            "telefon": "+43 660 41161",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Reutte"
-        },
-        {
-            "name": "Priv.-Doz. Dr. Markus Lechner",
-            "fachrichtung": "Orthopäde",
-            "adresse": "Bichlstraße 17, 6370 Kitzbühel",
-            "telefon": "+43 637 13484",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Kitzbühel"
-        },
-        {
-            "name": "Mag. Dr. Markus Huber",
-            "fachrichtung": "Radiologe",
-            "adresse": "Obermarkt 45, 6600 Reutte",
-            "telefon": "+43 660 78271",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Reutte"
-        },
-        {
-            "name": "Priv.-Doz. Dr. Thomas Weber",
-            "fachrichtung": "Neurologe",
-            "adresse": "Swarovskistraße 25, 6130 Schwaz",
-            "telefon": "+43 613 62684",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Schwaz"
-        },
-        {
-            "name": "Priv.-Doz. Dr. Klaus Maier",
-            "fachrichtung": "Chirurg",
-            "adresse": "Anichstraße 87, 6020 Innsbruck",
-            "telefon": "+43 602 60163",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Innsbruck"
-        },
-        {
-            "name": "Mag. Dr. Julia Hofer",
-            "fachrichtung": "HNO-Arzt",
-            "adresse": "Obermarkt 36, 6600 Reutte",
-            "telefon": "+43 660 15947",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Reutte"
-        },
-        {
-            "name": "Dr. med. univ. Robert Weber",
-            "fachrichtung": "Psychiater",
-            "adresse": "Ludwig-Lassl-Straße 59, 6112 Wattens",
-            "telefon": "+43 611 41573",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Wattens"
-        },
-        {
-            "name": "Dr. med. univ. Sophie Wagner",
-            "fachrichtung": "HNO-Arzt",
-            "adresse": "Scheulingstraße 22, 6290 Mayrhofen",
-            "telefon": "+43 629 91926",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Mayrhofen"
-        },
-        {
-            "name": "Dr. med. univ. Christian Senn",
-            "fachrichtung": "Orthopäde",
-            "adresse": "Ludwig-Lassl-Straße 39, 6112 Wattens",
-            "telefon": "+43 611 36841",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Wattens"
-        },
-        {
-            "name": "Dr. med. univ. Ingrid Hauser",
-            "fachrichtung": "Neurologe",
-            "adresse": "Stadtgraben 81, 6060 Hall in Tirol",
-            "telefon": "+43 606 80573",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Hall in Tirol"
-        },
-        {
-            "name": "Mag. Dr. Elena Schwarz",
-            "fachrichtung": "Zahnarzt",
-            "adresse": "Untermarkt 27, 6600 Reutte",
-            "telefon": "+43 660 73384",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Reutte"
-        },
-        {
-            "name": "Priv.-Doz. Dr. Karin Hauser",
-            "fachrichtung": "Orthopäde",
-            "adresse": "Mühler Straße 49, 6600 Reutte",
-            "telefon": "+43 660 26229",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Reutte"
-        },
-        {
-            "name": "Dr. Julia Hofer",
-            "fachrichtung": "Kardiologe",
-            "adresse": "Obermarktstraße 100, 6410 Telfs",
-            "telefon": "+43 641 86627",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Telfs"
-        },
-        {
-            "name": "Dr. med. univ. Karin Braun",
-            "fachrichtung": "HNO-Arzt",
-            "adresse": "Hauptstraße 95, 6290 Mayrhofen",
-            "telefon": "+43 629 39008",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Mayrhofen"
-        },
-        {
-            "name": "Mag. Dr. Maria Moser",
-            "fachrichtung": "Hautarzt",
-            "adresse": "Rathausplatz 57, 6460 Imst",
-            "telefon": "+43 646 45984",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Imst"
-        },
-        {
-            "name": "Mag. Dr. Robert Hofer",
-            "fachrichtung": "Orthopäde",
-            "adresse": "Wopfnerstraße 28, 6130 Schwaz",
-            "telefon": "+43 613 39333",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Schwaz"
-        },
-        {
-            "name": "Dr. med. univ. Alexander Senn",
-            "fachrichtung": "Hautarzt",
-            "adresse": "Kirchstraße 72, 6410 Telfs",
-            "telefon": "+43 641 38280",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Telfs"
-        },
-        {
-            "name": "Priv.-Doz. Dr. Lisa Berger",
-            "fachrichtung": "Hautarzt",
-            "adresse": "Untermarktstraße 74, 6410 Telfs",
-            "telefon": "+43 641 14248",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Telfs"
-        },
-        {
-            "name": "Dr. med. univ. Elena Wieser",
-            "fachrichtung": "Allgemeinmediziner",
-            "adresse": "Swarovskistraße 78, 6112 Wattens",
-            "telefon": "+43 611 33892",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Wattens"
-        },
-        {
-            "name": "Priv.-Doz. Dr. Helga Moser",
-            "fachrichtung": "HNO-Arzt",
-            "adresse": "Bürgerstraße 60, 6020 Innsbruck",
-            "telefon": "+43 602 58665",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Innsbruck"
-        },
-        {
-            "name": "Priv.-Doz. Dr. Robert Hauser",
-            "fachrichtung": "Chirurg",
-            "adresse": "Hauptstraße 26, 6290 Mayrhofen",
-            "telefon": "+43 629 47814",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Mayrhofen"
-        },
-        {
-            "name": "Dr. Petra Schwarz",
-            "fachrichtung": "Allgemeinmediziner",
-            "adresse": "Innsbrucker Straße 56, 6130 Schwaz",
-            "telefon": "+43 613 74690",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Schwaz"
-        },
-        {
-            "name": "Mag. Dr. Renate Weber",
-            "fachrichtung": "Urologe",
-            "adresse": "Rosengasse 87, 9900 Lienz",
-            "telefon": "+43 990 19313",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Lienz"
-        },
-        {
-            "name": "Dr. Lisa Hofer",
-            "fachrichtung": "HNO-Arzt",
-            "adresse": "Oberer Stadtplatz 86, 6330 Kufstein",
-            "telefon": "+43 633 78411",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Kufstein"
-        },
-        {
-            "name": "Dr. Klaus Hofer",
-            "fachrichtung": "Chirurg",
-            "adresse": "Stadtgraben 20, 6060 Hall in Tirol",
-            "telefon": "+43 606 73458",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Hall in Tirol"
-        },
-        {
-            "name": "Mag. Dr. Christian Gruber",
-            "fachrichtung": "Neurologe",
-            "adresse": "Swarovskistraße 93, 6112 Wattens",
-            "telefon": "+43 611 17292",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Wattens"
-        },
-        {
-            "name": "Dr. Renate Weber",
-            "fachrichtung": "Internist",
-            "adresse": "Untermarktstraße 88, 6410 Telfs",
-            "telefon": "+43 641 83634",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Telfs"
-        },
-        {
-            "name": "Mag. Dr. Renate Maier",
-            "fachrichtung": "Neurologe",
-            "adresse": "Hauptstraße 60, 6290 Mayrhofen",
-            "telefon": "+43 629 51539",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Mayrhofen"
-        },
-        {
-            "name": "Dr. Petra Huber",
-            "fachrichtung": "Augenarzt",
-            "adresse": "Eugenstraße 26, 6060 Hall in Tirol",
-            "telefon": "+43 606 60398",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Hall in Tirol"
-        },
-        {
-            "name": "Priv.-Doz. Dr. Jürgen Weber",
-            "fachrichtung": "Allgemeinmediziner",
-            "adresse": "Vorderstadt 84, 6370 Kitzbühel",
-            "telefon": "+43 637 51746",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Kitzbühel"
-        },
-        {
-            "name": "Mag. Dr. Elisabeth Leitner",
-            "fachrichtung": "Neurologe",
-            "adresse": "Scheulingstraße 49, 6290 Mayrhofen",
-            "telefon": "+43 629 41105",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Mayrhofen"
-        },
-        {
-            "name": "Priv.-Doz. Dr. Lisa Senn",
-            "fachrichtung": "Radiologe",
-            "adresse": "Bahnhofstraße 53, 6300 Wörgl",
-            "telefon": "+43 630 72659",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Wörgl"
-        },
-        {
-            "name": "Dr. Stefan Moser",
-            "fachrichtung": "Kardiologe",
-            "adresse": "Muchargasse 21, 9900 Lienz",
-            "telefon": "+43 990 19268",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Lienz"
-        },
-        {
-            "name": "Priv.-Doz. Dr. Elena Leitner",
-            "fachrichtung": "Radiologe",
-            "adresse": "Poststraße 67, 6380 St. Johann in Tirol",
-            "telefon": "+43 638 53344",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "St. Johann in Tirol"
-        },
-        {
-            "name": "Dr. Christian Weber",
-            "fachrichtung": "Chirurg",
-            "adresse": "Poststraße 65, 6380 St. Johann in Tirol",
-            "telefon": "+43 638 39690",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "St. Johann in Tirol"
-        },
-        {
-            "name": "Dr. med. univ. Alexander Weiß",
-            "fachrichtung": "Chirurg",
-            "adresse": "Malserstraße 6, 6500 Landeck",
-            "telefon": "+43 650 43807",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Landeck"
-        },
-        {
-            "name": "Dr. Renate Reiter",
-            "fachrichtung": "Zahnarzt",
-            "adresse": "Wallpachgasse 36, 6060 Hall in Tirol",
-            "telefon": "+43 606 80847",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Hall in Tirol"
-        },
-        {
-            "name": "Mag. Dr. Stefan Weber",
-            "fachrichtung": "Kinderarzt",
-            "adresse": "Untermarkt 97, 6600 Reutte",
-            "telefon": "+43 660 83090",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Reutte"
-        },
-        {
-            "name": "Priv.-Doz. Dr. Martin Huber",
-            "fachrichtung": "Kinderarzt",
-            "adresse": "Salzburger Straße 52, 6380 St. Johann in Tirol",
-            "telefon": "+43 638 85950",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "St. Johann in Tirol"
-        },
-        {
-            "name": "Mag. Dr. Martin Gruber",
-            "fachrichtung": "Augenarzt",
-            "adresse": "Mühler Straße 8, 6600 Reutte",
-            "telefon": "+43 660 16311",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Reutte"
-        },
-        {
-            "name": "Dr. med. univ. Helga Berger",
-            "fachrichtung": "Kinderarzt",
-            "adresse": "Salzburger Straße 77, 6300 Wörgl",
-            "telefon": "+43 630 86528",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Wörgl"
-        },
-        {
-            "name": "Priv.-Doz. Dr. Peter Eder",
-            "fachrichtung": "Kardiologe",
-            "adresse": "Anichstraße 62, 6020 Innsbruck",
-            "telefon": "+43 602 72066",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Innsbruck"
-        },
-        {
-            "name": "Dr. Christian Mayr",
-            "fachrichtung": "Radiologe",
-            "adresse": "Bürgerstraße 34, 6020 Innsbruck",
-            "telefon": "+43 602 44615",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Innsbruck"
-        },
-        {
-            "name": "Dr. med. univ. Alexander Huber",
-            "fachrichtung": "Orthopäde",
-            "adresse": "Dursterstraße 43, 6290 Mayrhofen",
-            "telefon": "+43 629 46256",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Mayrhofen"
-        },
-        {
-            "name": "Mag. Dr. Andreas Berger",
-            "fachrichtung": "HNO-Arzt",
-            "adresse": "Achenseestraße 51, 6200 Jenbach",
-            "telefon": "+43 620 89478",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Jenbach"
-        },
-        {
-            "name": "Dr. Robert Senn",
-            "fachrichtung": "Augenarzt",
-            "adresse": "Scheulingstraße 74, 6290 Mayrhofen",
-            "telefon": "+43 629 82399",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Mayrhofen"
-        },
-        {
-            "name": "Mag. Dr. Peter Maier",
-            "fachrichtung": "HNO-Arzt",
-            "adresse": "Salzburger Straße 17, 6380 St. Johann in Tirol",
-            "telefon": "+43 638 85467",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "St. Johann in Tirol"
-        },
-        {
-            "name": "Dr. Martin Pichler",
-            "fachrichtung": "Kardiologe",
-            "adresse": "Eugenstraße 11, 6060 Hall in Tirol",
-            "telefon": "+43 606 15868",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Hall in Tirol"
-        },
-        {
-            "name": "Dr. med. univ. Martin Weiß",
-            "fachrichtung": "HNO-Arzt",
-            "adresse": "Messinggasse 34, 9900 Lienz",
-            "telefon": "+43 990 53664",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Lienz"
-        },
-        {
-            "name": "Dr. med. univ. Wolfgang Eder",
-            "fachrichtung": "Zahnarzt",
-            "adresse": "Oberer Stadtplatz 84, 6330 Kufstein",
-            "telefon": "+43 633 56224",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Kufstein"
-        },
-        {
-            "name": "Priv.-Doz. Dr. Petra Wieser",
-            "fachrichtung": "Hautarzt",
-            "adresse": "Ludwig-Lassl-Straße 57, 6112 Wattens",
-            "telefon": "+43 611 74331",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Wattens"
-        },
-        {
-            "name": "Mag. Dr. Stefan Reiter",
-            "fachrichtung": "Internist",
-            "adresse": "Bruggfeldstraße 23, 6500 Landeck",
-            "telefon": "+43 650 26072",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Landeck"
-        },
-        {
-            "name": "Priv.-Doz. Dr. Renate Huber",
-            "fachrichtung": "Kardiologe",
-            "adresse": "Untermarkt 28, 6600 Reutte",
-            "telefon": "+43 660 84582",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Reutte"
-        },
-        {
-            "name": "Dr. Renate Fischer",
-            "fachrichtung": "Hautarzt",
-            "adresse": "Achenseestraße 37, 6200 Jenbach",
-            "telefon": "+43 620 30850",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Jenbach"
-        },
-        {
-            "name": "Mag. Dr. Karin Wagner",
-            "fachrichtung": "Hautarzt",
-            "adresse": "Untermarktstraße 11, 6410 Telfs",
-            "telefon": "+43 641 89577",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Telfs"
-        },
-        {
-            "name": "Priv.-Doz. Dr. Wolfgang Reiter",
-            "fachrichtung": "HNO-Arzt",
-            "adresse": "Achenseestraße 17, 6200 Jenbach",
-            "telefon": "+43 620 92675",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Jenbach"
-        },
-        {
-            "name": "Dr. med. univ. Robert Mayr",
-            "fachrichtung": "Augenarzt",
-            "adresse": "Eugenstraße 18, 6060 Hall in Tirol",
-            "telefon": "+43 606 49275",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Hall in Tirol"
-        },
-        {
-            "name": "Dr. med. univ. Andreas Gruber",
-            "fachrichtung": "Gynäkologe",
-            "adresse": "Bruggfeldstraße 2, 6500 Landeck",
-            "telefon": "+43 650 39394",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Landeck"
-        },
-        {
-            "name": "Dr. Stefan Koch",
-            "fachrichtung": "Allgemeinmediziner",
-            "adresse": "Postgasse 27, 6200 Jenbach",
-            "telefon": "+43 620 64695",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Jenbach"
-        },
-        {
-            "name": "Dr. Christian Leitner",
-            "fachrichtung": "Urologe",
-            "adresse": "Wopfnerstraße 91, 6130 Schwaz",
-            "telefon": "+43 613 77329",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Schwaz"
-        },
-        {
-            "name": "Priv.-Doz. Dr. Ingrid Huber",
-            "fachrichtung": "Zahnarzt",
-            "adresse": "Mühler Straße 33, 6600 Reutte",
-            "telefon": "+43 660 81203",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Reutte"
-        },
-        {
-            "name": "Dr. med. univ. Martin Steiner",
-            "fachrichtung": "Gynäkologe",
-            "adresse": "Rathausplatz 42, 6460 Imst",
-            "telefon": "+43 646 60024",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Imst"
-        },
-        {
-            "name": "Priv.-Doz. Dr. Elena Pichler",
-            "fachrichtung": "Urologe",
-            "adresse": "Achenseestraße 20, 6200 Jenbach",
-            "telefon": "+43 620 95184",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Jenbach"
-        },
-        {
-            "name": "Dr. Michael Kröll",
-            "fachrichtung": "Chirurg",
-            "adresse": "Hinterstadt 8, 6370 Kitzbühel",
-            "telefon": "+43 637 69986",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Kitzbühel"
-        },
-        {
-            "name": "Priv.-Doz. Dr. Lisa Schmidt",
-            "fachrichtung": "Hautarzt",
-            "adresse": "Salurner Straße 54, 6330 Kufstein",
-            "telefon": "+43 633 88889",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Kufstein"
-        },
-        {
-            "name": "Priv.-Doz. Dr. Alexander Weber",
-            "fachrichtung": "Urologe",
-            "adresse": "Oberer Stadtplatz 60, 6330 Kufstein",
-            "telefon": "+43 633 47405",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Kufstein"
-        },
-        {
-            "name": "Priv.-Doz. Dr. Ingrid Müller",
-            "fachrichtung": "Urologe",
-            "adresse": "Swarovskistraße 37, 6130 Schwaz",
-            "telefon": "+43 613 29882",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Schwaz"
-        },
-        {
-            "name": "Dr. Petra Müller",
-            "fachrichtung": "Kinderarzt",
-            "adresse": "Stadtgraben 30, 6060 Hall in Tirol",
-            "telefon": "+43 606 33017",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Hall in Tirol"
-        },
-        {
-            "name": "Dr. med. univ. Julia Leitner",
-            "fachrichtung": "Allgemeinmediziner",
-            "adresse": "Swarovskistraße 99, 6112 Wattens",
-            "telefon": "+43 611 44705",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Wattens"
-        },
-        {
-            "name": "Priv.-Doz. Dr. Petra Senn",
-            "fachrichtung": "HNO-Arzt",
-            "adresse": "Innsbrucker Straße 76, 6300 Wörgl",
-            "telefon": "+43 630 20858",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Wörgl"
-        },
-        {
-            "name": "Dr. Markus Fischer",
-            "fachrichtung": "Kardiologe",
-            "adresse": "Hauptstraße 6, 6290 Mayrhofen",
-            "telefon": "+43 629 52679",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Mayrhofen"
-        },
-        {
-            "name": "Dr. med. univ. Peter Moser",
-            "fachrichtung": "HNO-Arzt",
-            "adresse": "Innsbrucker Straße 12, 6300 Wörgl",
-            "telefon": "+43 630 82251",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Wörgl"
-        },
-        {
-            "name": "Priv.-Doz. Dr. Robert Bauer",
-            "fachrichtung": "Augenarzt",
-            "adresse": "Muchargasse 82, 9900 Lienz",
-            "telefon": "+43 990 21339",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Lienz"
-        },
-        {
-            "name": "Dr. med. univ. Monika Wieser",
-            "fachrichtung": "Zahnarzt",
-            "adresse": "Postgasse 50, 6200 Jenbach",
-            "telefon": "+43 620 31982",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Jenbach"
-        },
-        {
-            "name": "Priv.-Doz. Dr. Thomas Senn",
-            "fachrichtung": "Orthopäde",
-            "adresse": "Bahnhofstraße 24, 6300 Wörgl",
-            "telefon": "+43 630 65644",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Wörgl"
-        },
-        {
-            "name": "Priv.-Doz. Dr. Michael Braun",
-            "fachrichtung": "Kardiologe",
-            "adresse": "Innsbrucker Straße 57, 6300 Wörgl",
-            "telefon": "+43 630 15788",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Wörgl"
-        },
-        {
-            "name": "Mag. Dr. Lisa Lang",
-            "fachrichtung": "Psychiater",
-            "adresse": "Mühler Straße 58, 6600 Reutte",
-            "telefon": "+43 660 51328",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Reutte"
-        },
-        {
-            "name": "Dr. med. univ. Christian Moser",
-            "fachrichtung": "Zahnarzt",
-            "adresse": "Maria-Theresien-Straße 16, 6020 Innsbruck",
-            "telefon": "+43 602 83355",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Innsbruck"
-        },
-        {
-            "name": "Priv.-Doz. Dr. Robert Reiter",
-            "fachrichtung": "Orthopäde",
-            "adresse": "Obermarktstraße 65, 6410 Telfs",
-            "telefon": "+43 641 40012",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Telfs"
-        },
-        {
-            "name": "Dr. Wolfgang Bauer",
-            "fachrichtung": "Kinderarzt",
-            "adresse": "Mühler Straße 25, 6600 Reutte",
-            "telefon": "+43 660 11002",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Reutte"
-        },
-        {
-            "name": "Mag. Dr. Sophie Berger",
-            "fachrichtung": "Zahnarzt",
-            "adresse": "Innsbrucker Straße 4, 6300 Wörgl",
-            "telefon": "+43 630 30502",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Wörgl"
-        },
-        {
-            "name": "Mag. Dr. Klaus Hauser",
-            "fachrichtung": "Kinderarzt",
-            "adresse": "Hauptstraße 21, 6290 Mayrhofen",
-            "telefon": "+43 629 57282",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Mayrhofen"
-        },
-        {
-            "name": "Priv.-Doz. Dr. Lisa Maier",
-            "fachrichtung": "Gynäkologe",
-            "adresse": "Wallpachgasse 54, 6060 Hall in Tirol",
-            "telefon": "+43 606 23251",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Hall in Tirol"
-        },
-        {
-            "name": "Mag. Dr. Ursula Gruber",
-            "fachrichtung": "Gynäkologe",
-            "adresse": "Kirchstraße 49, 6410 Telfs",
-            "telefon": "+43 641 60299",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Telfs"
-        },
-        {
-            "name": "Dr. med. univ. Julia Kröll",
-            "fachrichtung": "Zahnarzt",
-            "adresse": "Rathausplatz 51, 6460 Imst",
-            "telefon": "+43 646 49468",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Imst"
-        },
-        {
-            "name": "Priv.-Doz. Dr. Robert Reiter",
-            "fachrichtung": "Chirurg",
-            "adresse": "Stadtgraben 56, 6060 Hall in Tirol",
-            "telefon": "+43 606 76584",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Hall in Tirol"
-        },
-        {
-            "name": "Mag. Dr. Elena Lechner",
-            "fachrichtung": "Augenarzt",
-            "adresse": "Bichlstraße 29, 6370 Kitzbühel",
-            "telefon": "+43 637 26232",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Kitzbühel"
-        },
-        {
-            "name": "Mag. Dr. Klaus Bauer",
-            "fachrichtung": "Chirurg",
-            "adresse": "Hauptstraße 62, 6290 Mayrhofen",
-            "telefon": "+43 629 24110",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Mayrhofen"
-        },
-        {
-            "name": "Mag. Dr. Robert Schwarz",
-            "fachrichtung": "HNO-Arzt",
-            "adresse": "Hauptstraße 34, 6290 Mayrhofen",
-            "telefon": "+43 629 91321",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Mayrhofen"
-        },
-        {
-            "name": "Dr. med. univ. Elisabeth Weiß",
-            "fachrichtung": "Allgemeinmediziner",
-            "adresse": "Salurner Straße 11, 6330 Kufstein",
-            "telefon": "+43 633 19373",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Kufstein"
-        },
-        {
-            "name": "Dr. med. univ. Elisabeth Fischer",
-            "fachrichtung": "Urologe",
-            "adresse": "Achenseestraße 77, 6200 Jenbach",
-            "telefon": "+43 620 10781",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Jenbach"
-        },
-        {
-            "name": "Mag. Dr. Jürgen Huber",
-            "fachrichtung": "Psychiater",
-            "adresse": "Muchargasse 36, 9900 Lienz",
-            "telefon": "+43 990 22431",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Lienz"
-        },
-        {
-            "name": "Mag. Dr. Peter Senn",
-            "fachrichtung": "Kinderarzt",
-            "adresse": "Stadtgraben 80, 6060 Hall in Tirol",
-            "telefon": "+43 606 79124",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Hall in Tirol"
-        },
-        {
-            "name": "Mag. Dr. Claudia Gruber",
-            "fachrichtung": "Neurologe",
-            "adresse": "Mühler Straße 77, 6600 Reutte",
-            "telefon": "+43 660 52809",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Reutte"
-        },
-        {
-            "name": "Mag. Dr. Karin Leitner",
-            "fachrichtung": "Hautarzt",
-            "adresse": "Salzburger Straße 81, 6300 Wörgl",
-            "telefon": "+43 630 34777",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Wörgl"
-        },
-        {
-            "name": "Dr. med. univ. Julia Kröll",
-            "fachrichtung": "Gynäkologe",
-            "adresse": "Innrain 100, 6020 Innsbruck",
-            "telefon": "+43 602 41216",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Innsbruck"
-        },
-        {
-            "name": "Dr. Michael Lang",
-            "fachrichtung": "Orthopäde",
-            "adresse": "Bahnhofstraße 78, 6300 Wörgl",
-            "telefon": "+43 630 90613",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Wörgl"
-        },
-        {
-            "name": "Mag. Dr. Elisabeth Wagner",
-            "fachrichtung": "Kinderarzt",
-            "adresse": "Salzburger Straße 72, 6380 St. Johann in Tirol",
-            "telefon": "+43 638 14047",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "St. Johann in Tirol"
-        },
-        {
-            "name": "Dr. Peter Leitner",
-            "fachrichtung": "Gynäkologe",
-            "adresse": "Scheulingstraße 23, 6290 Mayrhofen",
-            "telefon": "+43 629 90102",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Mayrhofen"
-        },
-        {
-            "name": "Priv.-Doz. Dr. Sophie Steiner",
-            "fachrichtung": "Urologe",
-            "adresse": "Schustergasse 59, 6460 Imst",
-            "telefon": "+43 646 15755",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Imst"
-        },
-        {
-            "name": "Mag. Dr. Monika Weiß",
-            "fachrichtung": "Internist",
-            "adresse": "Mühler Straße 70, 6600 Reutte",
-            "telefon": "+43 660 29374",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Reutte"
-        },
-        {
-            "name": "Priv.-Doz. Dr. Josef Müller",
-            "fachrichtung": "Gynäkologe",
-            "adresse": "Kinkstraße 58, 6330 Kufstein",
-            "telefon": "+43 633 16055",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Kufstein"
-        },
-        {
-            "name": "Dr. med. univ. Thomas Wolf",
-            "fachrichtung": "Internist",
-            "adresse": "Wallpachgasse 65, 6060 Hall in Tirol",
-            "telefon": "+43 606 13938",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Hall in Tirol"
-        },
-        {
-            "name": "Dr. med. univ. Renate Wolf",
-            "fachrichtung": "Allgemeinmediziner",
-            "adresse": "Rosengasse 12, 9900 Lienz",
-            "telefon": "+43 990 18850",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Lienz"
-        },
-        {
-            "name": "Dr. Jürgen Maier",
-            "fachrichtung": "Zahnarzt",
-            "adresse": "Speckbacherstraße 21, 6380 St. Johann in Tirol",
-            "telefon": "+43 638 87595",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "St. Johann in Tirol"
-        },
-        {
-            "name": "Dr. Renate Fischer",
-            "fachrichtung": "Augenarzt",
-            "adresse": "Wallpachgasse 39, 6060 Hall in Tirol",
-            "telefon": "+43 606 57221",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Hall in Tirol"
-        },
-        {
-            "name": "Priv.-Doz. Dr. Jürgen Müller",
-            "fachrichtung": "Urologe",
-            "adresse": "Eugenstraße 47, 6060 Hall in Tirol",
-            "telefon": "+43 606 52241",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Hall in Tirol"
-        },
-        {
-            "name": "Mag. Dr. Claudia Eder",
-            "fachrichtung": "Kardiologe",
-            "adresse": "Museumstraße 96, 6020 Innsbruck",
-            "telefon": "+43 602 60072",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Innsbruck"
-        },
-        {
-            "name": "Priv.-Doz. Dr. Alexander Huber",
-            "fachrichtung": "Orthopäde",
-            "adresse": "Muchargasse 62, 9900 Lienz",
-            "telefon": "+43 990 84999",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Lienz"
-        },
-        {
-            "name": "Dr. Jürgen Wieser",
-            "fachrichtung": "Gynäkologe",
-            "adresse": "Messinggasse 26, 9900 Lienz",
-            "telefon": "+43 990 41521",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Lienz"
-        },
-        {
-            "name": "Dr. Elisabeth Weiß",
-            "fachrichtung": "Urologe",
-            "adresse": "Vorderstadt 96, 6370 Kitzbühel",
-            "telefon": "+43 637 30944",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Kitzbühel"
-        },
-        {
-            "name": "Mag. Dr. Peter Senn",
-            "fachrichtung": "Gynäkologe",
-            "adresse": "Untermarkt 51, 6600 Reutte",
-            "telefon": "+43 660 37299",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Reutte"
-        },
-        {
-            "name": "Dr. med. univ. Markus Berger",
-            "fachrichtung": "Allgemeinmediziner",
-            "adresse": "Scheulingstraße 54, 6290 Mayrhofen",
-            "telefon": "+43 629 56376",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Mayrhofen"
-        },
-        {
-            "name": "Dr. med. univ. Ingrid Gruber",
-            "fachrichtung": "Hautarzt",
-            "adresse": "Innsbrucker Straße 58, 6300 Wörgl",
-            "telefon": "+43 630 17282",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Wörgl"
-        },
-        {
-            "name": "Priv.-Doz. Dr. Jürgen Braun",
-            "fachrichtung": "Gynäkologe",
-            "adresse": "Innrain 90, 6020 Innsbruck",
-            "telefon": "+43 602 90798",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Innsbruck"
-        },
-        {
-            "name": "Mag. Dr. Martin Senn",
-            "fachrichtung": "Allgemeinmediziner",
-            "adresse": "Oberer Stadtplatz 21, 6330 Kufstein",
-            "telefon": "+43 633 11478",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Kufstein"
-        },
-        {
-            "name": "Dr. med. univ. Karin Wieser",
-            "fachrichtung": "Psychiater",
-            "adresse": "Bichlstraße 16, 6370 Kitzbühel",
-            "telefon": "+43 637 56908",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Kitzbühel"
-        },
-        {
-            "name": "Dr. med. univ. Michael Schmidt",
-            "fachrichtung": "Internist",
-            "adresse": "Untermarkt 16, 6600 Reutte",
-            "telefon": "+43 660 92745",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Reutte"
-        },
-        {
-            "name": "Priv.-Doz. Dr. Monika Senn",
-            "fachrichtung": "Urologe",
-            "adresse": "Salurner Straße 75, 6330 Kufstein",
-            "telefon": "+43 633 79626",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Kufstein"
-        },
-        {
-            "name": "Priv.-Doz. Dr. Elisabeth Senn",
-            "fachrichtung": "Chirurg",
-            "adresse": "Salzburger Straße 14, 6300 Wörgl",
-            "telefon": "+43 630 10505",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Wörgl"
-        },
-        {
-            "name": "Dr. Elena Steiner",
-            "fachrichtung": "Radiologe",
-            "adresse": "Scheulingstraße 44, 6290 Mayrhofen",
-            "telefon": "+43 629 71169",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Mayrhofen"
-        },
-        {
-            "name": "Priv.-Doz. Dr. Julia Fischer",
-            "fachrichtung": "Gynäkologe",
-            "adresse": "Mühler Straße 54, 6600 Reutte",
-            "telefon": "+43 660 75897",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Reutte"
-        },
-        {
-            "name": "Dr. med. univ. Monika Schmidt",
-            "fachrichtung": "Urologe",
-            "adresse": "Scheulingstraße 49, 6290 Mayrhofen",
-            "telefon": "+43 629 59544",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Mayrhofen"
-        },
-        {
-            "name": "Mag. Dr. Elena Huber",
-            "fachrichtung": "Internist",
-            "adresse": "Obermarktstraße 5, 6410 Telfs",
-            "telefon": "+43 641 23031",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Telfs"
-        },
-        {
-            "name": "Priv.-Doz. Dr. Andreas Lang",
-            "fachrichtung": "Radiologe",
-            "adresse": "Oberer Stadtplatz 96, 6330 Kufstein",
-            "telefon": "+43 633 48295",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Kufstein"
-        },
-        {
-            "name": "Dr. med. univ. Sabine Maier",
-            "fachrichtung": "Augenarzt",
-            "adresse": "Innsbrucker Straße 23, 6130 Schwaz",
-            "telefon": "+43 613 19767",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Schwaz"
-        },
-        {
-            "name": "Priv.-Doz. Dr. Stefan Müller",
-            "fachrichtung": "Gynäkologe",
-            "adresse": "Museumstraße 8, 6020 Innsbruck",
-            "telefon": "+43 602 33584",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Innsbruck"
-        },
-        {
-            "name": "Priv.-Doz. Dr. Ingrid Schmidt",
-            "fachrichtung": "Chirurg",
-            "adresse": "Huberstraße 19, 6200 Jenbach",
-            "telefon": "+43 620 34719",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Jenbach"
-        },
-        {
-            "name": "Mag. Dr. Jürgen Eder",
-            "fachrichtung": "Zahnarzt",
-            "adresse": "Messinggasse 27, 9900 Lienz",
-            "telefon": "+43 990 99453",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Lienz"
-        },
-        {
-            "name": "Dr. med. univ. Michael Wagner",
-            "fachrichtung": "Neurologe",
-            "adresse": "Huberstraße 29, 6200 Jenbach",
-            "telefon": "+43 620 49251",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Jenbach"
-        },
-        {
-            "name": "Priv.-Doz. Dr. Lisa Penz",
-            "fachrichtung": "Gynäkologe",
-            "adresse": "Innsbrucker Straße 16, 6300 Wörgl",
-            "telefon": "+43 630 54196",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Wörgl"
-        },
-        {
-            "name": "Priv.-Doz. Dr. Karin Wagner",
-            "fachrichtung": "Gynäkologe",
-            "adresse": "Untermarktstraße 8, 6410 Telfs",
-            "telefon": "+43 641 83721",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Telfs"
-        },
-        {
-            "name": "Dr. Alexander Pichler",
-            "fachrichtung": "Hautarzt",
-            "adresse": "Kirchstraße 96, 6410 Telfs",
-            "telefon": "+43 641 72757",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Telfs"
-        },
-        {
-            "name": "Priv.-Doz. Dr. Alexander Steiner",
-            "fachrichtung": "Allgemeinmediziner",
-            "adresse": "Speckbacherstraße 84, 6380 St. Johann in Tirol",
-            "telefon": "+43 638 65843",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "St. Johann in Tirol"
-        },
-        {
-            "name": "Mag. Dr. Jürgen Reiter",
-            "fachrichtung": "Zahnarzt",
-            "adresse": "Scheulingstraße 59, 6290 Mayrhofen",
-            "telefon": "+43 629 19595",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Mayrhofen"
-        },
-        {
-            "name": "Dr. Josef Reiter",
-            "fachrichtung": "Zahnarzt",
-            "adresse": "Mühler Straße 75, 6600 Reutte",
-            "telefon": "+43 660 54554",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Reutte"
-        },
-        {
-            "name": "Dr. med. univ. Hans Schmidt",
-            "fachrichtung": "Kinderarzt",
-            "adresse": "Bahnhofstraße 36, 6300 Wörgl",
-            "telefon": "+43 630 22347",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Wörgl"
-        },
-        {
-            "name": "Mag. Dr. Renate Weiß",
-            "fachrichtung": "Kinderarzt",
-            "adresse": "Obermarktstraße 87, 6410 Telfs",
-            "telefon": "+43 641 16237",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Telfs"
-        },
-        {
-            "name": "Dr. Elena Lechner",
-            "fachrichtung": "HNO-Arzt",
-            "adresse": "Ludwig-Lassl-Straße 8, 6112 Wattens",
-            "telefon": "+43 611 60783",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Wattens"
-        },
-        {
-            "name": "Mag. Dr. Ingrid Lechner",
-            "fachrichtung": "Augenarzt",
-            "adresse": "Salzburger Straße 95, 6300 Wörgl",
-            "telefon": "+43 630 53141",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Wörgl"
-        },
-        {
-            "name": "Mag. Dr. Markus Müller",
-            "fachrichtung": "Kardiologe",
-            "adresse": "Pfarrgasse 20, 6460 Imst",
-            "telefon": "+43 646 99831",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Imst"
-        },
-        {
-            "name": "Dr. med. univ. Ursula Berger",
-            "fachrichtung": "Gynäkologe",
-            "adresse": "Bürgerstraße 4, 6020 Innsbruck",
-            "telefon": "+43 602 66852",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Innsbruck"
-        },
-        {
-            "name": "Dr. med. univ. Markus Reiter",
-            "fachrichtung": "Radiologe",
-            "adresse": "Oberer Stadtplatz 9, 6330 Kufstein",
-            "telefon": "+43 633 96409",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Kufstein"
-        },
-        {
-            "name": "Priv.-Doz. Dr. Christian Fischer",
-            "fachrichtung": "Gynäkologe",
-            "adresse": "Salzburger Straße 97, 6300 Wörgl",
-            "telefon": "+43 630 51253",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Wörgl"
-        },
-        {
-            "name": "Dr. Maria Reiter",
-            "fachrichtung": "Augenarzt",
-            "adresse": "Postgasse 13, 6200 Jenbach",
-            "telefon": "+43 620 52834",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Jenbach"
-        },
-        {
-            "name": "Dr. Renate Mayr",
-            "fachrichtung": "Kinderarzt",
-            "adresse": "Oberer Stadtplatz 98, 6330 Kufstein",
-            "telefon": "+43 633 37784",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Kufstein"
-        },
-        {
-            "name": "Dr. med. univ. Andreas Moser",
-            "fachrichtung": "HNO-Arzt",
-            "adresse": "Salurner Straße 33, 6330 Kufstein",
-            "telefon": "+43 633 61292",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Kufstein"
-        },
-        {
-            "name": "Dr. med. univ. Alexander Lechner",
-            "fachrichtung": "HNO-Arzt",
-            "adresse": "Hinterstadt 64, 6370 Kitzbühel",
-            "telefon": "+43 637 84744",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Kitzbühel"
-        },
-        {
-            "name": "Dr. med. univ. Renate Huber",
-            "fachrichtung": "Psychiater",
-            "adresse": "Obermarktstraße 4, 6410 Telfs",
-            "telefon": "+43 641 91694",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Telfs"
-        },
-        {
-            "name": "Dr. Hans Schmidt",
-            "fachrichtung": "Radiologe",
-            "adresse": "Kirchstraße 97, 6410 Telfs",
-            "telefon": "+43 641 64794",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Telfs"
-        },
-        {
-            "name": "Dr. med. univ. Ingrid Mayr",
-            "fachrichtung": "Psychiater",
-            "adresse": "Salurner Straße 13, 6330 Kufstein",
-            "telefon": "+43 633 32593",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Kufstein"
-        },
-        {
-            "name": "Dr. med. univ. Stefan Pichler",
-            "fachrichtung": "Gynäkologe",
-            "adresse": "Malserstraße 39, 6500 Landeck",
-            "telefon": "+43 650 34054",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Landeck"
-        },
-        {
-            "name": "Dr. Stefan Schmidt",
-            "fachrichtung": "Allgemeinmediziner",
-            "adresse": "Obermarkt 71, 6600 Reutte",
-            "telefon": "+43 660 89092",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Reutte"
-        },
-        {
-            "name": "Priv.-Doz. Dr. Ingrid Maier",
-            "fachrichtung": "Kinderarzt",
-            "adresse": "Maria-Theresien-Straße 95, 6020 Innsbruck",
-            "telefon": "+43 602 74743",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Innsbruck"
-        },
-        {
-            "name": "Priv.-Doz. Dr. Thomas Hofer",
-            "fachrichtung": "Psychiater",
-            "adresse": "Swarovskistraße 15, 6130 Schwaz",
-            "telefon": "+43 613 87099",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Schwaz"
-        },
-        {
-            "name": "Priv.-Doz. Dr. Sophie Fischer",
-            "fachrichtung": "Orthopäde",
-            "adresse": "Postgasse 86, 6200 Jenbach",
-            "telefon": "+43 620 96777",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Jenbach"
-        },
-        {
-            "name": "Dr. med. univ. Elisabeth Lechner",
-            "fachrichtung": "Urologe",
-            "adresse": "Poststraße 39, 6380 St. Johann in Tirol",
-            "telefon": "+43 638 75392",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "St. Johann in Tirol"
-        },
-        {
-            "name": "Dr. med. univ. Wolfgang Leitner",
-            "fachrichtung": "Orthopäde",
-            "adresse": "Vorderstadt 18, 6370 Kitzbühel",
-            "telefon": "+43 637 98301",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Kitzbühel"
-        },
-        {
-            "name": "Mag. Dr. Elisabeth Pichler",
-            "fachrichtung": "Psychiater",
-            "adresse": "Kinkstraße 66, 6330 Kufstein",
-            "telefon": "+43 633 42666",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Kufstein"
-        },
-        {
-            "name": "Dr. Petra Maier",
-            "fachrichtung": "Gynäkologe",
-            "adresse": "Muchargasse 73, 9900 Lienz",
-            "telefon": "+43 990 86433",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Lienz"
-        },
-        {
-            "name": "Dr. med. univ. Elisabeth Steiner",
-            "fachrichtung": "HNO-Arzt",
-            "adresse": "Achenseestraße 99, 6200 Jenbach",
-            "telefon": "+43 620 59426",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Jenbach"
-        },
-        {
-            "name": "Dr. med. univ. Maria Weber",
-            "fachrichtung": "Orthopäde",
-            "adresse": "Swarovskistraße 30, 6130 Schwaz",
-            "telefon": "+43 613 37342",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Schwaz"
-        },
-        {
-            "name": "Mag. Dr. Thomas Schmidt",
-            "fachrichtung": "Zahnarzt",
-            "adresse": "Mühler Straße 70, 6600 Reutte",
-            "telefon": "+43 660 88720",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Reutte"
-        },
-        {
-            "name": "Mag. Dr. Renate Lang",
-            "fachrichtung": "Neurologe",
-            "adresse": "Innsbrucker Straße 9, 6130 Schwaz",
-            "telefon": "+43 613 38635",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Schwaz"
-        },
-        {
-            "name": "Mag. Dr. Elisabeth Penz",
-            "fachrichtung": "Hautarzt",
-            "adresse": "Messinggasse 96, 9900 Lienz",
-            "telefon": "+43 990 63653",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Lienz"
-        },
-        {
-            "name": "Dr. Martin Schmidt",
-            "fachrichtung": "Zahnarzt",
-            "adresse": "Scheulingstraße 9, 6290 Mayrhofen",
-            "telefon": "+43 629 92146",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Mayrhofen"
-        },
-        {
-            "name": "Dr. med. univ. Wolfgang Koch",
-            "fachrichtung": "Neurologe",
-            "adresse": "Obermarkt 2, 6600 Reutte",
-            "telefon": "+43 660 65733",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Reutte"
-        },
-        {
-            "name": "Dr. Andreas Berger",
-            "fachrichtung": "Hautarzt",
-            "adresse": "Oberer Stadtplatz 51, 6330 Kufstein",
-            "telefon": "+43 633 71012",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Kufstein"
-        },
-        {
-            "name": "Priv.-Doz. Dr. Sabine Penz",
-            "fachrichtung": "Orthopäde",
-            "adresse": "Rathausplatz 2, 6460 Imst",
-            "telefon": "+43 646 99661",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Imst"
-        },
-        {
-            "name": "Dr. Maria Huber",
-            "fachrichtung": "Urologe",
-            "adresse": "Scheulingstraße 11, 6290 Mayrhofen",
-            "telefon": "+43 629 98730",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Mayrhofen"
-        },
-        {
-            "name": "Dr. Sabine Weiß",
-            "fachrichtung": "Kinderarzt",
-            "adresse": "Bürgerstraße 16, 6020 Innsbruck",
-            "telefon": "+43 602 83168",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Innsbruck"
-        },
-        {
-            "name": "Dr. med. univ. Christian Lechner",
-            "fachrichtung": "Internist",
-            "adresse": "Untermarkt 4, 6600 Reutte",
-            "telefon": "+43 660 88431",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Reutte"
-        },
-        {
-            "name": "Dr. med. univ. Renate Berger",
-            "fachrichtung": "Psychiater",
-            "adresse": "Obermarkt 27, 6600 Reutte",
-            "telefon": "+43 660 49286",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Reutte"
-        },
-        {
-            "name": "Dr. Peter Huber",
-            "fachrichtung": "Chirurg",
-            "adresse": "Kirchstraße 39, 6410 Telfs",
-            "telefon": "+43 641 98455",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Telfs"
-        },
-        {
-            "name": "Dr. med. univ. Monika Wagner",
-            "fachrichtung": "Psychiater",
-            "adresse": "Messinggasse 92, 9900 Lienz",
-            "telefon": "+43 990 80160",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Lienz"
-        },
-        {
-            "name": "Dr. Stefan Eder",
-            "fachrichtung": "Zahnarzt",
-            "adresse": "Obermarkt 29, 6600 Reutte",
-            "telefon": "+43 660 70730",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Reutte"
-        },
-        {
-            "name": "Priv.-Doz. Dr. Andreas Koch",
-            "fachrichtung": "HNO-Arzt",
-            "adresse": "Poststraße 65, 6380 St. Johann in Tirol",
-            "telefon": "+43 638 60439",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "St. Johann in Tirol"
-        },
-        {
-            "name": "Dr. med. univ. Robert Eder",
-            "fachrichtung": "Radiologe",
-            "adresse": "Speckbacherstraße 36, 6380 St. Johann in Tirol",
-            "telefon": "+43 638 30134",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "St. Johann in Tirol"
-        },
-        {
-            "name": "Dr. Helga Maier",
-            "fachrichtung": "HNO-Arzt",
-            "adresse": "Maria-Theresien-Straße 69, 6020 Innsbruck",
-            "telefon": "+43 602 12693",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Innsbruck"
-        },
-        {
-            "name": "Mag. Dr. Elisabeth Fischer",
-            "fachrichtung": "Internist",
-            "adresse": "Scheulingstraße 49, 6290 Mayrhofen",
-            "telefon": "+43 629 95782",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Mayrhofen"
-        },
-        {
-            "name": "Dr. med. univ. Hans Steiner",
-            "fachrichtung": "HNO-Arzt",
-            "adresse": "Dursterstraße 39, 6290 Mayrhofen",
-            "telefon": "+43 629 20721",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Mayrhofen"
-        },
-        {
-            "name": "Dr. med. univ. Michael Wieser",
-            "fachrichtung": "Allgemeinmediziner",
-            "adresse": "Messinggasse 97, 9900 Lienz",
-            "telefon": "+43 990 92720",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Lienz"
-        },
-        {
-            "name": "Mag. Dr. Julia Penz",
-            "fachrichtung": "Psychiater",
-            "adresse": "Innstraße 60, 6500 Landeck",
-            "telefon": "+43 650 68088",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Landeck"
-        },
-        {
-            "name": "Mag. Dr. Martin Lang",
-            "fachrichtung": "Allgemeinmediziner",
-            "adresse": "Muchargasse 34, 9900 Lienz",
-            "telefon": "+43 990 48646",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Lienz"
-        },
-        {
-            "name": "Dr. Helga Lang",
-            "fachrichtung": "Psychiater",
-            "adresse": "Achenseestraße 67, 6200 Jenbach",
-            "telefon": "+43 620 90017",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Jenbach"
-        },
-        {
-            "name": "Dr. Klaus Gruber",
-            "fachrichtung": "Radiologe",
-            "adresse": "Messinggasse 28, 9900 Lienz",
-            "telefon": "+43 990 79166",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Lienz"
-        },
-        {
-            "name": "Mag. Dr. Renate Eder",
-            "fachrichtung": "Orthopäde",
-            "adresse": "Schustergasse 72, 6460 Imst",
-            "telefon": "+43 646 68540",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Imst"
-        },
-        {
-            "name": "Dr. med. univ. Alexander Maier",
-            "fachrichtung": "Psychiater",
-            "adresse": "Postgasse 61, 6200 Jenbach",
-            "telefon": "+43 620 72679",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Jenbach"
-        },
-        {
-            "name": "Priv.-Doz. Dr. Elisabeth Wieser",
-            "fachrichtung": "Chirurg",
-            "adresse": "Bahnhofstraße 29, 6300 Wörgl",
-            "telefon": "+43 630 61584",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Wörgl"
-        },
-        {
-            "name": "Mag. Dr. Elisabeth Pichler",
-            "fachrichtung": "HNO-Arzt",
-            "adresse": "Poststraße 33, 6380 St. Johann in Tirol",
-            "telefon": "+43 638 19507",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "St. Johann in Tirol"
-        },
-        {
-            "name": "Mag. Dr. Markus Eder",
-            "fachrichtung": "Augenarzt",
-            "adresse": "Hinterstadt 38, 6370 Kitzbühel",
-            "telefon": "+43 637 22799",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Kitzbühel"
-        },
-        {
-            "name": "Dr. med. univ. Stefan Berger",
-            "fachrichtung": "Augenarzt",
-            "adresse": "Muchargasse 49, 9900 Lienz",
-            "telefon": "+43 990 68645",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Lienz"
-        },
-        {
-            "name": "Mag. Dr. Lisa Gruber",
-            "fachrichtung": "Orthopäde",
-            "adresse": "Huberstraße 5, 6200 Jenbach",
-            "telefon": "+43 620 56434",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Jenbach"
-        },
-        {
-            "name": "Dr. Peter Hauser",
-            "fachrichtung": "Gynäkologe",
-            "adresse": "Bichlstraße 29, 6370 Kitzbühel",
-            "telefon": "+43 637 22815",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Kitzbühel"
-        },
-        {
-            "name": "Mag. Dr. Petra Penz",
-            "fachrichtung": "Radiologe",
-            "adresse": "Wopfnerstraße 98, 6130 Schwaz",
-            "telefon": "+43 613 67114",
-            "kasse": false,
-            "wahlarzt": true,
-            "ort": "Schwaz"
-        },
-        {
-            "name": "Dr. med. univ. Jürgen Schmidt",
-            "fachrichtung": "Radiologe",
-            "adresse": "Wopfnerstraße 20, 6130 Schwaz",
-            "telefon": "+43 613 95462",
-            "kasse": true,
-            "wahlarzt": false,
-            "ort": "Schwaz"
+            "kategorie": "Allgemeinmedizin",
+            "daten": [
+                {
+                    "name": "Dr. Christina Jamnig",
+                    "adresse": "Bruneckerstraße 4, 6020 Innsbruck",
+                    "telefon": "+43 512 308330",
+                    "ort": "Innsbruck",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Allgemeinmedizin"
+                },
+                {
+                    "name": "Dr. Peter Kleboth",
+                    "adresse": "Viktor-Franz-Hess-Straße 1, 6020 Innsbruck",
+                    "telefon": "+43 512 281919",
+                    "ort": "Innsbruck",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Allgemeinmedizin"
+                },
+                {
+                    "name": "Dr. Roswitha Körner",
+                    "adresse": "Riesengasse 1, 6020 Innsbruck",
+                    "telefon": "+43 512 576583",
+                    "ort": "Innsbruck",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Allgemeinmedizin"
+                },
+                {
+                    "name": "Dr. Alice Kubanda-Pischinger",
+                    "adresse": "Prinz-Eugen-Straße 72, 6020 Innsbruck",
+                    "telefon": "+43 512 391488",
+                    "ort": "Innsbruck",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Allgemeinmedizin"
+                },
+                {
+                    "name": "Dr. Marcus Kufner",
+                    "adresse": "Amraser Straße 25, 6020 Innsbruck",
+                    "telefon": "+43 512 346526",
+                    "ort": "Innsbruck",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Allgemeinmedizin"
+                },
+                {
+                    "name": "Dr. Markus Lau",
+                    "adresse": "Südtiroler Platz 6/II, 6020 Innsbruck",
+                    "telefon": "+43 512 580992",
+                    "ort": "Innsbruck",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Allgemeinmedizin"
+                },
+                {
+                    "name": "Dr. Stefan Neuner",
+                    "adresse": "Fallmerayerstraße 14, 6020 Innsbruck",
+                    "telefon": "+43 512 302530",
+                    "ort": "Innsbruck",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Allgemeinmedizin"
+                },
+                {
+                    "name": "Dr. Christian Pegger",
+                    "adresse": "Ing.-Etzel-Straße 15, 6020 Innsbruck",
+                    "telefon": "+43 512 317045",
+                    "ort": "Innsbruck",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Allgemeinmedizin"
+                },
+                {
+                    "name": "Dr. Klaus Peyrer-Angermann",
+                    "adresse": "Reichenauerstr. 88, 6020 Innsbruck",
+                    "telefon": "+43 512 347709",
+                    "ort": "Innsbruck",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Allgemeinmedizin"
+                },
+                {
+                    "name": "Dr. Ernst Putz",
+                    "adresse": "Dr.-Glatz-Straße 26, 6020 Innsbruck",
+                    "telefon": "+43 512 342440",
+                    "ort": "Innsbruck",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Allgemeinmedizin"
+                },
+                {
+                    "name": "Dr. Gabriele Baldauf",
+                    "adresse": "6410 Telfs",
+                    "telefon": "+43 5262 62240",
+                    "ort": "Telfs",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Allgemeinmedizin"
+                },
+                {
+                    "name": "Dr. Helmuth Obermoser",
+                    "adresse": "Bahnhofstraße 1, 6370 Kitzbühel",
+                    "telefon": "+43 5356 64433",
+                    "ort": "Kitzbühel",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Allgemeinmedizin"
+                },
+                {
+                    "name": "Dr. Christoph Reisenauer",
+                    "adresse": "Wilhelm-Greil-Straße 21, 6020 Innsbruck",
+                    "telefon": "+43 664 4920022",
+                    "ort": "Innsbruck",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Allgemeinmedizin"
+                },
+                {
+                    "name": "Dr. Nevat Sari",
+                    "adresse": "Blasius-Huber-Straße 16, 6020 Innsbruck",
+                    "telefon": "+43 512 288196",
+                    "ort": "Innsbruck",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Allgemeinmedizin"
+                },
+                {
+                    "name": "Dr. Osman Ucar",
+                    "adresse": "Innrain 143, 6020 Innsbruck",
+                    "telefon": "+43 512 9010-5038",
+                    "ort": "Innsbruck",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Allgemeinmedizin"
+                },
+                {
+                    "name": "Dr. Gudrun Voithofer",
+                    "adresse": "Bozner Platz 5, 6020 Innsbruck",
+                    "telefon": "+43 664 1016061",
+                    "ort": "Innsbruck",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Allgemeinmedizin"
+                },
+                {
+                    "name": "Dr. Michael Wirnsperger",
+                    "adresse": "Mitterweg 16, 6020 Innsbruck",
+                    "telefon": "+43 664 3423522",
+                    "ort": "Innsbruck",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Allgemeinmedizin"
+                },
+                {
+                    "name": "Dr. Claudia Mark",
+                    "adresse": "Egger-Lienz-Straße 7a, 6112 Wattens",
+                    "telefon": "+43 664 5817988",
+                    "ort": "Wattens",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Allgemeinmedizin"
+                },
+                {
+                    "name": "Dr. Karin Leitner",
+                    "adresse": "Amraser Straße 25, 6020 Innsbruck",
+                    "telefon": "+43 699 18005948",
+                    "ort": "Innsbruck",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Allgemeinmedizin"
+                },
+                {
+                    "name": "Dr. Kurt Moser",
+                    "adresse": "Pradlerstraße 41, 6020 Innsbruck",
+                    "telefon": "+43 512 348916",
+                    "ort": "Innsbruck",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Allgemeinmedizin"
+                }
+            ]
+        },
+        {
+            "kategorie": "Augenheilkunde",
+            "daten": [
+                {
+                    "name": "Dr. Herbert Lechner",
+                    "adresse": "6460 Imst",
+                    "ort": "Imst",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Augenheilkunde",
+                    "telefon": "+43 512 000000"
+                },
+                {
+                    "name": "Dr. Christoph Reiter",
+                    "adresse": "6460 Imst",
+                    "ort": "Imst",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Augenheilkunde",
+                    "telefon": "+43 512 000000"
+                },
+                {
+                    "name": "Dr. Albino Parisi",
+                    "adresse": "6410 Telfs",
+                    "ort": "Telfs",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Augenheilkunde",
+                    "telefon": "+43 512 000000"
+                },
+                {
+                    "name": "Dr. Stefan Huber",
+                    "adresse": "6060 Hall in Tirol",
+                    "ort": "Hall",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Augenheilkunde",
+                    "telefon": "+43 512 000000"
+                },
+                {
+                    "name": "Dr. Peter Niedermüller",
+                    "adresse": "6060 Hall in Tirol",
+                    "ort": "Hall",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Augenheilkunde",
+                    "telefon": "+43 512 000000"
+                },
+                {
+                    "name": "Dr. Robab Hakim-Weber",
+                    "adresse": "6020 Innsbruck",
+                    "ort": "Innsbruck",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Augenheilkunde",
+                    "telefon": "+43 512 000000"
+                },
+                {
+                    "name": "Dr. Ivo Baldissera",
+                    "adresse": "6020 Innsbruck",
+                    "ort": "Innsbruck",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Augenheilkunde",
+                    "telefon": "+43 512 000000"
+                },
+                {
+                    "name": "Dr. Karl Forcher-Mayr",
+                    "adresse": "6020 Innsbruck",
+                    "ort": "Innsbruck",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Augenheilkunde",
+                    "telefon": "+43 512 000000"
+                },
+                {
+                    "name": "Dr. Andreas Gschließer",
+                    "adresse": "6020 Innsbruck",
+                    "ort": "Innsbruck",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Augenheilkunde",
+                    "telefon": "+43 512 000000"
+                },
+                {
+                    "name": "Dr. Fred Breitfuss",
+                    "adresse": "6370 Kitzbühel",
+                    "ort": "Kitzbühel",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Augenheilkunde",
+                    "telefon": "+43 512 000000"
+                },
+                {
+                    "name": "Dr. Anke Ramharter",
+                    "adresse": "6370 Kitzbühel",
+                    "ort": "Kitzbühel",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Augenheilkunde",
+                    "telefon": "+43 512 000000"
+                },
+                {
+                    "name": "Dr. Axel Schidlbauer",
+                    "adresse": "6370 Kitzbühel",
+                    "ort": "Kitzbühel",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Augenheilkunde",
+                    "telefon": "+43 512 000000"
+                },
+                {
+                    "name": "Dr. Bernd Hiti",
+                    "adresse": "6380 St. Johann",
+                    "ort": "St. Johann",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Augenheilkunde",
+                    "telefon": "+43 512 000000"
+                },
+                {
+                    "name": "Dr. Johann Friedrich Brandl",
+                    "adresse": "6236 Alpbach",
+                    "ort": "Alpbach",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Augenheilkunde",
+                    "telefon": "+43 512 000000"
+                },
+                {
+                    "name": "Dr. Verena Mair",
+                    "adresse": "6230 Brixlegg",
+                    "ort": "Brixlegg",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Augenheilkunde",
+                    "telefon": "+43 512 000000"
+                },
+                {
+                    "name": "Dr. Martin Bechmann",
+                    "adresse": "6352 Ellmau",
+                    "ort": "Ellmau",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Augenheilkunde",
+                    "telefon": "+43 512 000000"
+                },
+                {
+                    "name": "Dr. Konrad Höck",
+                    "adresse": "6330 Kufstein",
+                    "ort": "Kufstein",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Augenheilkunde",
+                    "telefon": "+43 512 000000"
+                },
+                {
+                    "name": "Dr. Walter Mair",
+                    "adresse": "6330 Kufstein",
+                    "ort": "Kufstein",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Augenheilkunde",
+                    "telefon": "+43 512 000000"
+                },
+                {
+                    "name": "Dr. Lotte Mayr-Engelke",
+                    "adresse": "6300 Wörgl",
+                    "ort": "Wörgl",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Augenheilkunde",
+                    "telefon": "+43 512 000000"
+                },
+                {
+                    "name": "Dr. Manuela Strasser-Schrattenthaler",
+                    "adresse": "6300 Wörgl",
+                    "ort": "Wörgl",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Augenheilkunde",
+                    "telefon": "+43 512 000000"
+                }
+            ]
+        },
+        {
+            "kategorie": "Orthopädie",
+            "daten": [
+                {
+                    "name": "Dr. Martin Weber",
+                    "adresse": "Bozner Platz 7, 6020 Innsbruck",
+                    "ort": "Innsbruck",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Orthopädie",
+                    "telefon": "+43 512 000000"
+                },
+                {
+                    "name": "Dr. Bertram Bitschnau",
+                    "adresse": "Elisabethstraße 11, 6020 Innsbruck",
+                    "ort": "Innsbruck",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Orthopädie",
+                    "telefon": "+43 512 000000"
+                },
+                {
+                    "name": "Dr. Gerhard Vogl",
+                    "adresse": "Edith-Stein-Weg 2, 6020 Innsbruck",
+                    "ort": "Innsbruck",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Orthopädie",
+                    "telefon": "+43 512 000000"
+                },
+                {
+                    "name": "Dr. Harald Triendl",
+                    "adresse": "Sennstraße 1, 6020 Innsbruck",
+                    "ort": "Innsbruck",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Orthopädie",
+                    "telefon": "+43 512 000000"
+                },
+                {
+                    "name": "Dr. Franz Rachbauer",
+                    "adresse": "Lärchenstraße 41, 6063 Rum",
+                    "ort": "Rum",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Orthopädie",
+                    "telefon": "+43 512 000000"
+                },
+                {
+                    "name": "Dr. Christian Zangl",
+                    "adresse": "Kaiser-Max-Straße 37, 6060 Hall",
+                    "ort": "Hall",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Orthopädie",
+                    "telefon": "+43 512 000000"
+                },
+                {
+                    "name": "Dr. Stefan Trobos",
+                    "adresse": "Innsbrucker Str. 4A, 6130 Schwaz",
+                    "ort": "Schwaz",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Orthopädie",
+                    "telefon": "+43 512 000000"
+                },
+                {
+                    "name": "Dr. Thomas Gstrein",
+                    "adresse": "Weißenbachgasse 1, 6410 Telfs",
+                    "ort": "Telfs",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Orthopädie",
+                    "telefon": "+43 512 000000"
+                },
+                {
+                    "name": "Doz. Dr. Rainer Biedermann",
+                    "adresse": "Innrain 6, 6020 Innsbruck",
+                    "ort": "Innsbruck",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Orthopädie",
+                    "telefon": "+43 512 000000"
+                }
+            ]
+        },
+        {
+            "kategorie": "Dermatologie",
+            "daten": [
+                {
+                    "name": "Dr. Beatrix Gasser",
+                    "adresse": "Kochstraße 1, 6020 Innsbruck",
+                    "ort": "Innsbruck",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Dermatologie",
+                    "telefon": "+43 512 000000"
+                },
+                {
+                    "name": "Dr. Alfred Karl Grassegger",
+                    "adresse": "Salurner Straße 15, 6020 Innsbruck",
+                    "ort": "Innsbruck",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Dermatologie",
+                    "telefon": "+43 512 000000"
+                },
+                {
+                    "name": "Doz. Dr. Florian Weber",
+                    "adresse": "Maria-Theresien-Straße 16, 6020 Innsbruck",
+                    "ort": "Innsbruck",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Dermatologie",
+                    "telefon": "+43 512 000000"
+                },
+                {
+                    "name": "Dr. Christina Rainer-Längle",
+                    "adresse": "Langer Weg 15, 6020 Innsbruck",
+                    "ort": "Innsbruck",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Dermatologie",
+                    "telefon": "+43 512 000000"
+                },
+                {
+                    "name": "Dr. Doris Schneeweiss",
+                    "adresse": "Landseestraße 3, 6020 Innsbruck",
+                    "ort": "Innsbruck",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Dermatologie",
+                    "telefon": "+43 512 000000"
+                },
+                {
+                    "name": "Dr. Christine Villinger",
+                    "adresse": "Arzler Straße 43 A, 6020 Innsbruck",
+                    "ort": "Innsbruck",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Dermatologie",
+                    "telefon": "+43 512 000000"
+                },
+                {
+                    "name": "Dr. Cornelia Egger",
+                    "adresse": "Museumstr. 16, 6020 Innsbruck",
+                    "ort": "Innsbruck",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Dermatologie",
+                    "telefon": "+43 512 000000"
+                },
+                {
+                    "name": "Dr. Dietmar Heiser",
+                    "adresse": "Olympiastraße 17, 6020 Innsbruck",
+                    "ort": "Innsbruck",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Dermatologie",
+                    "telefon": "+43 512 000000"
+                },
+                {
+                    "name": "Dr. Barbara Huter",
+                    "adresse": "Obermarkt 15, 6600 Reutte",
+                    "ort": "Reutte",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Dermatologie",
+                    "telefon": "+43 512 000000"
+                }
+            ]
+        },
+        {
+            "kategorie": "HNO",
+            "daten": [
+                {
+                    "name": "Doz. Dr. Andreas Neher",
+                    "adresse": "Meinhardstraße 5a, 6020 Innsbruck",
+                    "ort": "Innsbruck",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "HNO",
+                    "telefon": "+43 512 000000"
+                },
+                {
+                    "name": "Doz. Dr. Florian Kral",
+                    "adresse": "Maria-Theresien-Straße 17, 6020 Innsbruck",
+                    "ort": "Innsbruck",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "HNO",
+                    "telefon": "+43 512 000000"
+                },
+                {
+                    "name": "Dr. Christoph Stricker",
+                    "adresse": "Innrain 6, 6020 Innsbruck",
+                    "ort": "Innsbruck",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "HNO",
+                    "telefon": "+43 512 000000"
+                },
+                {
+                    "name": "Dr. Thomas Wöllner",
+                    "adresse": "Innrain 143, 6020 Innsbruck",
+                    "ort": "Innsbruck",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "HNO",
+                    "telefon": "+43 512 000000"
+                },
+                {
+                    "name": "Dr. Thomas Rainer",
+                    "adresse": "Silgasse 8A, 6020 Innsbruck",
+                    "ort": "Innsbruck",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "HNO",
+                    "telefon": "+43 512 000000"
+                },
+                {
+                    "name": "Dr. Elisabeth Appenroth-Gamper",
+                    "adresse": "Meinhardstraße 1, 6020 Innsbruck",
+                    "ort": "Innsbruck",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "HNO",
+                    "telefon": "+43 512 000000"
+                },
+                {
+                    "name": "Dr. Johannes Piegger",
+                    "adresse": "Pradler Straße 41, 6020 Innsbruck",
+                    "ort": "Innsbruck",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "HNO",
+                    "telefon": "+43 512 000000"
+                },
+                {
+                    "name": "Dr. Andreas Wackerle",
+                    "adresse": "Wilhelm-Greil-Straße 16, 6020 Innsbruck",
+                    "ort": "Innsbruck",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "HNO",
+                    "telefon": "+43 512 000000"
+                },
+                {
+                    "name": "Dr. Florian Fischer",
+                    "adresse": "Leopoldstraße 11, 6020 Innsbruck",
+                    "ort": "Innsbruck",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "HNO",
+                    "telefon": "+43 512 000000"
+                }
+            ]
+        },
+        {
+            "kategorie": "Kinderheilkunde",
+            "daten": [
+                {
+                    "name": "Dr. Thomas Müller",
+                    "adresse": "Anichstraße 35, 6020 Innsbruck",
+                    "telefon": "+43 512 504-23500",
+                    "ort": "Innsbruck",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Kinderheilkunde"
+                },
+                {
+                    "name": "Dr. Andreas Koch",
+                    "adresse": "Obermarktstraße 10, 6410 Telfs",
+                    "telefon": "+43 5262 64455",
+                    "ort": "Telfs",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Kinderheilkunde"
+                },
+                {
+                    "name": "Dr. Sabine Schwarz",
+                    "adresse": "Messinggasse 32, 9900 Lienz",
+                    "telefon": "+43 4852 68744",
+                    "ort": "Lienz",
+                    "kasse": true,
+                    "wahlarzt": false,
+                    "fachrichtung": "Kinderheilkunde"
+                }
+            ]
+        },
+        {
+            "kategorie": "Kardiologie",
+            "daten": [
+                {
+                    "name": "Doz. Dr. Axel Bauer",
+                    "adresse": "Anichstraße 35, 6020 Innsbruck",
+                    "telefon": "+43 512 5040",
+                    "ort": "Innsbruck",
+                    "kasse": true,
+                    "wahlarzt": false
+                },
+                {
+                    "name": "Dr. Gerhard Pölzl",
+                    "adresse": "Innrain 6, 6020 Innsbruck",
+                    "telefon": "+43 512 504-23253",
+                    "ort": "Innsbruck",
+                    "kasse": true,
+                    "wahlarzt": false
+                },
+                {
+                    "name": "Dr. Hannes Alber",
+                    "adresse": "Vorderstadt 12, 6370 Kitzbühel",
+                    "telefon": "+43 5356 62234",
+                    "ort": "Kitzbühel",
+                    "kasse": true,
+                    "wahlarzt": false
+                }
+            ]
+        },
+        {
+            "kategorie": "Zahnmedizin",
+            "daten": [
+                {
+                    "name": "Dr. Wolfgang Penz",
+                    "adresse": "Maria-Theresien-Straße 4, 6020 Innsbruck",
+                    "telefon": "+43 512 583421",
+                    "ort": "Innsbruck",
+                    "kasse": true,
+                    "wahlarzt": false
+                },
+                {
+                    "name": "Dr. Peter Senn",
+                    "adresse": "Obermarkt 12, 6600 Reutte",
+                    "telefon": "+43 5672 62345",
+                    "ort": "Reutte",
+                    "kasse": true,
+                    "wahlarzt": false
+                },
+                {
+                    "name": "Dr. Helga Müller-Wieser",
+                    "adresse": "Salurner Straße 15, 6330 Kufstein",
+                    "telefon": "+43 5372 64511",
+                    "ort": "Kufstein",
+                    "kasse": true,
+                    "wahlarzt": false
+                }
+            ]
+        },
+        {
+            "kategorie": "Neurologie & Psychiatrie",
+            "daten": [
+                {
+                    "name": "Dr. Stefan Kiechl",
+                    "adresse": "Innrain 143, 6020 Innsbruck",
+                    "telefon": "+43 512 9010",
+                    "ort": "Innsbruck",
+                    "kasse": true,
+                    "wahlarzt": false
+                },
+                {
+                    "name": "Dr. Christian Haring",
+                    "adresse": "Milser Straße 10, 6060 Hall in Tirol",
+                    "telefon": "+43 50303-31001",
+                    "ort": "Hall",
+                    "kasse": true,
+                    "wahlarzt": false
+                }
+            ]
+        },
+        {
+            "kategorie": "Gynäkologie",
+            "daten": [
+                {
+                    "name": "Dr. Christian Marth",
+                    "adresse": "Anichstraße 35, 6020 Innsbruck",
+                    "telefon": "+43 512 504-23050",
+                    "ort": "Innsbruck",
+                    "kasse": true,
+                    "wahlarzt": false
+                },
+                {
+                    "name": "Dr. Petra Huber",
+                    "adresse": "Museumstraße 21, 6020 Innsbruck",
+                    "telefon": "+43 512 572234",
+                    "ort": "Innsbruck",
+                    "kasse": true,
+                    "wahlarzt": false
+                }
+            ]
+        },
+        {
+            "kategorie": "Urologie",
+            "daten": [
+                {
+                    "name": "Dr. Brigitte Stöhr",
+                    "adresse": "Vogelsang 1, 6135 Stans",
+                    "telefon": "+43 5242 63200",
+                    "ort": "Stans",
+                    "kasse": true,
+                    "wahlarzt": false
+                },
+                {
+                    "name": "Dr. Thomas Weber",
+                    "adresse": "Meinhardstraße 5, 6020 Innsbruck",
+                    "telefon": "+43 512 581515",
+                    "ort": "Innsbruck",
+                    "kasse": true,
+                    "wahlarzt": false
+                }
+            ]
+        },
+        {
+            "kategorie": "Innere Medizin",
+            "daten": [
+                {
+                    "name": "Dr. Florian Andreas Stöckl",
+                    "adresse": "Bahnhofstraße 32, 6300 Wörgl",
+                    "telefon": "+43 5332 72120",
+                    "ort": "Wörgl",
+                    "kasse": true,
+                    "wahlarzt": false
+                },
+                {
+                    "name": "Dr. Markus Larcher",
+                    "adresse": "Malser Straße 23, 6500 Landeck",
+                    "telefon": "+43 5442 62311",
+                    "ort": "Landeck",
+                    "kasse": true,
+                    "wahlarzt": false
+                }
+            ]
+        },
+        {
+            "kategorie": "Radiologie",
+            "daten": [
+                {
+                    "name": "Dr. Werner Jaschke",
+                    "adresse": "Anichstraße 35, 6020 Innsbruck",
+                    "telefon": "+43 512 504-22761",
+                    "ort": "Innsbruck",
+                    "kasse": true,
+                    "wahlarzt": false
+                }
+            ]
+        },
+        {
+            "kategorie": "Chirurgie",
+            "daten": [
+                {
+                    "name": "Dr. Dietmar Öfner-Velano",
+                    "adresse": "Anichstraße 35, 6020 Innsbruck",
+                    "telefon": "+43 512 504-22601",
+                    "ort": "Innsbruck",
+                    "kasse": true,
+                    "wahlarzt": false
+                }
+            ]
         }
     ]
 }

@@ -4,7 +4,7 @@ import { API } from './db.js';
 // Polyfill: crypto.randomUUID() needs secure context + Safari 15.4+
 function _uuid() {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-    try { return crypto.randomUUID(); } catch(e) { /* fall through */ }
+    try { return crypto.randomUUID(); } catch (e) { /* fall through */ }
   }
   return '10000000-1000-4000-8000-100000000000'.replace(/[018]/g, c =>
     (+c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (+c / 4)))).toString(16)
@@ -36,7 +36,7 @@ window.state = {
   localDrugs: [],
   localDoctors: []
 };
-const APP_VERSION = '4.82.14';
+const APP_VERSION = '4.82.15';
 const state = window.state;
 
 const GROK_BASE_URL = "https://api.x.ai/v1/chat/completions";
@@ -44,110 +44,110 @@ const GROK_BASE_URL = "https://api.x.ai/v1/chat/completions";
 // === i18n ===
 const i18n = {
   en: {
-    settings:'Settings', home:'Home', meds:'Medications', logAction:'Log Intake', plans:'Plans',
-    dueToday:'Due Today', noPlans:'No plans found. Create one!',
-    loggedActivity:'Today\'s Activity', noLogsToday:'No intake logged today.',
-    recentMetrics:'Recent Metrics', noMetrics:'No metrics recorded yet.', 
-    scheduled:'Scheduled', completed:'\u2705 Completed', skipped:'\u274C Skipped', skip:'Skip', dueTodayBadge:'\u2022 Due Today', taken:'taken', weight:'Weight',
-    pastDue:'PAST DUE', missedTitle:'Missed Appointments',
-    addMedication:'Add Medication', nameLbl:'Name', defaultDose:'Default Dose', unitLbl:'Unit', formatLbl:'Format',
-    saveMedication:'Save Medication', cancel:'Cancel', yourMedications:'Your Medications',
-    noMedsFound:'No medications found. Add one!', delete:'Delete', addBtn:'+ Add New',
-    viewSideEffects:'\u26A0\uFE0F View Side Effects', translateAdverse:'\uD83C\uDF10 Translate to German',
-    createSchedule:'Create Plan', selectMed:'Select Medication', timeOfDay:'Time',
-    dose:'Dose', savePlan:'Save Plan', yourSchedule:'Your Daily Schedule',
-    noSchedule:'No schedule created.', remove:'Remove', newPlan:'+ New',
-    takes:'Takes', at:'at', appleCalendar:'+ Apple Calendar', chooseOption:'-- Choose Option --',
-    addMedFirst:'Add a medication first.',
-    logIntake:'Log Intake', addMedFirst2:'Please add a medication first.',
-    amountTaken:'Amount Taken', quantity:'Quantity', recordIntake:'Save Intake',
-    logMetric:'Record Body Metric', metricType:'Metric Type', bodyWeight:'Body Weight (kg)',
-    bloodPressure:'Blood Pressure (mmHg)', valueLbl:'Value', saveMetric:'Save Metric',
-    dataManagement:'Data Management',
-    dataNote:'Your data is entirely private and stored locally. Hard-deleting the app loses all data. Export regularly!',
-    exportData:'Export Data (Backup)', restoreData:'Restore Data', importRestore:'Import / Restore',
-    nameAndDose:'Name and dose required', selectAndAmount:'Select medication and amount',
-    enterIngredient:'Enter ingredient name first.', medAndTime:'Medication and time required',
-    queryingFDA:'Querying FDA database...', noBrandTrying:'No brand match \u2014 trying active ingredient...',
-    searchingWiki:'Searching Wikipedia for ingredients...',
-    genericMatch:'Generic match', viaWiki:'\uD83D\uDCDA Via Wikipedia', doses:'Dosen',
-    notFoundFDA:'Not found in FDA, Wikipedia, or generic databases.',
-    saveAsTypedBtn:'Save as "{n}"', linkIngredient:'Optional: Ingredient for FDA data',
-    ingredientPlaceholder:'e.g. Rosuvastatin', fetchBtn:'Fetch',
-    adverseLabel:'\u26A0\uFE0F Main Adverse Events:', adverseVia:'\u26A0\uFE0F Main Adverse Events (via {ing}):',
-    notFoundFDAShort:'Not found in FDA either.',
-    deleteMedConfirm:'Delete medication?', loggedSuccess:'Logged successfully!',
-    removeScheduleConfirm:'Remove schedule?', valueRequired:'Value required',
-    selectFile:'Please select a file first.', restoredSuccess:'Data successfully restored!',
-    importError:'Error reading backup file.', lookupFailed:'Lookup failed. Check connection.',
-    wikiIngredientFound:'Wikipedia found ingredient: {ing}', translating:'Translating...',
-    unknown:'Unknown', units:'Units', pillUnit:'Pill(s)', kg:'kg',
-    pillFormat:'Pill', liquidFormat:'Liquid', injectionFormat:'Injection', inhalerFormat:'Inhaler',
-    detailsBtn:'Details', editBtn:'Edit', updateMedication:'Edit Medication',
-    sideEffectsTitle:'\u26A0\uFE0F Side Effects', frequency:'Frequency', symptom:'Symptom', close:'Close',
-    morning:'Morning', noon:'Noon', evening:'Evening',
-    daily:'Daily', weekly:'Weekly', monthly:'Monthly', quarterly:'Quarterly', everyXDays:'Every X Days',
-    dayIntervalLbl:'Repeat every {x} days',
-    searchStartpage:'\uD83D\uDD0D Search on Startpage',
-    searchAi:'\uD83D\uDD0D AI Search',
-    enteringApiKey:'Grok API-Key',
-    aiThinking:'Grok thinking...',
-    aiError:'AI request failed.',
-    settingsSavedLabel:'Settings saved',
-    saveSettingsBtn:'Save Settings',
-    missingKeyError:'Please setup your Grok API-Key in settings first.',
-    testingKey:'Testing Key...',
-    keyInvalid:'Key invalid',
-    modelIdLabel:'Grok Model ID',
-    modelSuggestion:'Try: grok-4.20-non-reasoning or grok-2',
-    fetchingModels:'Loading models...',
-    refreshModels:'Refresh Models',
-    customModel:'Custom...',
-    notFoundAiLabel:'Medication not found or unknown.',
-    selectMatch:'Select match:',
-    multipleFound:'Multiple matches found',
-    history:'History',
-    pulse:'Pulse',
-    glucose:'Blood Glucose',
-    linkMetrics:'Link body metrics with this plan',
-    pulseLabel:'Pulse (bpm)',
-    glucoseLabel:'Glucose (mg/dL)',
-    deleteAllData:'Clear all project data',
-    deleteLogs:'Clear intake log only',
-    resetTodayLbl:'Reset today\'s plan',
-    confirmDeleteAll:'CRITICAL: DELETE ALL DATA (Meds, Plans, Logs)? This cannot be undone!',
-    confirmDeleteLogs:'Clear all intake/metric history?',
-    metricRequired:'Metric required',
-    fillRequiredMetrics:'Please enter required metrics.',
-    anchorDate:'Start Date',
-    startWeekday:'Weekday',
-    startDayOfMonth:'Day of Month',
-    monday:'Monday', tuesday:'Tuesday', wednesday:'Wednesday', thursday:'Thursday', friday:'Friday', saturday:'Saturday', sunday:'Sunday',
-    adHoc:'Ad-hoc',
-    analytics:'Analytics',
-    list:'List',
-    charts:'Charts',
-    adherence:'Adherence',
-    trends:'Trends',
-    last7Days:'Last 7 Days',
-    last30Days:'Last 30 Days',
-    lastYear:'Last Year',
-    missed:'Missed',
-    generateTestBtn:'Add Test Data',
-    clearTestBtn:'Clear Test Data',
-    testDataCount:'Count: {n}',
-    testDataNote:'Test data is marked. Your personal entries stay safe when clearing test data.',
-    upcomingEvents:'Upcoming Events',
+    settings: 'Settings', home: 'Home', meds: 'Medications', logAction: 'Log Intake', plans: 'Plans',
+    dueToday: 'Due Today', noPlans: 'No plans found. Create one!',
+    loggedActivity: 'Today\'s Activity', noLogsToday: 'No intake logged today.',
+    recentMetrics: 'Recent Metrics', noMetrics: 'No metrics recorded yet.',
+    scheduled: 'Scheduled', completed: '\u2705 Completed', skipped: '\u274C Skipped', skip: 'Skip', dueTodayBadge: '\u2022 Due Today', taken: 'taken', weight: 'Weight',
+    pastDue: 'PAST DUE', missedTitle: 'Missed Appointments',
+    addMedication: 'Add Medication', nameLbl: 'Name', defaultDose: 'Default Dose', unitLbl: 'Unit', formatLbl: 'Format',
+    saveMedication: 'Save Medication', cancel: 'Cancel', yourMedications: 'Your Medications',
+    noMedsFound: 'No medications found. Add one!', delete: 'Delete', addBtn: '+ Add New',
+    viewSideEffects: '\u26A0\uFE0F View Side Effects', translateAdverse: '\uD83C\uDF10 Translate to German',
+    createSchedule: 'Create Plan', selectMed: 'Select Medication', timeOfDay: 'Time',
+    dose: 'Dose', savePlan: 'Save Plan', yourSchedule: 'Your Daily Schedule',
+    noSchedule: 'No schedule created.', remove: 'Remove', newPlan: '+ New',
+    takes: 'Takes', at: 'at', appleCalendar: '+ Apple Calendar', chooseOption: '-- Choose Option --',
+    addMedFirst: 'Add a medication first.',
+    logIntake: 'Log Intake', addMedFirst2: 'Please add a medication first.',
+    amountTaken: 'Amount Taken', quantity: 'Quantity', recordIntake: 'Save Intake',
+    logMetric: 'Record Body Metric', metricType: 'Metric Type', bodyWeight: 'Body Weight (kg)',
+    bloodPressure: 'Blood Pressure (mmHg)', valueLbl: 'Value', saveMetric: 'Save Metric',
+    dataManagement: 'Data Management',
+    dataNote: 'Your data is entirely private and stored locally. Hard-deleting the app loses all data. Export regularly!',
+    exportData: 'Export Data (Backup)', restoreData: 'Restore Data', importRestore: 'Import / Restore',
+    nameAndDose: 'Name and dose required', selectAndAmount: 'Select medication and amount',
+    enterIngredient: 'Enter ingredient name first.', medAndTime: 'Medication and time required',
+    queryingFDA: 'Querying FDA database...', noBrandTrying: 'No brand match \u2014 trying active ingredient...',
+    searchingWiki: 'Searching Wikipedia for ingredients...',
+    genericMatch: 'Generic match', viaWiki: '\uD83D\uDCDA Via Wikipedia', doses: 'Dosen',
+    notFoundFDA: 'Not found in FDA, Wikipedia, or generic databases.',
+    saveAsTypedBtn: 'Save as "{n}"', linkIngredient: 'Optional: Ingredient for FDA data',
+    ingredientPlaceholder: 'e.g. Rosuvastatin', fetchBtn: 'Fetch',
+    adverseLabel: '\u26A0\uFE0F Main Adverse Events:', adverseVia: '\u26A0\uFE0F Main Adverse Events (via {ing}):',
+    notFoundFDAShort: 'Not found in FDA either.',
+    deleteMedConfirm: 'Delete medication?', loggedSuccess: 'Logged successfully!',
+    removeScheduleConfirm: 'Remove schedule?', valueRequired: 'Value required',
+    selectFile: 'Please select a file first.', restoredSuccess: 'Data successfully restored!',
+    importError: 'Error reading backup file.', lookupFailed: 'Lookup failed. Check connection.',
+    wikiIngredientFound: 'Wikipedia found ingredient: {ing}', translating: 'Translating...',
+    unknown: 'Unknown', units: 'Units', pillUnit: 'Pill(s)', kg: 'kg',
+    pillFormat: 'Pill', liquidFormat: 'Liquid', injectionFormat: 'Injection', inhalerFormat: 'Inhaler',
+    detailsBtn: 'Details', editBtn: 'Edit', updateMedication: 'Edit Medication',
+    sideEffectsTitle: '\u26A0\uFE0F Side Effects', frequency: 'Frequency', symptom: 'Symptom', close: 'Close',
+    morning: 'Morning', noon: 'Noon', evening: 'Evening',
+    daily: 'Daily', weekly: 'Weekly', monthly: 'Monthly', quarterly: 'Quarterly', everyXDays: 'Every X Days',
+    dayIntervalLbl: 'Repeat every {x} days',
+    searchStartpage: '\uD83D\uDD0D Search on Startpage',
+    searchAi: '\uD83D\uDD0D AI Search',
+    enteringApiKey: 'Grok API-Key',
+    aiThinking: 'Grok thinking...',
+    aiError: 'AI request failed.',
+    settingsSavedLabel: 'Settings saved',
+    saveSettingsBtn: 'Save Settings',
+    missingKeyError: 'Please setup your Grok API-Key in settings first.',
+    testingKey: 'Testing Key...',
+    keyInvalid: 'Key invalid',
+    modelIdLabel: 'Grok Model ID',
+    modelSuggestion: 'Try: grok-4.20-non-reasoning or grok-2',
+    fetchingModels: 'Loading models...',
+    refreshModels: 'Refresh Models',
+    customModel: 'Custom...',
+    notFoundAiLabel: 'Medication not found or unknown.',
+    selectMatch: 'Select match:',
+    multipleFound: 'Multiple matches found',
+    history: 'History',
+    pulse: 'Pulse',
+    glucose: 'Blood Glucose',
+    linkMetrics: 'Link body metrics with this plan',
+    pulseLabel: 'Pulse (bpm)',
+    glucoseLabel: 'Glucose (mg/dL)',
+    deleteAllData: 'Clear all project data',
+    deleteLogs: 'Clear intake log only',
+    resetTodayLbl: 'Reset today\'s plan',
+    confirmDeleteAll: 'CRITICAL: DELETE ALL DATA (Meds, Plans, Logs)? This cannot be undone!',
+    confirmDeleteLogs: 'Clear all intake/metric history?',
+    metricRequired: 'Metric required',
+    fillRequiredMetrics: 'Please enter required metrics.',
+    anchorDate: 'Start Date',
+    startWeekday: 'Weekday',
+    startDayOfMonth: 'Day of Month',
+    monday: 'Monday', tuesday: 'Tuesday', wednesday: 'Wednesday', thursday: 'Thursday', friday: 'Friday', saturday: 'Saturday', sunday: 'Sunday',
+    adHoc: 'Ad-hoc',
+    analytics: 'Analytics',
+    list: 'List',
+    charts: 'Charts',
+    adherence: 'Adherence',
+    trends: 'Trends',
+    last7Days: 'Last 7 Days',
+    last30Days: 'Last 30 Days',
+    lastYear: 'Last Year',
+    missed: 'Missed',
+    generateTestBtn: 'Add Test Data',
+    clearTestBtn: 'Clear Test Data',
+    testDataCount: 'Count: {n}',
+    testDataNote: 'Test data is marked. Your personal entries stay safe when clearing test data.',
+    upcomingEvents: 'Upcoming Events',
     doctorNotFoundAi: 'No doctor matching your criteria was found.',
     forceUpdateBtn: '\uD83D\uDCC4 Force App Update (Clear Cache)',
-    today:'Today',
-    tomorrow:'Tomorrow',
-    noUpcoming:'No upcoming medications.',
-    weeklyExport:'Weekly Export (.ics)',
-    addToCalendar:'Reminder',
-    calendarFileName:'Medicine_Plan.ics',
-    appointment:'Doctor Appointment',
-    medication:'Medication',
+    today: 'Today',
+    tomorrow: 'Tomorrow',
+    noUpcoming: 'No upcoming medications.',
+    weeklyExport: 'Weekly Export (.ics)',
+    addToCalendar: 'Reminder',
+    calendarFileName: 'Medicine_Plan.ics',
+    appointment: 'Doctor Appointment',
+    medication: 'Medication',
     doctorName: 'Name, Practice or Clinic (Search & Auto-Fill)',
     location: 'Location / Address',
     phone: 'Phone Number',
@@ -159,12 +159,12 @@ const i18n = {
     specialty: 'Specialty (Urology, GP, ...)',
     anySpecialty: 'Any Specialty',
     doctorSelect: 'Select Doctor',
-    defaultRegionLabel:'Default City / Region for AI Search',
-    locating:'Locating...',
-    locErr:'Location failed',
+    defaultRegionLabel: 'Default City / Region for AI Search',
+    locating: 'Locating...',
+    locErr: 'Location failed',
     specialties: [
-      'General Practitioner', 'Internist', 'Cardiologist', 'Dentist', 'Urologist', 
-      'Gynecologist', 'Orthopedist', 'Dermatologist', 'Ophthalmologist', 'ENT', 
+      'General Practitioner', 'Internist', 'Cardiologist', 'Dentist', 'Urologist',
+      'Gynecologist', 'Orthopedist', 'Dermatologist', 'Ophthalmologist', 'ENT',
       'Pediatrician', 'Neurologist', 'Psychiatrist'
     ],
     searchGoogle: 'Search on Google',
@@ -189,134 +189,134 @@ const i18n = {
     chooseArea: '-- Choose Class --'
   },
   de: {
-    settings:'Einstellungen',
-    home:'Start', meds:'Medikamente', logAction:'Einnahme', plans:'Pl\u00E4ne',
-    dueToday:'Heute f\u00FCllig', noPlans:'Keine Pl\u00E4ne vorhanden. Erstelle einen Plan!',
-    loggedActivity:'Heutige Aktivit\u00E4t', noLogsToday:'Noch keine Einnahme heute.',
-    recentMetrics:'Letzte Messwerte', noMetrics:'Noch keine Messwerte eingetragen.',
-    scheduled:'Geplant', completed:'\u2705 Eingenommen', skipped:'\u274C \u00DCbersprungen', skip:'\u00DCberspringen', dueTodayBadge:'\u2022 Heute f\u00FCllig', taken:'eingenommen', weight:'Gewicht',
-    pastDue:'\u00DCberf\u00E4llig', missedTitle:'Verpasste Termine',
-    addMedication:'Medikament hinzuf\u00FCgen', nameLbl:'Name', defaultDose:'Standarddosis', unitLbl:'Einheit', formatLbl:'Format',
-    saveMedication:'Medikament speichern', cancel:'Abbrechen', yourMedications:'Ihre Medikamente',
-    noMedsFound:'Keine Medikamente gefunden. F\u00FCgen Sie eines hinzu!', delete:'L\u00F6schen', addBtn:'+ Hinzuf\u00FCgen',
-    viewSideEffects:'\u26A0\uFE0F Nebenwirkungen', translateAdverse:'\uD83C\uDF10 Auf Deutsch \u00FCbersetzen',
-    createSchedule:'Plan erstellen', selectMed:'Medikament w\u00E4hlen', timeOfDay:'Uhrzeit',
-    dose:'Dosis', savePlan:'Plan speichern', yourSchedule:'Ihr Tagesplan',
-    noSchedule:'Kein Tagesplan erstellt.', remove:'Entfernen', newPlan:'+ Neu',
-    takes:'Nimmt', at:'um', appleCalendar:'+ Apple Kalender', chooseOption:'-- Bitte w\u00E4hlen --',
-    addMedFirst:'Zuerst ein Medikament hinzuf\u00FCgen.',
-    logIntake:'Einnahme erfassen', addMedFirst2:'Bitte zuerst ein Medikament hinzuf\u00FCgen.',
-    amountTaken:'Eingenommene Menge', quantity:'Menge', recordIntake:'Einnahme speichern',
-    logMetric:'K\u00F6rpermesswert erfassen', metricType:'Messtyp', bodyWeight:'K\u00F6rpergewicht (kg)',
-    bloodPressure:'Blutdruck (mmHg)', valueLbl:'Wert', saveMetric:'Messwert speichern',
-    dataManagement:'Datenverwaltung',
-    dataNote:'Ihre Daten sind vollst\u00E4ndig privat und lokal gespeichert. Beim L\u00F6schen der App gehen alle Daten verloren. Exportieren Sie Ihre Daten regelm\u00E4\u00DFig!',
-    exportData:'Daten exportieren (Sicherung)', restoreData:'Daten wiederherstellen', importRestore:'Importieren / Wiederherstellen',
-    nameAndDose:'Name und Dosis erforderlich', selectAndAmount:'Bitte Medikament und Menge angeben',
-    enterIngredient:'Bitte zuerst einen Wirkstoffnamen eingeben.', medAndTime:'Medication and time required',
-    queryingFDA:'FDA-Datenbank wird abgefragt...', noBrandTrying:'Kein Markenname \u2014 suche nach Wirkstoff...',
-    searchingWiki:'Wikipedia wird nach Wirkstoffen durchsucht...',
-    genericMatch:'Wirkstoff-Treffer', viaWiki:'\uD83D\uDCDA Via Wikipedia', doses:'Dosen',
-    notFoundFDA:'Nicht in FDA, Wikipedia oder Wirkstoffdatenbank gefunden.',
-    saveAsTypedBtn:'\u201E{n}\u201C so speichern', linkIngredient:'Optional: Wirkstoff eingeben f\u00FCr FDA-Daten',
-    ingredientPlaceholder:'z.B. Rosuvastatin', fetchBtn:'Abrufen',
-    adverseLabel:'\u26A0\uFE0F Hauptnebenwirkungen:', adverseVia:'\u26A0\uFE0F Hauptnebenwirkungen (via {ing}):',
-    notFoundFDAShort:'Auch in FDA nicht gefunden.',
-    deleteMedConfirm:'Medikament l\u00F6schen?', loggedSuccess:'Erfolgreich eingetragen!',
-    removeScheduleConfirm:'Tagesplan entfernen?', valueRequired:'Wert erforderlich',
-    selectFile:'Bitte zuerst eine Datei w\u00E4hlen.', restoredSuccess:'Daten erfolgreich wiederhergestellt!',
-    importError:'Fehler beim Lesen der Sicherungsdatei.', lookupFailed:'Suche fehlgeschlagen. Verbindung pr\u00FCfen.',
-    wikiIngredientFound:'Wikipedia hat Wirkstoff gefunden: {ing}', translating:'\u00DCbersetze...',
-    unknown:'Unbekannt', units:'Einheiten', pillUnit:'Pille(n)', kg:'kg',
-    pillFormat:'Pille', liquidFormat:'Fl\u00FCssigkeit', injectionFormat:'Injektion', inhalerFormat:'Inhalator',
-    detailsBtn:'Details', editBtn:'Bearbeiten', updateMedication:'Medikament bearbeiten',
-    sideEffectsTitle:'\u26A0\uFE0F Nebenwirkungen', frequency:'H\u00E4ufigkeit', symptom:'Symptom', close:'Schlie\u00DFen',
-    morning:'Morgens', noon:'Mittags', evening:'Abends',
-    daily:'T\u00E4glich', weekly:'W\u00F6chentlich', monthly:'Monatlich', quarterly:'Viertelj\u00E4hrlich', everyXDays:'Alle X Tage',
-    dayIntervalLbl:'Wiederhole alle {x} Tage',
-    searchStartpage:'\uD83D\uDD0D Auf Startpage suchen',
-    searchAi:'\uD83D\uDD0D KI-Suche',
-    enteringApiKey:'Grok API-Key',
-    aiThinking:'Grok denkt nach...',
-    aiError:'Fehler bei der KI-Abfrage.',
-    settingsSavedLabel:'Einstellungen gespeichert',
-    saveSettingsBtn:'Einstellungen speichern',
-    missingKeyError:'Bitte hinterlege zuerst deinen Grok API-Key in den Einstellungen.',
-    testingKey:'Key wird gepr\u00FCft...',
-    keyInvalid:'Key ung\u00FCltig',
-    modelIdLabel:'Grok Modell ID',
-    modelSuggestion:'Versuche: grok-4.20-non-reasoning oder grok-2',
-    fetchingModels:'Modelle werden geladen...',
-    refreshModels:'Modelle aktualisieren',
-    customModel:'Benutzerdefiniert...',
-    notFoundAiLabel:'Medikament nicht gefunden oder unbekannt.',
-    selectMatch:'Bitte Treffer w\u00E4hlen:',
-    multipleFound:'Mehrere Ergebnisse gefunden',
-    history:'Historie',
-    pulse:'Puls',
-    glucose:'Blutzucker',
-    linkMetrics:'K\u00F6rpermesswerte mit diesem Plan verkn\u00FCpfen',
-    pulseLabel:'Puls (bpm)',
-    glucoseLabel:'Blutzucker (mg/dL)',
-    deleteAllData:'Alle Projektdaten l\u00F6schen',
-    deleteLogs:'Nur Einnahme-Log l\u00F6schen',
-    resetTodayLbl:'Heutigen Tagesplan zur\u00FCcksetzen',
-    confirmDeleteAll:'KRITISCH: ALLE Daten l\u00F6schen (Medikamente, Pl\u00E4ne, Logs)? Dies kann nicht r\u00FCckg\u00E4ngig gemacht werden!',
-    confirmDeleteLogs:'Alle Einnahme- und Messwert-Historien l\u00F6schen?',
-    metricRequired:'Messung erforderlich',
-    fillRequiredMetrics:'Bitte trage die erforderlichen Messwerte ein.',
-    anchorDate:'Startdatum',
-    startWeekday:'Wochentag',
-    startDayOfMonth:'Tag des Monats',
-    monday:'Montag', tuesday:'Dienstag', wednesday:'Mittwoch', thursday:'Donnerstag', friday:'Freitag', saturday:'Samstag', sunday:'Sonntag',
-    adHoc:'Ad-hoc',
-    analytics:'Statistik',
-    list:'Liste',
-    charts:'Diagramme',
-    adherence:'Adh\u00E4renz',
-    trends:'Trends',
-    last7Days:'Letzte 7 Tage',
-    last30Days:'Letzte 30 Tage',
-    lastYear:'Letztes Jahr',
-    missed:'Vergessen',
-    generateTestBtn:'Testdaten hinzuf\u00FCgen',
-    clearTestBtn:'Testdaten l\u00F6schen',
-    testDataCount:'Anzahl: {n}',
-    testDataNote:'Testdaten sind markiert. Deine pers\u00F6nlichen Eintr\u00E4ge bleiben beim L\u00F6schen sicher.',
-    upcomingEvents:'Anstehende Termine',
+    settings: 'Einstellungen',
+    home: 'Start', meds: 'Medikamente', logAction: 'Einnahme', plans: 'Pl\u00E4ne',
+    dueToday: 'Heute f\u00FCllig', noPlans: 'Keine Pl\u00E4ne vorhanden. Erstelle einen Plan!',
+    loggedActivity: 'Heutige Aktivit\u00E4t', noLogsToday: 'Noch keine Einnahme heute.',
+    recentMetrics: 'Letzte Messwerte', noMetrics: 'Noch keine Messwerte eingetragen.',
+    scheduled: 'Geplant', completed: '\u2705 Eingenommen', skipped: '\u274C \u00DCbersprungen', skip: '\u00DCberspringen', dueTodayBadge: '\u2022 Heute f\u00FCllig', taken: 'eingenommen', weight: 'Gewicht',
+    pastDue: '\u00DCberf\u00E4llig', missedTitle: 'Verpasste Termine',
+    addMedication: 'Medikament hinzuf\u00FCgen', nameLbl: 'Name', defaultDose: 'Standarddosis', unitLbl: 'Einheit', formatLbl: 'Format',
+    saveMedication: 'Medikament speichern', cancel: 'Abbrechen', yourMedications: 'Ihre Medikamente',
+    noMedsFound: 'Keine Medikamente gefunden. F\u00FCgen Sie eines hinzu!', delete: 'L\u00F6schen', addBtn: '+ Hinzuf\u00FCgen',
+    viewSideEffects: '\u26A0\uFE0F Nebenwirkungen', translateAdverse: '\uD83C\uDF10 Auf Deutsch \u00FCbersetzen',
+    createSchedule: 'Plan erstellen', selectMed: 'Medikament w\u00E4hlen', timeOfDay: 'Uhrzeit',
+    dose: 'Dosis', savePlan: 'Plan speichern', yourSchedule: 'Ihr Tagesplan',
+    noSchedule: 'Kein Tagesplan erstellt.', remove: 'Entfernen', newPlan: '+ Neu',
+    takes: 'Nimmt', at: 'um', appleCalendar: '+ Apple Kalender', chooseOption: '-- Bitte w\u00E4hlen --',
+    addMedFirst: 'Zuerst ein Medikament hinzuf\u00FCgen.',
+    logIntake: 'Einnahme erfassen', addMedFirst2: 'Bitte zuerst ein Medikament hinzuf\u00FCgen.',
+    amountTaken: 'Eingenommene Menge', quantity: 'Menge', recordIntake: 'Einnahme speichern',
+    logMetric: 'K\u00F6rpermesswert erfassen', metricType: 'Messtyp', bodyWeight: 'K\u00F6rpergewicht (kg)',
+    bloodPressure: 'Blutdruck (mmHg)', valueLbl: 'Wert', saveMetric: 'Messwert speichern',
+    dataManagement: 'Datenverwaltung',
+    dataNote: 'Ihre Daten sind vollst\u00E4ndig privat und lokal gespeichert. Beim L\u00F6schen der App gehen alle Daten verloren. Exportieren Sie Ihre Daten regelm\u00E4\u00DFig!',
+    exportData: 'Daten exportieren (Sicherung)', restoreData: 'Daten wiederherstellen', importRestore: 'Importieren / Wiederherstellen',
+    nameAndDose: 'Name und Dosis erforderlich', selectAndAmount: 'Bitte Medikament und Menge angeben',
+    enterIngredient: 'Bitte zuerst einen Wirkstoffnamen eingeben.', medAndTime: 'Medication and time required',
+    queryingFDA: 'FDA-Datenbank wird abgefragt...', noBrandTrying: 'Kein Markenname \u2014 suche nach Wirkstoff...',
+    searchingWiki: 'Wikipedia wird nach Wirkstoffen durchsucht...',
+    genericMatch: 'Wirkstoff-Treffer', viaWiki: '\uD83D\uDCDA Via Wikipedia', doses: 'Dosen',
+    notFoundFDA: 'Nicht in FDA, Wikipedia oder Wirkstoffdatenbank gefunden.',
+    saveAsTypedBtn: '\u201E{n}\u201C so speichern', linkIngredient: 'Optional: Wirkstoff eingeben f\u00FCr FDA-Daten',
+    ingredientPlaceholder: 'z.B. Rosuvastatin', fetchBtn: 'Abrufen',
+    adverseLabel: '\u26A0\uFE0F Hauptnebenwirkungen:', adverseVia: '\u26A0\uFE0F Hauptnebenwirkungen (via {ing}):',
+    notFoundFDAShort: 'Auch in FDA nicht gefunden.',
+    deleteMedConfirm: 'Medikament l\u00F6schen?', loggedSuccess: 'Erfolgreich eingetragen!',
+    removeScheduleConfirm: 'Tagesplan entfernen?', valueRequired: 'Wert erforderlich',
+    selectFile: 'Bitte zuerst eine Datei w\u00E4hlen.', restoredSuccess: 'Daten erfolgreich wiederhergestellt!',
+    importError: 'Fehler beim Lesen der Sicherungsdatei.', lookupFailed: 'Suche fehlgeschlagen. Verbindung pr\u00FCfen.',
+    wikiIngredientFound: 'Wikipedia hat Wirkstoff gefunden: {ing}', translating: '\u00DCbersetze...',
+    unknown: 'Unbekannt', units: 'Einheiten', pillUnit: 'Pille(n)', kg: 'kg',
+    pillFormat: 'Pille', liquidFormat: 'Fl\u00FCssigkeit', injectionFormat: 'Injektion', inhalerFormat: 'Inhalator',
+    detailsBtn: 'Details', editBtn: 'Bearbeiten', updateMedication: 'Medikament bearbeiten',
+    sideEffectsTitle: '\u26A0\uFE0F Nebenwirkungen', frequency: 'H\u00E4ufigkeit', symptom: 'Symptom', close: 'Schlie\u00DFen',
+    morning: 'Morgens', noon: 'Mittags', evening: 'Abends',
+    daily: 'T\u00E4glich', weekly: 'W\u00F6chentlich', monthly: 'Monatlich', quarterly: 'Viertelj\u00E4hrlich', everyXDays: 'Alle X Tage',
+    dayIntervalLbl: 'Wiederhole alle {x} Tage',
+    searchStartpage: '\uD83D\uDD0D Auf Startpage suchen',
+    searchAi: '\uD83D\uDD0D KI-Suche',
+    enteringApiKey: 'Grok API-Key',
+    aiThinking: 'Grok denkt nach...',
+    aiError: 'Fehler bei der KI-Abfrage.',
+    settingsSavedLabel: 'Einstellungen gespeichert',
+    saveSettingsBtn: 'Einstellungen speichern',
+    missingKeyError: 'Bitte hinterlege zuerst deinen Grok API-Key in den Einstellungen.',
+    testingKey: 'Key wird gepr\u00FCft...',
+    keyInvalid: 'Key ung\u00FCltig',
+    modelIdLabel: 'Grok Modell ID',
+    modelSuggestion: 'Versuche: grok-4.20-non-reasoning oder grok-2',
+    fetchingModels: 'Modelle werden geladen...',
+    refreshModels: 'Modelle aktualisieren',
+    customModel: 'Benutzerdefiniert...',
+    notFoundAiLabel: 'Medikament nicht gefunden oder unbekannt.',
+    selectMatch: 'Bitte Treffer w\u00E4hlen:',
+    multipleFound: 'Mehrere Ergebnisse gefunden',
+    history: 'Historie',
+    pulse: 'Puls',
+    glucose: 'Blutzucker',
+    linkMetrics: 'K\u00F6rpermesswerte mit diesem Plan verkn\u00FCpfen',
+    pulseLabel: 'Puls (bpm)',
+    glucoseLabel: 'Blutzucker (mg/dL)',
+    deleteAllData: 'Alle Projektdaten l\u00F6schen',
+    deleteLogs: 'Nur Einnahme-Log l\u00F6schen',
+    resetTodayLbl: 'Heutigen Tagesplan zur\u00FCcksetzen',
+    confirmDeleteAll: 'KRITISCH: ALLE Daten l\u00F6schen (Medikamente, Pl\u00E4ne, Logs)? Dies kann nicht r\u00FCckg\u00E4ngig gemacht werden!',
+    confirmDeleteLogs: 'Alle Einnahme- und Messwert-Historien l\u00F6schen?',
+    metricRequired: 'Messung erforderlich',
+    fillRequiredMetrics: 'Bitte trage die erforderlichen Messwerte ein.',
+    anchorDate: 'Startdatum',
+    startWeekday: 'Wochentag',
+    startDayOfMonth: 'Tag des Monats',
+    monday: 'Montag', tuesday: 'Dienstag', wednesday: 'Mittwoch', thursday: 'Donnerstag', friday: 'Freitag', saturday: 'Samstag', sunday: 'Sonntag',
+    adHoc: 'Ad-hoc',
+    analytics: 'Statistik',
+    list: 'Liste',
+    charts: 'Diagramme',
+    adherence: 'Adh\u00E4renz',
+    trends: 'Trends',
+    last7Days: 'Letzte 7 Tage',
+    last30Days: 'Letzte 30 Tage',
+    lastYear: 'Letztes Jahr',
+    missed: 'Vergessen',
+    generateTestBtn: 'Testdaten hinzuf\u00FCgen',
+    clearTestBtn: 'Testdaten l\u00F6schen',
+    testDataCount: 'Anzahl: {n}',
+    testDataNote: 'Testdaten sind markiert. Deine pers\u00F6nlichen Eintr\u00E4ge bleiben beim L\u00F6schen sicher.',
+    upcomingEvents: 'Anstehende Termine',
     doctorNotFoundAi: 'Kein Arzt passend zu Ihren Kriterien gefunden.',
     forceUpdateBtn: '\uD83D\uDCC4 App-Update erzwingen (Cache leeren)',
-    today:'Heute',
-    tomorrow:'Morgen',
-    noUpcoming:'Keine anstehenden Medikamente.',
-    weeklyExport:'Wochen-Export (.ics)',
-    addToCalendar:'Erinnerung',
-    calendarFileName:'Medikamente_Plan.ics',
-    appointment:'Arzt-Termin',
-    medication:'Medikament',
-    doctorName:'Arzt, Klinik oder Praxis (Suche & Auto-Fill)',
-    location:'Ort / Adresse',
-    phone:'Telefonnummer',
-    note:'Notizen',
-    oneTime:'Einmalig (Datum & Uhrzeit)',
-    recurring:'Regelm\u00E4\u00DFig',
-    doctorSearch:'\u2728 Arzt im Internet suchen',
-    regionPlaceholder:'Ort oder Postleitzahl',
-    specialty:'Fachrichtung (Urologe, Hausarzt, ...)',
-    anySpecialty:'Keine Einschr\u00E4nkung (Alle)',
-    doctorSelect:'Arzt w\u00E4hlen',
+    today: 'Heute',
+    tomorrow: 'Morgen',
+    noUpcoming: 'Keine anstehenden Medikamente.',
+    weeklyExport: 'Wochen-Export (.ics)',
+    addToCalendar: 'Erinnerung',
+    calendarFileName: 'Medikamente_Plan.ics',
+    appointment: 'Arzt-Termin',
+    medication: 'Medikament',
+    doctorName: 'Arzt, Klinik oder Praxis (Suche & Auto-Fill)',
+    location: 'Ort / Adresse',
+    phone: 'Telefonnummer',
+    note: 'Notizen',
+    oneTime: 'Einmalig (Datum & Uhrzeit)',
+    recurring: 'Regelm\u00E4\u00DFig',
+    doctorSearch: '\u2728 Arzt im Internet suchen',
+    regionPlaceholder: 'Ort oder Postleitzahl',
+    specialty: 'Fachrichtung',
+    anySpecialty: 'Keine Einschr\u00E4nkung (Alle)',
+    doctorSelect: 'Arzt w\u00E4hlen',
     magicImportFallback: 'Manuell einf\u00FCgen (Text/Link)',
-    defaultRegionLabel:'Standard Stadt / Region f\u00FCr KI-Suche',
-    locating:'Ortung...',
-    locErr:'Ortung fehlgeschlagen',
+    defaultRegionLabel: 'Standard Stadt / Region f\u00FCr KI-Suche',
+    locating: 'Ortung...',
+    locErr: 'Ortung fehlgeschlagen',
     extendedInfo: 'Erweiterte Infos',
     hersteller: 'Hersteller',
     einsatzgebiet: 'Einsatzgebiet',
     quickSelectArea: 'Nach Klasse suchen:',
     chooseArea: '-- Klasse w\u00E4hlen --',
     specialties: [
-      'Allgemeinmediziner', 'Internist', 'Kardiologe', 'Zahnarzt', 'Urologe', 
-      'Gyn\u00E4kologe', 'Orthop\u00E4de', 'Hautarzt', 'Augenarzt', 'HNO-Arzt', 
+      'Allgemeinmediziner', 'Internist', 'Kardiologe', 'Zahnarzt', 'Urologe',
+      'Gyn\u00E4kologe', 'Orthop\u00E4de', 'Hautarzt', 'Augenarzt', 'HNO-Arzt',
       'Kinderarzt', 'Neurologe', 'Psychiater'
     ],
     searchGoogle: 'Auf Google suchen',
@@ -367,7 +367,7 @@ window._autoTranslateAdverse = async (text) => {
     const r = await fetch(`https://api.mymemory.translated.net/get?q=${encoded}&langpair=en|de`);
     const d = await r.json();
     return d.responseData ? d.responseData.translatedText : text;
-  } catch(e) { return text; }
+  } catch (e) { return text; }
 };
 
 // --- DOM ---
@@ -404,10 +404,10 @@ window.navigate = async (view) => {
 window._geolocate = (inputId) => {
   const el = document.getElementById(inputId);
   if (!navigator.geolocation) return alert(t('locErr'));
-  
+
   const originalVal = el.value;
   el.value = t('locating');
-  
+
   navigator.geolocation.getCurrentPosition(async (pos) => {
     try {
       const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json`, {
@@ -417,13 +417,13 @@ window._geolocate = (inputId) => {
       const city = data.address.city || data.address.town || data.address.village || data.address.county || '';
       const postcode = data.address.postcode || '';
       const country = data.address.country || '';
-      
+
       if (city) {
         let locParts = [city];
         if (postcode) locParts.push(postcode);
         if (country) locParts.push(country);
         const finalLoc = locParts.join(', ');
-        
+
         el.value = finalLoc;
         // If this is the settings input, auto-save state
         if (inputId === 'grok-region-input') {
@@ -450,13 +450,13 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.82.14</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.82.15</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
         <div style="display:flex; border:1px solid rgba(255,255,255,0.15); border-radius:8px; overflow:hidden; font-size:14px; font-weight:700;">
-          <button onclick="window.toggleLang('en')" style="padding:8px 12px; background:${state.lang==='en'?'var(--accent-color)':'transparent'}; color:${state.lang==='en'?'#000':'#94a3b8'}; border:none; cursor:pointer;">EN</button>
-          <button onclick="window.toggleLang('de')" style="padding:8px 12px; background:${state.lang==='de'?'var(--accent-color)':'transparent'}; color:${state.lang==='de'?'#000':'#94a3b8'}; border:none; cursor:pointer;">DE</button>
+          <button onclick="window.toggleLang('en')" style="padding:8px 12px; background:${state.lang === 'en' ? 'var(--accent-color)' : 'transparent'}; color:${state.lang === 'en' ? '#000' : '#94a3b8'}; border:none; cursor:pointer;">EN</button>
+          <button onclick="window.toggleLang('de')" style="padding:8px 12px; background:${state.lang === 'de' ? 'var(--accent-color)' : 'transparent'}; color:${state.lang === 'de' ? '#000' : '#94a3b8'}; border:none; cursor:pointer;">DE</button>
         </div>
         <button class="header-action" onclick="window.navigate('settings')" title="${t('settings')}" style="padding: 8px; display: flex; align-items: center; justify-content: center;">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -483,7 +483,7 @@ function render() {
 window.render = render;
 
 function getViewHTML() {
-  switch(state.currentView) {
+  switch (state.currentView) {
     case 'dashboard': return renderDashboard();
     case 'medications': return renderMedications();
     case 'plans': return renderPlans();
@@ -501,26 +501,26 @@ function getViewHTML() {
 function _findPastDueItems() {
   const missed = [];
   const today = new Date();
-  today.setHours(0,0,0,0);
-  
+  today.setHours(0, 0, 0, 0);
+
   // Look back 7 days for missed items
   for (let i = 1; i <= 7; i++) {
     const d = new Date(today);
     d.setDate(d.getDate() - i);
     const dISO = d.toISOString().split('T')[0];
-    
+
     const duePlans = state.plans.filter(p => window._isPlanDueOnDate(p, d));
     for (const p of duePlans) {
-      const handled = state.logs.some(l => 
-        (l.planId === p.id && l.plannedDate === dISO) || 
-        (!l.planId && l.medicationId === p.medicationId && new Date(l.timestamp).setHours(0,0,0,0) === d.getTime())
+      const handled = state.logs.some(l =>
+        (l.planId === p.id && l.plannedDate === dISO) ||
+        (!l.planId && l.medicationId === p.medicationId && new Date(l.timestamp).setHours(0, 0, 0, 0) === d.getTime())
       );
       if (!handled) {
         missed.push({ plan: p, date: d, dateISO: dISO });
       }
     }
   }
-  
+
   // Group shared missed events
   const grouped = {};
   for (const m of missed) {
@@ -531,47 +531,47 @@ function _findPastDueItems() {
       grouped[key].count++;
     }
   }
-  
-  return Object.values(grouped).sort((a,b) => b.date - a.date);
+
+  return Object.values(grouped).sort((a, b) => b.date - a.date);
 }
 
 function renderDashboard() {
-  const todayStart = new Date().setHours(0,0,0,0);
-  const todaysLogs = state.logs.filter(l => new Date(l.timestamp).setHours(0,0,0,0) === todayStart).reverse();
-  
+  const todayStart = new Date().setHours(0, 0, 0, 0);
+  const todaysLogs = state.logs.filter(l => new Date(l.timestamp).setHours(0, 0, 0, 0) === todayStart).reverse();
+
   let forecastHtml = '';
   for (let i = 0; i < 14; i++) {
     const targetDate = new Date();
     targetDate.setDate(targetDate.getDate() + i);
-    targetDate.setHours(0,0,0,0);
+    targetDate.setHours(0, 0, 0, 0);
     const isToday = i === 0;
     const isTomorrow = i === 1;
-    
+
     let dateLabel = targetDate.toLocaleDateString(undefined, { weekday: 'short', day: '2-digit', month: '2-digit' });
     if (isToday) dateLabel = t('today');
     else if (isTomorrow) dateLabel = t('tomorrow');
 
     const duePlans = state.plans.filter(p => window._isPlanDueOnDate(p, targetDate));
-    
+
     if (duePlans.length > 0) {
       const itemsHtml = duePlans.map(p => {
         const isAppt = p.type === 'appointment';
-        const med = !isAppt ? (state.medications.find(m => m.id === p.medicationId) || {name: t('unknown')}) : null;
-        
+        const med = !isAppt ? (state.medications.find(m => m.id === p.medicationId) || { name: t('unknown') }) : null;
+
         const targetDateISO = targetDate.toISOString().split('T')[0];
         const logEntry = todaysLogs.find(l => l.planId === p.id && l.plannedDate === targetDateISO);
         const isCompleted = !isAppt && logEntry && logEntry.status === 'taken';
         const isSkipped = !isAppt && logEntry && logEntry.status === 'skipped';
-        
+
         if (isSkipped) return '';
 
         let statusColor = isCompleted ? 'var(--accent-color)' : (isToday ? '#ef4444' : 'rgba(255,255,255,0.2)');
         if (isAppt) statusColor = '#8b5cf6';
 
         const opacity = isCompleted ? '0.6' : '1';
-        
+
         const title = isAppt ? `\uD83D\uDEBA ${p.doctorName}` : med.name;
-        const subtitle = isAppt 
+        const subtitle = isAppt
           ? `${p.location ? '\uD83D\uDCCD ' + p.location : ''} ${p.phone ? ' | \uD83D\uDCDE ' + p.phone : ''}`
           : `${t(p.timeCategory || 'morning')} | ${p.dose} ${med.unit || t('units')}`;
 
@@ -594,7 +594,7 @@ function renderDashboard() {
              <div id="metrics-entry-${p.id}" style="margin-bottom:12px; padding:8px; background:rgba(0,0,0,0.2); border-radius:8px;">
                <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
                  ${p.linkedMetrics.map(type => `
-                   <input type="text" id="m-val-${p.id}-${type}" placeholder="${t(type==='weight'?'weight':(type==='bp'?'bloodPressure':type))}" style="padding:6px; font-size:10px; background:transparent; border:1px solid rgba(255,255,255,0.1); color:white;">
+                   <input type="text" id="m-val-${p.id}-${type}" placeholder="${t(type === 'weight' ? 'weight' : (type === 'bp' ? 'bloodPressure' : type))}" style="padding:6px; font-size:10px; background:transparent; border:1px solid rgba(255,255,255,0.1); color:white;">
                  `).join('')}
                </div>
              </div>
@@ -605,7 +605,7 @@ function renderDashboard() {
       forecastHtml += `
         <div style="margin-bottom: 24px;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-            <div style="font-size:13px; font-weight:700; color:${isToday?'var(--accent-color)':'#94a3b8'}; text-transform:uppercase; letter-spacing:0.5px;">${dateLabel}</div>
+            <div style="font-size:13px; font-weight:700; color:${isToday ? 'var(--accent-color)' : '#94a3b8'}; text-transform:uppercase; letter-spacing:0.5px;">${dateLabel}</div>
             ${isToday ? `<button class="btn btn-secondary" style="width:auto; padding:4px 8px; font-size:10px; border-color:var(--accent-color); color:var(--accent-color);" onclick="window.navigate('log')">+ ${t('adHoc')}</button>` : ''}
           </div>
           ${itemsHtml}
@@ -615,10 +615,10 @@ function renderDashboard() {
   }
 
   const logsHtml = todaysLogs.length ? todaysLogs.map(l => {
-    const med = state.medications.find(m => m.id === l.medicationId) || {name: t('unknown')};
+    const med = state.medications.find(m => m.id === l.medicationId) || { name: t('unknown') };
     return `<div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:12px; opacity:0.7;">
               <span>${med.name} (${l.amount_taken})</span>
-              <span>${new Date(l.timestamp).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</span>
+              <span>${new Date(l.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
             </div>`;
   }).join('') : `<div style="font-size:11px; opacity:0.5;">${t('noLogsToday')}</div>`;
 
@@ -635,24 +635,24 @@ function renderDashboard() {
       </div>
       <div style="max-height: 55vh; overflow-y:auto; padding-right:8px; margin-bottom:24px;">
         ${(() => {
-          const missed = _findPastDueItems();
-          if (missed.length === 0) return '';
-          return `
+      const missed = _findPastDueItems();
+      if (missed.length === 0) return '';
+      return `
             <div style="margin-bottom: 24px;">
               <div style="font-size:13px; font-weight:700; color:#f87171; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
                 ${t('pastDue')}
               </div>
               ${missed.map(m => {
-                const p = m.plan;
-                const isAppt = p.type === 'appointment';
-                const med = !isAppt ? (state.medications.find(med => med.id === p.medicationId) || {name: t('unknown')}) : null;
-                const title = isAppt ? `\uD83D\uDEBA ${p.doctorName}` : med.name;
-                const subtitle = isAppt 
-                  ? `${m.date.toLocaleDateString(undefined, {weekday:'short', day:'2-digit', month:'2-digit'})} | ${p.location || ''}`
-                  : `${m.date.toLocaleDateString(undefined, {weekday:'short', day:'2-digit', month:'2-digit'})} \u2022 ${t(p.timeCategory || 'morning')} | ${p.dose} ${med.unit || t('units')}`;
-                
-                return `
+        const p = m.plan;
+        const isAppt = p.type === 'appointment';
+        const med = !isAppt ? (state.medications.find(med => med.id === p.medicationId) || { name: t('unknown') }) : null;
+        const title = isAppt ? `\uD83D\uDEBA ${p.doctorName}` : med.name;
+        const subtitle = isAppt
+          ? `${m.date.toLocaleDateString(undefined, { weekday: 'short', day: '2-digit', month: '2-digit' })} | ${p.location || ''}`
+          : `${m.date.toLocaleDateString(undefined, { weekday: 'short', day: '2-digit', month: '2-digit' })} \u2022 ${t(p.timeCategory || 'morning')} | ${p.dose} ${med.unit || t('units')}`;
+
+        return `
                   <div class="card" style="border-left: 3px solid #f87171; margin-bottom: 8px; padding: 12px; display:flex; justify-content:space-between; align-items:center; background: rgba(248, 113, 113, 0.05);">
                     <div style="flex:1; min-width:0;">
                       <div class="card-title" style="font-size:14px; margin-bottom:0; color:#fca5a5;">${title}</div>
@@ -664,11 +664,11 @@ function renderDashboard() {
                     </div>
                   </div>
                 `;
-              }).join('')}
+      }).join('')}
             </div>
             <div style="border-top: 1px dashed rgba(255,255,255,0.1); margin-bottom: 24px;"></div>
           `;
-        })()}
+    })()}
 
         ${forecastHtml || `<div class="empty-state">${t('noUpcoming')}</div>`}
       </div>
@@ -684,9 +684,9 @@ function renderDashboard() {
 window.confirmIntake = async (planId, plannedDateISO) => {
   const plan = state.plans.find(p => p.id === planId);
   if (!plan) return;
-  
+
   const plannedDate = plannedDateISO || new Date().toISOString().split('T')[0];
-  
+
   const linkedMetricIds = [];
   if (plan.linkedMetrics) {
     let missing = false;
@@ -707,7 +707,7 @@ window.confirmIntake = async (planId, plannedDateISO) => {
       return;
     }
   }
-  
+
   await API.addLog({
     medicationId: plan.medicationId,
     planId: plan.id,
@@ -717,7 +717,7 @@ window.confirmIntake = async (planId, plannedDateISO) => {
     linkedMetricIds,
     timestamp: Date.now()
   });
-  
+
   alert(t('loggedSuccess'));
   render();
 };
@@ -725,9 +725,9 @@ window.confirmIntake = async (planId, plannedDateISO) => {
 window.skipIntake = async (planId, plannedDateISO) => {
   const plan = state.plans.find(p => p.id === planId);
   if (!plan) return;
-  
+
   const plannedDate = plannedDateISO || new Date().toISOString().split('T')[0];
-  
+
   await API.addLog({
     medicationId: plan.medicationId,
     planId: plan.id,
@@ -736,7 +736,7 @@ window.skipIntake = async (planId, plannedDateISO) => {
     amount_taken: 0,
     timestamp: Date.now()
   });
-  
+
   render();
 };
 
@@ -751,7 +751,7 @@ function renderMedications() {
     };
     const icon = formatIcons[m.format] || '\uD83D\uDC8A';
     const hue = [...m.name].reduce((h, c) => h + c.charCodeAt(0), 0) % 360;
-    
+
     // Avatar: Icon on top, small dose below
     const avatar = `
       <div style="display:flex; flex-direction:column; align-items:center; gap:4px; flex-shrink:0; width:64px;">
@@ -890,14 +890,14 @@ function renderPlans() {
       title = `\uD83D\uDEBA ${p.doctorName || t('appointment')}`;
       subtitle = `${p.location ? '\uD83D\uDCCD ' + p.location : ''} ${p.phone ? ' | \uD83D\uDCDE ' + p.phone : ''}`;
       const dt = (p.isOneTime && p.startDate) ? new Date(p.startDate) : null;
-      infoLine = dt 
-        ? `\uD83D\uDDD3 ${dt.toLocaleDateString()} ${t('at')} ${dt.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}` 
+      infoLine = dt
+        ? `\uD83D\uDDD3 ${dt.toLocaleDateString()} ${t('at')} ${dt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
         : `\uD83D\uDDD3 ${t('recurring')}: ${t(p.timeCategory || 'morning')}`;
     } else {
-      const med = state.medications.find(m => m.id === p.medicationId) || {name: t('unknown')};
+      const med = state.medications.find(m => m.id === p.medicationId) || { name: t('unknown') };
       title = med.name;
       subtitle = `${t('takes')} ${p.dose} ${med.unit || t('units')} ${t('at')} <strong>${t(p.timeCategory || 'morning')}</strong>`;
-      
+
       let freqText = t(p.frequency || 'daily');
       if (p.frequency === 'everyXDays') freqText = t('dayIntervalLbl').replace('{x}', p.intervalX);
       if (p.frequency === 'weekly' && p.startWeekday !== undefined) {
@@ -940,8 +940,8 @@ function renderPlans() {
       
       <!-- Type Switcher -->
       <div style="display:flex; background:rgba(255,255,255,0.05); border-radius:10px; padding:4px; margin-bottom:20px;">
-        <button onclick="window._setPlanType('medication')" style="flex:1; border:none; padding:8px; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer; background:${type==='medication'?'var(--accent-color)':'transparent'}; color:${type==='medication'?'#000':'#94a3b8'}; transition:all 0.2s;">${t('medication')}</button>
-        <button onclick="window._setPlanType('appointment')" style="flex:1; border:none; padding:8px; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer; background:${type==='appointment'?'var(--accent-color)':'transparent'}; color:${type==='appointment'?'#000':'#94a3b8'}; transition:all 0.2s;">${t('appointment')}</button>
+        <button onclick="window._setPlanType('medication')" style="flex:1; border:none; padding:8px; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer; background:${type === 'medication' ? 'var(--accent-color)' : 'transparent'}; color:${type === 'medication' ? '#000' : '#94a3b8'}; transition:all 0.2s;">${t('medication')}</button>
+        <button onclick="window._setPlanType('appointment')" style="flex:1; border:none; padding:8px; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer; background:${type === 'appointment' ? 'var(--accent-color)' : 'transparent'}; color:${type === 'appointment' ? '#000' : '#94a3b8'}; transition:all 0.2s;">${t('appointment')}</button>
       </div>
       
       ${state.showMagicImport ? `
@@ -1142,7 +1142,7 @@ function _renderSharedPlanFields() {
 // 3. Activity Log
 function renderLog() {
   const medOptions = state.medications.map(m => `<option value="${m.id}" data-dose="${m.dose}">${m.name}</option>`).join('');
-  
+
   return `
     <div class="glass-panel">
       <div class="text-h2">${t('logIntake')}</div>
@@ -1183,17 +1183,17 @@ function renderLog() {
 function renderHistory() {
   const medFiltersHtml = state.medications.map(m => {
     const active = state.historyMedFilters.includes(m.id);
-    return `<div onclick="window._toggleHistoryFilter('${m.id}')" style="flex-shrink:0; padding:6px 12px; border-radius:30px; font-size:12px; font-weight:700; cursor:pointer; background:${active?'var(--accent-color)':'rgba(255,255,255,0.05)'}; color:${active?'#000':'#94a3b8'}; border:1px solid ${active?'var(--accent-color)':'rgba(255,255,255,0.1)'}; transition:all 0.2s;">${m.name}</div>`;
+    return `<div onclick="window._toggleHistoryFilter('${m.id}')" style="flex-shrink:0; padding:6px 12px; border-radius:30px; font-size:12px; font-weight:700; cursor:pointer; background:${active ? 'var(--accent-color)' : 'rgba(255,255,255,0.05)'}; color:${active ? '#000' : '#94a3b8'}; border:1px solid ${active ? 'var(--accent-color)' : 'rgba(255,255,255,0.1)'}; transition:all 0.2s;">${m.name}</div>`;
   }).join('');
 
   return `
     <div style="display:flex; gap:8px; overflow-x:auto; padding:8px 0; margin-bottom:12px; scrollbar-width:none; -ms-overflow-style:none;">
-      <div onclick="window._clearHistoryFilters()" style="flex-shrink:0; padding:6px 12px; border-radius:30px; font-size:12px; font-weight:700; cursor:pointer; background:${state.historyMedFilters.length===0?'rgba(255,255,255,0.2)':'rgba(255,255,255,0.05)'}; color:#fff; border:1px solid rgba(255,255,255,0.1);">${t('allMeds') || 'Alle'}</div>
+      <div onclick="window._clearHistoryFilters()" style="flex-shrink:0; padding:6px 12px; border-radius:30px; font-size:12px; font-weight:700; cursor:pointer; background:${state.historyMedFilters.length === 0 ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.05)'}; color:#fff; border:1px solid rgba(255,255,255,0.1);">${t('allMeds') || 'Alle'}</div>
       ${medFiltersHtml}
     </div>
     <div style="padding: 16px 0; display: flex; gap: 8px; margin-bottom: 8px;">
-      <button class="btn" style="flex:1; font-weight:700; height:44px; border-radius:12px; background:${state.historyView==='list'?'var(--accent-color)':'rgba(0,0,0,0.2)'}; color:${state.historyView==='list'?'#000':'#94a3b8'}; border:none;" onclick="window._setHistoryView('list')">${t('list')}</button>
-      <button class="btn" style="flex:1; font-weight:700; height:44px; border-radius:12px; background:${state.historyView==='charts'?'var(--accent-color)':'rgba(0,0,0,0.2)'}; color:${state.historyView==='charts'?'#000':'#94a3b8'}; border:none;" onclick="window._setHistoryView('charts')">${t('charts')}</button>
+      <button class="btn" style="flex:1; font-weight:700; height:44px; border-radius:12px; background:${state.historyView === 'list' ? 'var(--accent-color)' : 'rgba(0,0,0,0.2)'}; color:${state.historyView === 'list' ? '#000' : '#94a3b8'}; border:none;" onclick="window._setHistoryView('list')">${t('list')}</button>
+      <button class="btn" style="flex:1; font-weight:700; height:44px; border-radius:12px; background:${state.historyView === 'charts' ? 'var(--accent-color)' : 'rgba(0,0,0,0.2)'}; color:${state.historyView === 'charts' ? '#000' : '#94a3b8'}; border:none;" onclick="window._setHistoryView('charts')">${t('charts')}</button>
     </div>
     ${state.historyView === 'list' ? _renderLogList() : renderAnalytics()}
   `;
@@ -1215,27 +1215,27 @@ function _generateFullHistoryStream() {
   const daysLimit = 14;
   const stream = [];
   const now = new Date();
-  
+
   // 1. Add actual logs
   state.logs.forEach(l => {
     stream.push({ ...l, date: new Date(l.timestamp), type: 'log', status: l.amount_taken > 0 ? 'taken' : 'skipped' });
   });
-  
+
   // 2. Generate missed events from plans
   for (let i = 0; i < daysLimit; i++) {
-    const d = new Date(); d.setDate(d.getDate() - i); d.setHours(0,0,0,0);
+    const d = new Date(); d.setDate(d.getDate() - i); d.setHours(0, 0, 0, 0);
     const dateStr = d.toDateString();
-    
+
     state.plans.forEach(p => {
       if (p.type !== 'medication') return;
       if (!window._isPlanDueOnDate(p, d)) return;
-      
+
       // Check if we have a log for this med on this day
-      const hasLog = state.logs.some(l => 
-        l.medicationId === p.medicationId && 
+      const hasLog = state.logs.some(l =>
+        l.medicationId === p.medicationId &&
         new Date(l.timestamp).toDateString() === dateStr
       );
-      
+
       if (!hasLog && d < now) {
         stream.push({
           medicationId: p.medicationId,
@@ -1248,23 +1248,23 @@ function _generateFullHistoryStream() {
       }
     });
   }
-  
-  return stream.sort((a,b) => b.timestamp - a.timestamp);
+
+  return stream.sort((a, b) => b.timestamp - a.timestamp);
 }
 
 function _renderLogList() {
   let stream = _generateFullHistoryStream();
-  
+
   // Apply Filter
   if (state.historyMedFilters.length > 0) {
     stream = stream.filter(s => state.historyMedFilters.includes(s.medicationId));
   }
 
   const logCards = stream.map(l => {
-    const med = state.medications.find(m => m.id === l.medicationId) || {name: t('unknown')};
+    const med = state.medications.find(m => m.id === l.medicationId) || { name: t('unknown') };
     const time = new Date(l.timestamp).toLocaleString([], { dateStyle: 'short', timeStyle: l.type === 'log' ? 'short' : undefined });
     const isRed = l.status === 'skipped' || l.status === 'missed';
-    
+
     return `
       <div class="swipe-item">
         <button class="swipe-action" onclick="window._deleteHistoryLog('${l.id}')">
@@ -1326,13 +1326,13 @@ function renderSettings() {
       <div class="form-group">
         <label>${t('modelIdLabel')}</label>
         <div style="display:flex; gap:8px; margin-bottom:12px;">
-          ${state.availableModels.length > 0 
-            ? `<select id="grok-model-input" style="flex:1;">
+          ${state.availableModels.length > 0
+      ? `<select id="grok-model-input" style="flex:1;">
                 ${state.availableModels.map(m => `<option value="${m}" ${state.grokModel === m ? 'selected' : ''}>${m}</option>`).join('')}
                 <option value="custom">${t('customModel')}</option>
                </select>`
-            : `<input type="text" id="grok-model-input" value="${state.grokModel}" placeholder="grok-beta" style="flex:1;">`
-          }
+      : `<input type="text" id="grok-model-input" value="${state.grokModel}" placeholder="grok-beta" style="flex:1;">`
+    }
           <button class="btn btn-secondary" style="width:auto; padding:0 12px; font-size:12px;" onclick="window.fetchGrokModels()" title="${t('refreshModels')}">\uD83D\uDDD8</button>
         </div>
       </div>
@@ -1384,9 +1384,9 @@ window.saveMed = async () => {
   const format = document.getElementById('med-format').value;
   const hersteller = document.getElementById('med-hersteller').value;
   const einsatzgebiet = document.getElementById('med-einsatzgebiet').value;
-  
+
   if (!name || !dose) return alert(t('nameAndDose'));
-  
+
   let advEvents = state.pendingAdverseEvents;
 
   if (id) {
@@ -1395,7 +1395,7 @@ window.saveMed = async () => {
       if (!advEvents) advEvents = existing.adverse_events;
     }
   }
-  
+
   await API.addMedication({ id: id || undefined, name, dose, unit, format, hersteller, einsatzgebiet, adverse_events: advEvents });
   window.closeMedPanel();
   window.navigate('medications');
@@ -1404,7 +1404,7 @@ window.saveMed = async () => {
 window.editMed = (id) => {
   const med = state.medications.find(m => m.id === id);
   if (!med) return;
-  
+
   state.editingMedId = id;
   document.getElementById('med-id').value = id;
   document.getElementById('med-name').value = med.name;
@@ -1413,7 +1413,7 @@ window.editMed = (id) => {
   document.getElementById('med-format').value = med.format;
   document.getElementById('med-hersteller').value = med.hersteller || "";
   document.getElementById('med-einsatzgebiet').value = med.einsatzgebiet || "";
-  
+
   document.getElementById('add-med-title').innerText = t('updateMedication');
   document.getElementById('med-save-btn').innerText = t('saveMedication');
   document.getElementById('add-med-panel').style.display = 'block';
@@ -1528,7 +1528,7 @@ window._parseAdverseEvents = (text) => {
   // 1. Frequency Parsing
   const freqRegex = /([^,.;:]+?)\s*\(?\s*(\d+(?:\.\d+)?\s*%|>\s*\d+\s*%)\s*\)?/g;
   const matches = [...text.matchAll(freqRegex)];
-  
+
   if (matches.length > 2) {
     const tableRows = matches.map(match => `
       <tr>
@@ -1570,27 +1570,27 @@ window._isPlanDueToday = (p) => window._isPlanDueOnDate(p, new Date());
 
 window._isPlanDueOnDate = (p, targetDate) => {
   const d = new Date(targetDate);
-  d.setHours(0,0,0,0);
+  d.setHours(0, 0, 0, 0);
   const start = new Date(p.startDate || d);
-  start.setHours(0,0,0,0);
-  
+  start.setHours(0, 0, 0, 0);
+
   if (d < start) return false;
   if (p.isOneTime && d.getTime() !== start.getTime()) return false;
 
   const diffDays = Math.round((d - start) / (1000 * 60 * 60 * 24));
 
-  switch(p.frequency) {
-    case 'weekly': 
+  switch (p.frequency) {
+    case 'weekly':
       const targetWeekday = p.startWeekday !== undefined ? parseInt(p.startWeekday) : start.getDay();
       return d.getDay() === targetWeekday;
-    case 'monthly': 
+    case 'monthly':
       const targetDay = p.startDayOfMonth !== undefined ? parseInt(p.startDayOfMonth) : start.getDate();
       return d.getDate() === targetDay;
-    case 'quarterly': 
+    case 'quarterly':
       const targetQDay = p.startDayOfMonth !== undefined ? parseInt(p.startDayOfMonth) : start.getDate();
-      return d.getDate() === targetQDay && 
-             (d.getMonth() - start.getMonth() + (12 * (d.getFullYear() - start.getFullYear()))) % 3 === 0;
-    case 'everyXDays': 
+      return d.getDate() === targetQDay &&
+        (d.getMonth() - start.getMonth() + (12 * (d.getFullYear() - start.getFullYear()))) % 3 === 0;
+    case 'everyXDays':
       const x = parseInt(p.intervalX) || 1;
       return diffDays % x === 0;
     case 'daily':
@@ -1613,7 +1613,7 @@ window._syncPlanAnchors = (dateStr) => {
 };
 
 window.deleteMed = async (id) => {
-  if(confirm(t('deleteMedConfirm'))) {
+  if (confirm(t('deleteMedConfirm'))) {
     await API.deleteMedication(id);
     window.navigate('medications');
   }
@@ -1622,9 +1622,9 @@ window.deleteMed = async (id) => {
 window.saveLog = async () => {
   const medicationId = document.getElementById('log-med').value;
   const amount = document.getElementById('log-amount').value;
-  
+
   if (!medicationId || !amount) return alert(t('selectAndAmount'));
-  
+
   await API.addLog({ medicationId, amount_taken: amount });
   window.navigate('dashboard');
 };
@@ -1637,33 +1637,33 @@ window.savePlan = async () => {
     const phone = type === 'appointment' ? document.getElementById('appt-phone')?.value : null;
     const note = type === 'appointment' ? document.getElementById('appt-note')?.value : null;
     const isOneTime = type === 'appointment' ? document.getElementById('appt-one-time')?.checked : false;
-    
+
     const timeCategory = type === 'medication' ? document.getElementById('plan-category')?.value : (isOneTime ? null : document.getElementById('appt-category')?.value);
     const dose = type === 'medication' ? document.getElementById('plan-dose')?.value : null;
-    
+
     const frequency = document.getElementById('plan-freq')?.value || 'daily';
     const intervalX = document.getElementById('plan-interval-x')?.value || 1;
     const startDateRaw = isOneTime ? document.getElementById('appt-date')?.value : document.getElementById('plan-start-date')?.value;
     const startWeekday = document.getElementById('plan-weekday')?.value || 1;
     const startDayOfMonth = document.getElementById('plan-day-of-month')?.value || 1;
-    
+
     if (type === 'medication' && (!medicationId || !dose)) return alert(t('medAndTime') || 'Select Med and dose');
     if (type === 'appointment' && !doctorName) return alert(t('doctorName') || 'Enter Doctor name');
-    
+
     const linkedMetrics = type === 'medication' ? Array.from(document.querySelectorAll('input[name="link-metric"]:checked')).map(cb => cb.value) : [];
-    
-    const plan = { 
+
+    const plan = {
       type,
-      medicationId, 
+      medicationId,
       doctorName,
       location,
       phone,
       note,
       isOneTime,
-      timeCategory, 
-      dose, 
-      frequency, 
-      intervalX, 
+      timeCategory,
+      dose,
+      frequency,
+      intervalX,
       linkedMetrics,
       startDate: startDateRaw ? new Date(startDateRaw).toISOString() : new Date().toISOString(),
       startWeekday,
@@ -1680,7 +1680,7 @@ window.savePlan = async () => {
 
 
 window.deletePlan = async (id) => {
-  if(confirm(t('removeScheduleConfirm'))) {
+  if (confirm(t('removeScheduleConfirm'))) {
     await API.deletePlan(id);
     window.navigate('plans');
   }
@@ -1694,9 +1694,9 @@ window.searchMedicationLocal = (query) => {
   }
 
   const q = query.toLowerCase();
-  const matches = state.localDrugs.filter(d => 
-    d.name.toLowerCase().includes(q) || 
-    d.wirkstoff.toLowerCase().includes(q) || 
+  const matches = state.localDrugs.filter(d =>
+    d.name.toLowerCase().includes(q) ||
+    d.wirkstoff.toLowerCase().includes(q) ||
     (d.einsatzgebiet && d.einsatzgebiet.toLowerCase().includes(q)) ||
     (d.klasse && d.klasse.toLowerCase().includes(q))
   ).slice(0, 10);
@@ -1723,10 +1723,10 @@ window.searchByClass = (klasse) => {
     document.getElementById('local-search-results').style.display = 'none';
     return;
   }
-  
+
   const matches = state.localDrugs.filter(d => d.klasse === klasse).slice(0, 30);
   const resultsEl = document.getElementById('local-search-results');
-  
+
   resultsEl.innerHTML = matches.map(m => `
     <div style="padding:10px 14px; cursor:pointer; border-bottom:1px solid rgba(255,255,255,0.05); transition:background 0.2s;" 
          onmouseover="this.style.background='rgba(255,255,255,0.05)'" 
@@ -1762,8 +1762,8 @@ window.searchDoctorLocal = (query) => {
   const q = query.toLowerCase();
   const matches = state.localDoctors.filter(d => {
     const nameMatch = d.name.toLowerCase().includes(q);
-    const specialtyMatch = !specialty || d.fachrichtung === specialty;
-    const regionMatch = !region || d.ort.toLowerCase().includes(region) || d.adresse.toLowerCase().includes(region);
+    const specialtyMatch = !specialty || (d.fachrichtung && d.fachrichtung.includes(specialty));
+    const regionMatch = !region || (d.ort && d.ort.toLowerCase().includes(region)) || (d.adresse && d.adresse.toLowerCase().includes(region));
     return nameMatch && specialtyMatch && regionMatch;
   }).slice(0, 15);
 
@@ -1787,19 +1787,19 @@ window.searchDoctorLocal = (query) => {
          onclick="window.applyLocalDoctor(${JSON.stringify(m).replace(/"/g, '&quot;')})">
       <div style="display:flex; justify-content:space-between; align-items:flex-start;">
         <div style="font-weight:700; color:var(--accent-color); font-size:13px;">${m.name}</div>
-        <div style="font-size:8px; background:rgba(74,222,128,0.1); color:var(--accent-color); padding:1px 5px; border-radius:4px; border:1px solid rgba(74,222,128,0.2);">${m.kasse ? 'Kasse' : 'Privat'}</div>
+        ${m.kasse ? \`<div style="font-size:8px; background:rgba(74,222,128,0.1); color:var(--accent-color); padding:1px 5px; border-radius:4px; border:1px solid rgba(74,222,128,0.2);">Kasse</div>\` : ''}
       </div>
-      <div style="font-size:10px; opacity:0.8; margin-top:2px;">${m.fachrichtung}</div>
-      <div style="font-size:9px; opacity:0.5; margin-top:2px;">\uD83D\uDCCD ${m.adresse}</div>
+      <div style="font-size:10px; opacity:0.8; margin-top:2px;">\${m.fachrichtung}</div>
+      <div style="font-size:9px; opacity:0.5; margin-top:2px;">\uD83D\uDCCD \${m.adresse}</div>
     </div>
-  `).join('');
+  \`).join('');
   resultsEl.style.display = 'block';
 };
 
 window.applyLocalDoctor = (doc) => {
   document.getElementById('appt-doctor').value = doc.name;
   document.getElementById('appt-location').value = doc.adresse;
-  document.getElementById('appt-phone').value = doc.telefon;
+  document.getElementById('appt-phone').value = doc.telefon || doc.phone || "";
   document.getElementById('doctor-search-results').style.display = 'none';
 };
 
@@ -1862,8 +1862,8 @@ window.searchWithGrok = async () => {
 
     if (!res.ok) {
       const errData = await res.json().catch(() => ({}));
-      const errorMsg = (typeof errData.error === 'string') 
-        ? errData.error 
+      const errorMsg = (typeof errData.error === 'string')
+        ? errData.error
         : (errData.error?.message || res.statusText);
       throw new Error(errorMsg);
     }
@@ -1877,21 +1877,21 @@ window.searchWithGrok = async () => {
 
     let resultsList = [];
     if (Array.isArray(result.results)) {
-       resultsList = result.results;
+      resultsList = result.results;
     } else if (result.name) {
-       resultsList = [result];
+      resultsList = [result];
     }
-    
+
     state.pendingGrokResults = resultsList;
-    
+
     if (state.pendingGrokResults.length === 0) {
-       adverseEl.innerHTML = `<div style="color: #64748b; font-style: italic;">\u26A0\uFE0F ${t('notFoundAiLabel')}</div>`;
-       return;
+      adverseEl.innerHTML = `<div style="color: #64748b; font-style: italic;">\u26A0\uFE0F ${t('notFoundAiLabel')}</div>`;
+      return;
     }
 
     if (state.pendingGrokResults.length === 1) {
-       window.applyGrokMatch(0);
-       return;
+      window.applyGrokMatch(0);
+      return;
     }
 
     // Multiple results found
@@ -1958,40 +1958,40 @@ window.translateAdverse = async (medId, text) => {
     const translated = d.responseData ? d.responseData.translatedText : text;
     _advTransCache.set(medId, translated);
     el.innerHTML = translated;
-  } catch(e) {
+  } catch (e) {
     el.innerHTML = text;
   }
 };
 
 // --- CALENDAR EXPORT HELPERS ---
 function _generateICS(events) {
-    const formatICSDate = (date) => {
-        return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-    };
-    
-    let icsItems = events.map(e => {
-        const desc = (e.description || '').replace(/\n/g, '\\n');
-        const loc = (e.location || '').replace(/\n/g, '\\n');
-        return [
-            'BEGIN:VEVENT',
-            `UID:${_uuid()}`,
-            `DTSTAMP:${formatICSDate(new Date())}`,
-            `DTSTART:${formatICSDate(e.start)}`,
-            `DTEND:${formatICSDate(new Date(e.start.getTime() + 30 * 60 * 1000))}`,
-            `SUMMARY:\uD83D\uDC8A ${e.title}`,
-            `DESCRIPTION:${desc}`,
-            `LOCATION:${loc}`,
-            'END:VEVENT'
-        ].join('\r\n');
-    }).join('\r\n');
+  const formatICSDate = (date) => {
+    return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+  };
 
+  let icsItems = events.map(e => {
+    const desc = (e.description || '').replace(/\n/g, '\\n');
+    const loc = (e.location || '').replace(/\n/g, '\\n');
     return [
-        'BEGIN:VCALENDAR',
-        'VERSION:2.0',
-        'PRODID:-//MedicaTrack//Schedule//EN',
-        icsItems,
-        'END:VCALENDAR'
+      'BEGIN:VEVENT',
+      `UID:${_uuid()}`,
+      `DTSTAMP:${formatICSDate(new Date())}`,
+      `DTSTART:${formatICSDate(e.start)}`,
+      `DTEND:${formatICSDate(new Date(e.start.getTime() + 30 * 60 * 1000))}`,
+      `SUMMARY:\uD83D\uDC8A ${e.title}`,
+      `DESCRIPTION:${desc}`,
+      `LOCATION:${loc}`,
+      'END:VEVENT'
     ].join('\r\n');
+  }).join('\r\n');
+
+  return [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//MedicaTrack//Schedule//EN',
+    icsItems,
+    'END:VCALENDAR'
+  ].join('\r\n');
 }
 
 // AI DOCTOR SEARCH
@@ -2000,7 +2000,7 @@ window.searchDoctorSmart = async () => {
   const region = document.getElementById('appt-region').value.toLowerCase();
   const specialty = document.getElementById('appt-specialty').value;
   const listEl = document.getElementById('doctor-ai-results');
-  
+
   listEl.style.display = 'block';
   listEl.innerHTML = `<span style="font-size:11px; color:var(--accent-color);">${t('testingKey')}...</span>`;
 
@@ -2045,56 +2045,56 @@ window.searchDoctorSmart = async () => {
 };
 
 window._runAISearchOnly = async () => {
-    const listEl = document.getElementById('doctor-ai-results');
-    const name = document.getElementById('appt-doctor').value;
-    const specialty = document.getElementById('appt-specialty').value;
-    const region = document.getElementById('appt-region').value;
+  const listEl = document.getElementById('doctor-ai-results');
+  const name = document.getElementById('appt-doctor').value;
+  const specialty = document.getElementById('appt-specialty').value;
+  const region = document.getElementById('appt-region').value;
 
-    if (!region) {
-      listEl.innerHTML = `<div style="font-size:11px; color:#ef4444; background:rgba(239,68,68,0.1); padding:8px; border-radius:6px;">\u26A0\uFE0F ${t('defaultRegionLabel')}</div>`;
-      return;
-    }
-    if (!state.grokKey) {
-      listEl.innerHTML = `<div style="font-size:11px; color:#ef4444; background:rgba(239,68,68,0.1); padding:8px; border-radius:6px;">${t('missingKeyError')}</div>`;
-      return;
-    }
+  if (!region) {
+    listEl.innerHTML = `<div style="font-size:11px; color:#ef4444; background:rgba(239,68,68,0.1); padding:8px; border-radius:6px;">\u26A0\uFE0F ${t('defaultRegionLabel')}</div>`;
+    return;
+  }
+  if (!state.grokKey) {
+    listEl.innerHTML = `<div style="font-size:11px; color:#ef4444; background:rgba(239,68,68,0.1); padding:8px; border-radius:6px;">${t('missingKeyError')}</div>`;
+    return;
+  }
 
-    listEl.style.display = 'block';
-    listEl.innerHTML = `<div style="display:flex; gap:10px; align-items:center; font-size:11px; color:var(--accent-color);">
+  listEl.style.display = 'block';
+  listEl.innerHTML = `<div style="display:flex; gap:10px; align-items:center; font-size:11px; color:var(--accent-color);">
       <div style="width:16px; height:16px; border:2px solid var(--accent-color); border-top-color:transparent; border-radius:50%; animation: spin 0.8s linear infinite;"></div> 
       ${t('aiThinking') || 'Suche im Internet...'}
     </div>`;
 
-    try {
-      const regionText = region ? ` in "${region}"` : '';
-      const nameText = name ? (specialty ? `named "${name}" specializing in "${specialty}"` : `named "${name}"`) : `specializing in "${specialty}"`;
-      const prompt = `Find professional contact details for: ${nameText}${regionText}. Return ONLY JSON: {"doctors": [{"name": "...", "specialty": "...", "address": "...", "phone": "..."}]}. Language: ${state.lang === 'de' ? 'German' : 'English'}.`;
+  try {
+    const regionText = region ? ` in "${region}"` : '';
+    const nameText = name ? (specialty ? `named "${name}" specializing in "${specialty}"` : `named "${name}"`) : `specializing in "${specialty}"`;
+    const prompt = `Find professional contact details for: ${nameText}${regionText}. Return ONLY JSON: {"doctors": [{"name": "...", "specialty": "...", "address": "...", "phone": "..."}]}. Language: ${state.lang === 'de' ? 'German' : 'English'}.`;
 
-      const body = { model: state.grokModel, messages: [{ role: "user", content: prompt }], temperature: 0 };
-      if (state.useLiveSearch) body.tools = [{ type: "web_search" }];
-      else body.response_format = { type: "json_object" };
+    const body = { model: state.grokModel, messages: [{ role: "user", content: prompt }], temperature: 0 };
+    if (state.useLiveSearch) body.tools = [{ type: "web_search" }];
+    else body.response_format = { type: "json_object" };
 
-      const res = await fetch(GROK_BASE_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${state.grokKey}` },
-        body: JSON.stringify(body)
-      });
+    const res = await fetch(GROK_BASE_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${state.grokKey}` },
+      body: JSON.stringify(body)
+    });
 
-      if (!res.ok) throw new Error(`API Error ${res.status}`);
-      const d = await res.json();
-      let content = d.choices[0].message.content || "";
-      if (content.includes('```json')) content = content.split('```json')[1].split('```')[0].trim();
-      else if (content.includes('{')) content = content.substring(content.indexOf('{'), content.lastIndexOf('}') + 1);
+    if (!res.ok) throw new Error(`API Error ${res.status}`);
+    const d = await res.json();
+    let content = d.choices[0].message.content || "";
+    if (content.includes('```json')) content = content.split('```json')[1].split('```')[0].trim();
+    else if (content.includes('{')) content = content.substring(content.indexOf('{'), content.lastIndexOf('}') + 1);
 
-      const data = JSON.parse(content);
-      const doctors = data.doctors || [];
+    const data = JSON.parse(content);
+    const doctors = data.doctors || [];
 
-      if (doctors.length === 0) {
-        listEl.innerHTML = `<div style="font-size:11px; opacity:0.6;">Keine Ergebnisse gefunden.</div>`;
-        return;
-      }
+    if (doctors.length === 0) {
+      listEl.innerHTML = `<div style="font-size:11px; opacity:0.6;">Keine Ergebnisse gefunden.</div>`;
+      return;
+    }
 
-      listEl.innerHTML = `
+    listEl.innerHTML = `
         <div style="font-size:10px; font-weight:700; margin-bottom:8px; opacity:0.6; color:#fde047;">\u26A0\uFE0F ${t('aiAccuracyWarning')}</div>
         <div style="display:flex; flex-direction:column; gap:8px;">
           ${doctors.map((doc, i) => `
@@ -2108,17 +2108,17 @@ window._runAISearchOnly = async () => {
           `).join('')}
         </div>
       `;
-    } catch(err) {
-      listEl.innerHTML = `<div style="color:#f87171; font-size:10px;">Error: ${err.message}.</div>`;
-    }
+  } catch (err) {
+    listEl.innerHTML = `<div style="color:#f87171; font-size:10px;">Error: ${err.message}.</div>`;
+  }
 };
 
 window._applyDoctorSmart = (i, list) => {
-    const doc = list[i];
-    document.getElementById('appt-doctor').value = doc.name;
-    document.getElementById('appt-location').value = doc.address || "";
-    document.getElementById('appt-phone').value = doc.phone || doc.telefon || "";
-    document.getElementById('doctor-ai-results').style.display = 'none';
+  const doc = list[i];
+  document.getElementById('appt-doctor').value = doc.name;
+  document.getElementById('appt-location').value = doc.address || "";
+  document.getElementById('appt-phone').value = doc.phone || doc.telefon || "";
+  document.getElementById('doctor-ai-results').style.display = 'none';
 };
 
 
@@ -2127,21 +2127,21 @@ window._applyDoctorSmart = (i, list) => {
 window._runMagicImportAI = async (isAuto = false) => {
   let text = document.getElementById('magic-import-text')?.value || "";
   if (isAuto) {
-      const name = document.getElementById('appt-doctor')?.value || "";
-      const specialty = document.getElementById('appt-specialty')?.value || "";
-      const region = document.getElementById('appt-region')?.value || "";
-      if (!name && !specialty) return alert("Please enter at least a name or specialty to search.");
-      text = `Search for: ${name} ${specialty} in region ${region}`;
+    const name = document.getElementById('appt-doctor')?.value || "";
+    const specialty = document.getElementById('appt-specialty')?.value || "";
+    const region = document.getElementById('appt-region')?.value || "";
+    if (!name && !specialty) return alert("Please enter at least a name or specialty to search.");
+    text = `Search for: ${name} ${specialty} in region ${region}`;
   }
-  
+
   const statusEl = document.getElementById('magic-status');
   if (!text.trim()) return;
   if (!state.grokKey) return alert(t('missingKeyError'));
 
   statusEl.innerHTML = `<div style="font-size:11px; color:var(--accent-color); margin-bottom:8px;">${t('importing')}</div>`;
-  
+
   try {
-    const prompt = isAuto 
+    const prompt = isAuto
       ? `You are an automated research assistant. 
          TASK: Search the web for a medical professional matching: "${text}".
          
@@ -2173,9 +2173,9 @@ window._runMagicImportAI = async (isAuto = false) => {
          If any field is missing, use null. Return ONLY the JSON object.`;
 
     const body = {
-        model: state.grokModel,
-        messages: [{ role: "user", content: prompt }],
-        temperature: 0
+      model: state.grokModel,
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0
     };
 
     // ENABLE WEB SEARCH FOR URL BROWSING
@@ -2186,17 +2186,17 @@ window._runMagicImportAI = async (isAuto = false) => {
       headers: { "Content-Type": "application/json", "Authorization": `Bearer ${state.grokKey}` },
       body: JSON.stringify(body)
     });
-    
+
     if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error?.message || `API Error ${res.status}`);
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error?.message || `API Error ${res.status}`);
     }
 
     const d = await res.json();
     let content = d.choices[0].message.content || "";
-    
+
     if (!content && d.choices[0].message.tool_calls) {
-        throw new Error("Web search tool was used but no final answer was returned. Ensure you are using a reasoning model.");
+      throw new Error("Web search tool was used but no final answer was returned. Ensure you are using a reasoning model.");
     }
 
     // Fallback parser: Extract JSON if model included text
@@ -2205,22 +2205,22 @@ window._runMagicImportAI = async (isAuto = false) => {
     } else if (content.includes('{')) {
       content = content.substring(content.indexOf('{'), content.lastIndexOf('}') + 1);
     }
-    
+
     const result = JSON.parse(content);
-    
+
     document.getElementById('appt-doctor').value = result.name || "";
     document.getElementById('appt-location').value = result.address || "";
     if (result.phone) {
-        // Find existing phone input or just add to address
-        document.getElementById('appt-location').value += ` (Tel: ${result.phone})`;
+      // Find existing phone input or just add to address
+      document.getElementById('appt-location').value += ` (Tel: ${result.phone})`;
     }
     if (result.specialty) {
-        // Handle specialty if needed
+      // Handle specialty if needed
     }
-    
+
     state.showMagicImport = false;
     render();
-  } catch(e) {
+  } catch (e) {
     statusEl.innerHTML = `<div style="color:#f87171; font-size:10px; margin-bottom:8px;">Error: ${e.message}</div>`;
   }
 };
@@ -2278,7 +2278,7 @@ window.fetchGrokModels = async () => {
 
 window.exportData = async () => {
   const jsonString = await API.exportData();
-  const blob = new Blob([jsonString], {type: "application/json"});
+  const blob = new Blob([jsonString], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -2288,10 +2288,10 @@ window.exportData = async () => {
 
 window.importData = async () => {
   const fileInput = document.getElementById('import-file');
-  if(!fileInput.files.length) return alert(t('selectFile'));
+  if (!fileInput.files.length) return alert(t('selectFile'));
   const reader = new FileReader();
   reader.onload = async (e) => {
-    try { await API.importData(e.target.result); window.navigate('dashboard'); } catch(err) { alert(t('importError')); }
+    try { await API.importData(e.target.result); window.navigate('dashboard'); } catch (err) { alert(t('importError')); }
   };
   reader.readAsText(fileInput.files[0]);
 };
@@ -2301,31 +2301,31 @@ window.confirmClearLogs = async () => { if (confirm(t('confirmDeleteLogs'))) { a
 window.resetToday = async () => { await API.clearTodayLogs(); window.navigate('dashboard'); };
 
 window.generateTestData = async (countVal) => {
-    if (state.medications.length === 0) return alert(t('addMedFirst'));
-    const count = parseInt(countVal) || 50;
-    const now = Date.now();
-    for (let i = 0; i < count; i++) {
-        const timestamp = now - Math.random() * (30 * 24 * 60 * 60 * 1000);
-        const med = state.medications[Math.floor(Math.random() * state.medications.length)];
-        await API.addLog({ medicationId: med.id, amount_taken: med.dose || 1, timestamp, isTestData: true });
-    }
-    alert(`${count} test entries generated!`);
-    window.navigate('history');
+  if (state.medications.length === 0) return alert(t('addMedFirst'));
+  const count = parseInt(countVal) || 50;
+  const now = Date.now();
+  for (let i = 0; i < count; i++) {
+    const timestamp = now - Math.random() * (30 * 24 * 60 * 60 * 1000);
+    const med = state.medications[Math.floor(Math.random() * state.medications.length)];
+    await API.addLog({ medicationId: med.id, amount_taken: med.dose || 1, timestamp, isTestData: true });
+  }
+  alert(`${count} test entries generated!`);
+  window.navigate('history');
 };
 
-window.confirmClearTestData = async () => { 
-  if (confirm(t('clearTestBtn') + "?")) { 
-    await API.clearTestData(); 
-    window.navigate('dashboard'); 
-  } 
+window.confirmClearTestData = async () => {
+  if (confirm(t('clearTestBtn') + "?")) {
+    await API.clearTestData();
+    window.navigate('dashboard');
+  }
 };
 
 function renderAnalytics() {
-    const r = state.analyticsRange || 7;
-    return `<div class="glass-panel" style="padding-top:0;">
+  const r = state.analyticsRange || 7;
+  return `<div class="glass-panel" style="padding-top:0;">
         <div style="display:flex; gap:8px; margin-bottom:20px; overflow-x:auto; padding-bottom:8px;">
-          <button class="btn btn-secondary" onclick="window._setAnalyticsRange(7)" style="${r===7?'background:var(--accent-color);color:#000;':''}">7D</button>
-          <button class="btn btn-secondary" onclick="window._setAnalyticsRange(30)" style="${r===30?'background:var(--accent-color);color:#000;':''}">30D</button>
+          <button class="btn btn-secondary" onclick="window._setAnalyticsRange(7)" style="${r === 7 ? 'background:var(--accent-color);color:#000;' : ''}">7D</button>
+          <button class="btn btn-secondary" onclick="window._setAnalyticsRange(30)" style="${r === 30 ? 'background:var(--accent-color);color:#000;' : ''}">30D</button>
         </div>
         <div id="chart-adherence" style="min-height: 200px;"></div>
         <div id="chart-weight" style="min-height: 200px; margin-top:20px;"></div>
@@ -2335,50 +2335,50 @@ function renderAnalytics() {
 window._setAnalyticsRange = (r) => { state.analyticsRange = r; render(); };
 
 async function _initCharts() {
-    if (typeof ApexCharts === 'undefined') return setTimeout(_initCharts, 200);
-    const range = state.analyticsRange || 7;
-    const dates = [];
-    for (let i = range - 1; i >= 0; i--) {
-        const d = new Date(); d.setDate(d.getDate() - i); d.setHours(0,0,0,0);
-        dates.push(d);
+  if (typeof ApexCharts === 'undefined') return setTimeout(_initCharts, 200);
+  const range = state.analyticsRange || 7;
+  const dates = [];
+  for (let i = range - 1; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i); d.setHours(0, 0, 0, 0);
+    dates.push(d);
+  }
+
+  const adherenceData = dates.map(date => {
+    let plans = state.plans.filter(p => window._isPlanDueOnDate(p, date));
+    let logs = state.logs.filter(l => new Date(l.timestamp).toDateString() === date.toDateString());
+
+    // Filter by history selection if in history view
+    if (state.currentView === 'history' && state.historyMedFilters.length > 0) {
+      plans = plans.filter(p => state.historyMedFilters.includes(p.medicationId));
+      logs = logs.filter(l => state.historyMedFilters.includes(l.medicationId));
     }
-    
-    const adherenceData = dates.map(date => {
-        let plans = state.plans.filter(p => window._isPlanDueOnDate(p, date));
-        let logs = state.logs.filter(l => new Date(l.timestamp).toDateString() === date.toDateString());
-        
-        // Filter by history selection if in history view
-        if (state.currentView === 'history' && state.historyMedFilters.length > 0) {
-          plans = plans.filter(p => state.historyMedFilters.includes(p.medicationId));
-          logs = logs.filter(l => state.historyMedFilters.includes(l.medicationId));
-        }
-        
-        const due = plans.length;
-        if (due === 0) return 0;
-        const taken = logs.filter(l => l.amount_taken > 0).length;
-        return Math.min(100, Math.round((taken / due) * 100));
-    });
-    new ApexCharts(document.querySelector("#chart-adherence"), {
-        series: [{ name: t('adherence'), data: adherenceData }],
-        chart: { type: 'bar', height: 200, toolbar: { show: false } },
-        theme: { mode: 'dark' },
-        colors: ['#6366f1'],
-        xaxis: { categories: dates.map(d => d.toLocaleDateString(undefined, { day: '2-digit', month: '2-digit' })) },
-        yaxis: { labels: { formatter: (val) => Math.floor(val) } }
-    }).render();
+
+    const due = plans.length;
+    if (due === 0) return 0;
+    const taken = logs.filter(l => l.amount_taken > 0).length;
+    return Math.min(100, Math.round((taken / due) * 100));
+  });
+  new ApexCharts(document.querySelector("#chart-adherence"), {
+    series: [{ name: t('adherence'), data: adherenceData }],
+    chart: { type: 'bar', height: 200, toolbar: { show: false } },
+    theme: { mode: 'dark' },
+    colors: ['#6366f1'],
+    xaxis: { categories: dates.map(d => d.toLocaleDateString(undefined, { day: '2-digit', month: '2-digit' })) },
+    yaxis: { labels: { formatter: (val) => Math.floor(val) } }
+  }).render();
 }
 
 window.downloadICS = (id) => { window._exportSingleEvent(id, new Date().toISOString()); };
 
 window._exportSingleEvent = (planId, dateStr) => {
-    const p = state.plans.find(x => x.id === planId);
-    if (!p) return;
-    const isAppt = p.type === 'appointment';
-    const med = !isAppt ? state.medications.find(m => m.id === p.medicationId) : null;
-    const eventDate = new Date(dateStr);
-    const title = isAppt ? p.doctorName : `${med.name} (${p.dose})`;
-    const icsContent = _generateICS([{ title, start: eventDate, description: "", location: p.location || "" }]);
-    _downloadBlob(icsContent, `Reminder.ics`);
+  const p = state.plans.find(x => x.id === planId);
+  if (!p) return;
+  const isAppt = p.type === 'appointment';
+  const med = !isAppt ? state.medications.find(m => m.id === p.medicationId) : null;
+  const eventDate = new Date(dateStr);
+  const title = isAppt ? p.doctorName : `${med.name} (${p.dose})`;
+  const icsContent = _generateICS([{ title, start: eventDate, description: "", location: p.location || "" }]);
+  _downloadBlob(icsContent, `Reminder.ics`);
 };
 
 window._exportWeeklyEvents = () => { alert("Exporting..."); };
@@ -2402,13 +2402,13 @@ window.checkUpdateManual = async () => {
   const btn = event?.target;
   const originalText = btn ? btn.innerText : '';
   if (btn) btn.innerText = "...";
-  
+
   try {
     const res = await fetch(`/version.json?t=${Date.now()}`);
     if (!res.ok) throw new Error("Fetch failed");
     const data = await res.json();
     const newVer = data.version;
-    
+
     if (newVer && newVer !== APP_VERSION) {
       window._showUpdatePopup(APP_VERSION, newVer);
     } else {
@@ -2471,7 +2471,7 @@ window._showUpdatePopup = (oldVer, newVer) => {
 window.addEventListener('DOMContentLoaded', async () => {
   try {
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
-    
+
     // Auto-identify location on first start if not set
     if (!state.defaultRegion && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(async (pos) => {
@@ -2493,10 +2493,10 @@ window.addEventListener('DOMContentLoaded', async () => {
         } catch (e) { console.warn("Auto-location failed", e); }
       }, (err) => { console.warn("Geolocation permission denied or failed", err); }, { timeout: 5000 });
     }
-    
+
     await window.navigate('dashboard');
     window._autoUpdateCheck();
-    
+
     // Load local databases
     try {
       const drugRes = await fetch(`/drugs.json?v=${APP_VERSION}`);
@@ -2504,11 +2504,17 @@ window.addEventListener('DOMContentLoaded', async () => {
         const drugData = await drugRes.json();
         state.localDrugs = drugData.kategorien.flatMap(k => k.eintraege.map(e => ({ ...e, bereich: k.bereich })));
       }
-      
+
       const docRes = await fetch(`/doctors.json?v=${APP_VERSION}`);
       if (docRes.ok) {
         const docData = await docRes.json();
-        state.localDoctors = docData.aerzte || [];
+        // Flatten categorized structure: { aerzte: [ { kategorie: "...", daten: [...] } ] }
+        state.localDoctors = (docData.aerzte || []).flatMap(cat => 
+          (cat.daten || []).map(doc => ({ 
+            ...doc, 
+            fachrichtung: doc.fachrichtung || cat.kategorie 
+          }))
+        );
       }
     } catch (e) { console.warn("Failed to load local databases", e); }
   } catch (err) { document.getElementById('app').innerHTML = `<div style="padding:40px; color:white;">Error: ${err.message}</div>`; }
@@ -2545,16 +2551,16 @@ document.addEventListener('touchstart', (e) => {
   const content = e.target.closest('.swipe-content');
   if (!content) {
     if (activeSwipeItem) {
-       activeSwipeItem.style.transform = 'translateX(0)';
-       activeSwipeItem = null;
+      activeSwipeItem.style.transform = 'translateX(0)';
+      activeSwipeItem = null;
     }
     return;
   }
-  
+
   if (activeSwipeItem && activeSwipeItem !== content) {
     activeSwipeItem.style.transform = 'translateX(0)';
   }
-  
+
   touchStartX = e.touches[0].clientX;
   touchStartY = e.touches[0].clientY;
   activeSwipeItem = content;
@@ -2564,13 +2570,13 @@ document.addEventListener('touchstart', (e) => {
 
 document.addEventListener('touchmove', (e) => {
   if (!activeSwipeItem || isScrolling) return;
-  
+
   touchCurrentX = e.touches[0].clientX;
   const touchCurrentY = e.touches[0].clientY;
-  
+
   const diffX = touchCurrentX - touchStartX;
   const diffY = touchCurrentY - touchStartY;
-  
+
   // Decide if scrolling or swiping
   if (!isScrolling && Math.abs(diffY) > Math.abs(diffX) && Math.abs(diffY) > 5) {
     isScrolling = true;
@@ -2581,7 +2587,7 @@ document.addEventListener('touchmove', (e) => {
   // Only start swiping if horizontal intent is clear (threshold)
   if (diffX < -15 && Math.abs(diffX) > Math.abs(diffY)) {
     // Prevent accidental scroll once swiping starts
-    if (e.cancelable) e.preventDefault(); 
+    if (e.cancelable) e.preventDefault();
     activeSwipeItem.style.transform = `translateX(${diffX}px)`;
   }
 }, { passive: false });
@@ -2590,7 +2596,7 @@ document.addEventListener('touchend', (e) => {
   if (!activeSwipeItem) return;
   activeSwipeItem.style.transition = 'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)';
   const diff = touchCurrentX - touchStartX;
-  
+
   if (diff < -65) {
     activeSwipeItem.style.transform = 'translateX(-80px)';
   } else {
@@ -2611,7 +2617,7 @@ function _updateNavUI() {
   views.forEach(v => {
     const el = document.getElementById(`nav-${v}`);
     if (!el) return;
-    
+
     // Set Active
     if (state.currentView === v) {
       el.classList.add('active');
@@ -2620,7 +2626,7 @@ function _updateNavUI() {
       el.classList.remove('active');
       el.style.filter = '';
     }
-    
+
     // Set text (i18n)
     const textEl = el.querySelector('.nav-text');
     if (textEl) {
@@ -2634,7 +2640,7 @@ function _renderInstallPrompt() {
   const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
   const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
   const hasBeenDismissed = localStorage.getItem('med_install_dismissed');
-  
+
   if (isiOS && !isStandalone && !hasBeenDismissed) {
     return `
       <div id="install-prompt" class="glass-panel" style="margin-top:20px; padding:16px; border:1px solid var(--accent-color); animation: slideUp 0.5s ease-out;">
