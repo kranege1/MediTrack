@@ -1304,27 +1304,10 @@ function renderSettings() {
         <button class="btn btn-secondary" onclick="window.confirmClearLogs()" style="border-color: #f59e0b; color: #f59e0b; background: rgba(245, 158, 11, 0.05);">${t('deleteLogs')}</button>
         <button class="btn btn-danger" onclick="window.confirmClearAll()" style="margin-top: 8px;">${t('deleteAllData')}</button>
       </div>
-    </div>
-  `;
-}
-        </div>
-        <div style="font-size:10px; color:#94a3b8; margin-top:4px;">${t('modelSuggestion')}</div>
-      </div>
-      
-      <div class="form-group" style="background:rgba(99,102,241,0.1); padding:12px; border-radius:10px; border:1px solid rgba(99,102,241,0.2);">
-        <label style="display:flex; justify-content:space-between; align-items:center; color:#818cf8; font-weight:700;">
-          ${t('liveSearchLabel')}
-          <input type="checkbox" id="grok-livesearch-input" ${state.useLiveSearch ? 'checked' : ''} style="width:20px; height:20px; accent-color:var(--accent-color);">
-        </label>
-        <div style="font-size:9px; opacity:0.8; margin-top:4px;">${t('liveSearchSub')}</div>
-      </div>
 
-      <button class="btn" onclick="window.saveSettings()">${t('saveSettingsBtn')}</button>
-      <div id="settings-msg" style="margin-top: 12px; color: var(--accent-color);"></div>
-
-      <div style="border-top: 1px solid var(--glass-border); margin: 32px 0;"></div>
+      <div style="border-top: 1px solid var(--glass-border); margin: 24px 0;"></div>
       
-      <div class="text-h2">${t('settings')}</div>
+      <div class="text-h2">${t('restoreData') || 'Daten wiederherstellen'}</div>
       <input type="file" id="import-file" accept=".json" style="margin-bottom: 12px;">
       <button class="btn btn-secondary" onclick="window.importData()">${t('importRestore')}</button>
       
@@ -1333,7 +1316,7 @@ function renderSettings() {
           ${t('forceUpdateBtn')}
         </button>
         <p style="font-size:10px; opacity:0.5; margin-top:8px;">
-          Current: 4.81.8 \u2022 Use if UI seems outdated.
+          Current: ${APP_VERSION} \u2022 Use if UI seems outdated.
         </p>
       </div>
     </div>
