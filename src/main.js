@@ -34,7 +34,7 @@ window.state = {
   showMagicImport: false,
   historyMedFilters: []
 };
-const APP_VERSION = '4.82.3';
+const APP_VERSION = '4.82.4';
 const state = window.state;
 
 const GROK_BASE_URL = "https://api.x.ai/v1/chat/completions";
@@ -174,7 +174,12 @@ const i18n = {
     magicImportInfo: 'AI will extract name, address and phone from text or URLs.',
     importing: 'Magic Importing...',
     autoSearchBtn: 'Auto-Search & Fill',
-    autoSearchInfo: 'AI will search for the name above and find the address.'
+    autoSearchInfo: 'AI will search for the name above and find the address.',
+    updateAvailable: 'Update Available',
+    currentVersion: 'Current Version',
+    newVersion: 'New Version',
+    updateNow: 'Update Now',
+    upToDate: 'App is up to date'
   },
   de: {
     settings:'Einstellungen',
@@ -311,7 +316,12 @@ const i18n = {
     magicImportInfo: 'KI extrahiert Name, Adresse und Telefon aus Text oder Links.',
     importing: 'Magic Import läuft...',
     autoSearchBtn: 'Automatisch suchen & ausf\u00FCllen',
-    autoSearchInfo: 'KI sucht nach dem oben eingegebenen Namen im Internet.'
+    autoSearchInfo: 'KI sucht nach dem oben eingegebenen Namen im Internet.',
+    updateAvailable: 'Update verfügbar',
+    currentVersion: 'Aktuelle Version',
+    newVersion: 'Neue Version',
+    updateNow: 'Jetzt aktualisieren',
+    upToDate: 'App ist auf dem neuesten Stand'
   }
 };
 const LOCAL_DRUG_KB = {
@@ -428,7 +438,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.82.3</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.82.4</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -1311,11 +1321,11 @@ function renderSettings() {
       <button class="btn btn-secondary" onclick="window.importData()">${t('importRestore')}</button>
       
       <div style="margin-top:32px; padding-top:20px; border-top:1px solid var(--glass-border); text-align:center;">
-        <button class="btn btn-secondary" style="background:rgba(74,222,128,0.1); border-color:var(--accent-color); color:var(--accent-color);" onclick="window._forceReload()">
+        <button class="btn btn-secondary" style="background:rgba(74,222,128,0.1); border-color:var(--accent-color); color:var(--accent-color);" onclick="window.checkUpdateManual()">
           ${t('forceUpdateBtn')}
         </button>
         <p style="font-size:10px; opacity:0.5; margin-top:8px;">
-          Current: 4.82.1 \u2022 Use if UI seems outdated.
+          Current: ${APP_VERSION} \u2022 Use if UI seems outdated.
         </p>
       </div>
     </div>
@@ -2319,6 +2329,76 @@ window._autoUpdateCheck = async () => {
       }
     }
   } catch (e) { console.warn("Auto-update check failed", e); }
+};
+
+window.checkUpdateManual = async () => {
+  const btn = event?.target;
+  const originalText = btn ? btn.innerText : '';
+  if (btn) btn.innerText = "...";
+  
+  try {
+    const res = await fetch(`/version.json?t=${Date.now()}`);
+    if (!res.ok) throw new Error("Fetch failed");
+    const data = await res.json();
+    const newVer = data.version;
+    
+    if (newVer && newVer !== APP_VERSION) {
+      window._showUpdatePopup(APP_VERSION, newVer);
+    } else {
+      alert(t('upToDate'));
+    }
+  } catch (e) {
+    alert("Check failed. Performing fallback reload...");
+    window._forceReload();
+  } finally {
+    if (btn) btn.innerText = originalText;
+  }
+};
+
+window._showUpdatePopup = (oldVer, newVer) => {
+  const app = document.getElementById('app');
+  let overlay = document.getElementById('update-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'update-overlay';
+    overlay.style.cssText = `
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      z-index: 3000; display: flex; align-items: center; justify-content: center;
+      background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      padding: 20px;
+    `;
+    app.appendChild(overlay);
+  }
+
+  overlay.innerHTML = `
+    <div class="glass-panel" style="max-width: 320px; width: 100%; padding: 24px; text-align: center; border: 1px solid var(--accent-color); box-shadow: 0 0 40px rgba(74, 222, 128, 0.15);">
+      <div style="width: 64px; height: 64px; background: rgba(74, 222, 128, 0.1); border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; color: var(--accent-color);">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+      </div>
+      <div class="text-h2" style="color: var(--accent-color); margin-bottom: 8px;">${t('updateAvailable')}</div>
+      <p style="font-size: 13px; opacity: 0.7; margin-bottom: 24px;">A new version of MedicaTrack is ready.</p>
+      
+      <div style="display: flex; justify-content: space-around; align-items: center; margin-bottom: 32px; padding: 16px; background: rgba(255,255,255,0.03); border-radius: 14px; border: 1px solid rgba(255,255,255,0.05);">
+        <div style="text-align: left;">
+          <div style="font-size: 9px; opacity: 0.5; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">${t('currentVersion')}</div>
+          <div style="font-size: 16px; font-weight: 700; opacity: 0.6;">${oldVer}</div>
+        </div>
+        <div style="opacity: 0.3;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+        </div>
+        <div style="text-align: right;">
+          <div style="font-size: 9px; opacity: 0.5; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">${t('newVersion')}</div>
+          <div style="font-size: 16px; font-weight: 700; color: var(--accent-color);">${newVer}</div>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <button class="btn" onclick="window._forceReload()">${t('updateNow')}</button>
+        <button class="btn btn-secondary" onclick="document.getElementById('update-overlay').style.display='none'">${t('cancel')}</button>
+      </div>
+    </div>
+  `;
+  overlay.style.display = 'flex';
 };
 
 window.addEventListener('DOMContentLoaded', async () => {
