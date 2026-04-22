@@ -449,7 +449,6 @@ function render() {
       ${getViewHTML()}
       ${_renderInstallPrompt()}
     </div>
-    </div>
   `;
 
   // Update persistent nav state
