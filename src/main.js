@@ -35,7 +35,7 @@ window.state = {
   historyMedFilters: [],
   localDrugs: []
 };
-const APP_VERSION = '4.82.7';
+const APP_VERSION = '4.82.8';
 const state = window.state;
 
 const GROK_BASE_URL = "https://api.x.ai/v1/chat/completions";
@@ -180,7 +180,12 @@ const i18n = {
     currentVersion: 'Current Version',
     newVersion: 'New Version',
     updateNow: 'Update Now',
-    upToDate: 'App is up to date'
+    upToDate: 'App is up to date',
+    extendedInfo: 'Extended Info',
+    hersteller: 'Manufacturer',
+    einsatzgebiet: 'Area of Use',
+    quickSelectArea: 'Search by Area:',
+    chooseArea: '-- Choose Area --'
   },
   de: {
     settings:'Einstellungen',
@@ -303,6 +308,11 @@ const i18n = {
     defaultRegionLabel:'Standard Stadt / Region f\u00FCr KI-Suche',
     locating:'Ortung...',
     locErr:'Ortung fehlgeschlagen',
+    extendedInfo: 'Erweiterte Infos',
+    hersteller: 'Hersteller',
+    einsatzgebiet: 'Einsatzgebiet',
+    quickSelectArea: 'Nach Einsatzgebiet suchen:',
+    chooseArea: '-- Gebiet w\u00E4hlen --',
     specialties: [
       'Allgemeinmediziner', 'Internist', 'Kardiologe', 'Zahnarzt', 'Urologe', 
       'Gyn\u00E4kologe', 'Orthop\u00E4de', 'Hautarzt', 'Augenarzt', 'HNO-Arzt', 
@@ -439,7 +449,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.82.7</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.82.8</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -802,23 +812,25 @@ function renderMedications() {
         <div id="med-fda-adverse" style="display:none; margin-top: 8px; font-size: 11px; color: #f87171; background: rgba(0,0,0,0.2); border: 1px solid rgba(239, 68, 68, 0.2); padding: 8px; border-radius: 6px; line-height: 1.4;"></div>
       </div>
 
-      <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 12px; margin-bottom: 20px;">
-        <div style="font-size: 10px; font-weight: 700; color: var(--accent-color); margin-bottom: 8px; text-transform: uppercase;">${t('extendedInfo') || 'Erweiterte Infos'}</div>
-        <div style="display: flex; gap: 12px; margin-bottom: 8px;">
-          <div class="form-group" style="flex:1; margin:0;">
-            <label>${t('hersteller') || 'Hersteller'}</label>
-            <input type="text" id="med-hersteller" placeholder="z.B. G.L. Pharma" style="font-size: 12px;">
-          </div>
-          <div class="form-group" style="flex:1; margin:0;">
-            <label>${t('einsatzgebiet') || 'Einsatzgebiet'}</label>
-            <input type="text" id="med-einsatzgebiet" placeholder="z.B. Blutdruck" style="font-size: 12px;">
-          </div>
+      <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 16px; margin-bottom: 24px;">
+        <div style="font-size: 11px; font-weight: 800; color: var(--accent-color); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">${t('extendedInfo')}</div>
+        
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label style="font-size: 13px; font-weight: 600;">${t('hersteller')}</label>
+          <input type="text" id="med-hersteller" placeholder="z.B. G.L. Pharma" style="font-size: 14px; padding: 12px; height: 48px;">
         </div>
         
-        <div class="form-group" style="margin-top:12px;">
-          <label style="font-size:11px; opacity:0.7;">${t('quickSelectArea') || 'Nach Einsatzgebiet suchen:'}</label>
-          <select id="area-search-select" onchange="window.searchByArea(this.value)" style="font-size:12px; height:36px; border-color:rgba(255,255,255,0.1);">
-            <option value="">${t('chooseArea') || '-- Gebiet wählen --'}</option>
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label style="font-size: 13px; font-weight: 600;">${t('einsatzgebiet')}</label>
+          <input type="text" id="med-einsatzgebiet" placeholder="z.B. Bluthochdruck" style="font-size: 14px; padding: 12px; height: 48px;">
+        </div>
+        
+        <div style="height: 1px; background: rgba(255,255,255,0.05); margin: 8px 0 16px;"></div>
+        
+        <div class="form-group" style="margin:0;">
+          <label style="font-size: 12px; opacity: 0.8; font-weight: 600; margin-bottom: 8px; display: block;">${t('quickSelectArea')}</label>
+          <select id="area-search-select" onchange="window.searchByArea(this.value)" style="font-size: 14px; height: 48px; border-color: rgba(255,255,255,0.15); padding: 0 12px; border-radius: 10px;">
+            <option value="">${t('chooseArea')}</option>
             ${Array.from(new Set(state.localDrugs.map(d => d.einsatzgebiet || d.bereich))).sort().map(a => `<option value="${a}">${a}</option>`).join('')}
           </select>
         </div>
