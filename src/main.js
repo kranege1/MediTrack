@@ -33,9 +33,10 @@ window.state = {
   useLiveSearch: localStorage.getItem('use_live_search') === 'true',
   showMagicImport: false,
   historyMedFilters: [],
-  localDrugs: []
+  localDrugs: [],
+  localDoctors: []
 };
-const APP_VERSION = '4.82.12';
+const APP_VERSION = '4.82.13';
 const state = window.state;
 
 const GROK_BASE_URL = "https://api.x.ai/v1/chat/completions";
@@ -449,7 +450,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.82.12</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.82.13</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -1940,64 +1941,93 @@ function _generateICS(events) {
 
 // AI DOCTOR SEARCH
 window.searchDoctorSmart = async () => {
+  const name = document.getElementById('appt-doctor').value.toLowerCase();
+  const region = document.getElementById('appt-region').value.toLowerCase();
+  const specialty = document.getElementById('appt-specialty').value;
+  const listEl = document.getElementById('doctor-ai-results');
+  
+  listEl.style.display = 'block';
+  listEl.innerHTML = `<span style="font-size:11px; color:var(--accent-color);">${t('testingKey')}...</span>`;
+
+  // 1. Local Search Priority
+  let localMatches = [];
+  if (state.localDoctors && state.localDoctors.length > 0) {
+    localMatches = state.localDoctors.filter(d => {
+      const nameMatch = !name || d.name.toLowerCase().includes(name);
+      const specialtyMatch = !specialty || d.fachrichtung === specialty;
+      const regionMatch = !region || d.ort.toLowerCase().includes(region) || d.adresse.toLowerCase().includes(region);
+      return nameMatch && specialtyMatch && regionMatch;
+    });
+  }
+
+  if (localMatches.length > 0) {
+    listEl.innerHTML = `
+      <div style="font-size:10px; font-weight:700; margin-bottom:8px; color:var(--accent-color); text-transform:uppercase;">\u2728 Lokale Treffer (${localMatches.length})</div>
+      <div style="display:flex; flex-direction:column; gap:8px; max-height:250px; overflow-y:auto;">
+        ${localMatches.map((doc, i) => `
+          <div style="background:rgba(255,255,255,0.05); border:1px solid var(--accent-color); border-radius:12px; padding:10px;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+              <div style="color:var(--accent-color); font-size:12px; font-weight:700;">${doc.name}</div>
+              <div style="font-size:9px; background:rgba(74,222,128,0.1); color:var(--accent-color); padding:2px 6px; border-radius:4px;">${doc.kasse ? 'Kasse' : 'Wahl'}</div>
+            </div>
+            <div style="font-size:10px; opacity:0.8; margin:4px 0;">${doc.fachrichtung}</div>
+            <div style="font-size:10px; opacity:0.6; margin:4px 0;">\uD83D\uDCCD ${doc.adresse}<br>\uD83D\uDCDE ${doc.telefon}</div>
+            <button type="button" class="btn btn-secondary" style="height:28px; font-size:10px; background:var(--accent-color); color:#000; border:none; margin-top:4px;" onclick="window._applyDoctorSmart(${i}, ${JSON.stringify(localMatches).replace(/"/g, '&quot;')})">
+              ${t('chooseOption')}
+            </button>
+          </div>
+        `).join('')}
+      </div>
+      <div style="margin-top:12px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.1); text-align:center;">
+        <button class="btn btn-secondary" style="font-size:10px; width:auto; padding:4px 12px;" onclick="window._runAISearchOnly()">${t('doctorSearch')}</button>
+      </div>
+    `;
+    return;
+  }
+
+  // 2. AI Fallback (Auto-start if no local matches)
+  window._runAISearchOnly();
+};
+
+window._runAISearchOnly = async () => {
     const listEl = document.getElementById('doctor-ai-results');
     const name = document.getElementById('appt-doctor').value;
     const specialty = document.getElementById('appt-specialty').value;
     const region = document.getElementById('appt-region').value;
 
-    if (!name && !specialty) return alert(t('nameAndDose'));
-    if (!state.grokKey) return alert(t('missingKeyError'));
+    if (!region) {
+      listEl.innerHTML = `<div style="font-size:11px; color:#ef4444; background:rgba(239,68,68,0.1); padding:8px; border-radius:6px;">\u26A0\uFE0F ${t('defaultRegionLabel')}</div>`;
+      return;
+    }
+    if (!state.grokKey) {
+      listEl.innerHTML = `<div style="font-size:11px; color:#ef4444; background:rgba(239,68,68,0.1); padding:8px; border-radius:6px;">${t('missingKeyError')}</div>`;
+      return;
+    }
 
     listEl.style.display = 'block';
     listEl.innerHTML = `<div style="display:flex; gap:10px; align-items:center; font-size:11px; color:var(--accent-color);">
       <div style="width:16px; height:16px; border:2px solid var(--accent-color); border-top-color:transparent; border-radius:50%; animation: spin 0.8s linear infinite;"></div> 
-      <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
       ${t('aiThinking') || 'Suche im Internet...'}
     </div>`;
 
     try {
-      const prompt = `Search for a medical professional matching:
-      Name: ${name || 'any'}
-      Specialty: ${specialty || 'any'}
-      City/Region: ${region || 'any'}
-      
-      INSTRUCTIONS:
-      1. Perform a live web search to identify REAL, currently practicing doctors.
-      2. If multiple are found, list up to 5 best matches.
-      3. For each one, provide the full business Name, Address, and Phone.
-      4. DO NOT hallucinate. Only return doctors you can verify online.
-      
-      RESPONSE FORMAT (JSON only):
-      {
-        "doctors": [
-          { "name": "Dr. ...", "address": "Full Address", "phone": "Phone Number", "specialty": "..." }
-        ]
-      }`;
+      const regionText = region ? ` in "${region}"` : '';
+      const nameText = name ? (specialty ? `named "${name}" specializing in "${specialty}"` : `named "${name}"`) : `specializing in "${specialty}"`;
+      const prompt = `Find professional contact details for: ${nameText}${regionText}. Return ONLY JSON: {"doctors": [{"name": "...", "specialty": "...", "address": "...", "phone": "..."}]}. Language: ${state.lang === 'de' ? 'German' : 'English'}.`;
+
+      const body = { model: state.grokModel, messages: [{ role: "user", content: prompt }], temperature: 0 };
+      if (state.useLiveSearch) body.tools = [{ type: "web_search" }];
+      else body.response_format = { type: "json_object" };
 
       const res = await fetch(GROK_BASE_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${state.grokKey}` },
-        body: JSON.stringify({
-          model: state.grokModel,
-          messages: [{ role: "user", content: prompt }],
-          temperature: 0,
-          tools: [{ type: "web_search" }]
-        })
+        body: JSON.stringify(body)
       });
 
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error?.message || `API Error ${res.status}`);
-      }
-
+      if (!res.ok) throw new Error(`API Error ${res.status}`);
       const d = await res.json();
       let content = d.choices[0].message.content || "";
-      
-      if (!content && d.choices[0].message.tool_calls) {
-         throw new Error("Web search tool was triggered but no results were returned. Please try a different model (e.g. grok-2 or reasoning models).");
-      }
-      
-      // Extract JSON if model included extra text
       if (content.includes('```json')) content = content.split('```json')[1].split('```')[0].trim();
       else if (content.includes('{')) content = content.substring(content.indexOf('{'), content.lastIndexOf('}') + 1);
 
@@ -2005,7 +2035,7 @@ window.searchDoctorSmart = async () => {
       const doctors = data.doctors || [];
 
       if (doctors.length === 0) {
-        listEl.innerHTML = `<div style="font-size:11px; opacity:0.6;">${t('doctorNotFoundAi')}</div>`;
+        listEl.innerHTML = `<div style="font-size:11px; opacity:0.6;">Keine Ergebnisse gefunden.</div>`;
         return;
       }
 
@@ -2024,7 +2054,7 @@ window.searchDoctorSmart = async () => {
         </div>
       `;
     } catch(err) {
-      listEl.innerHTML = `<div style="color:#f87171; font-size:10px;">Error: ${err.message}. Try refining your search.</div>`;
+      listEl.innerHTML = `<div style="color:#f87171; font-size:10px;">Error: ${err.message}.</div>`;
     }
 };
 
@@ -2032,154 +2062,12 @@ window._applyDoctorSmart = (i, list) => {
     const doc = list[i];
     document.getElementById('appt-doctor').value = doc.name;
     document.getElementById('appt-location').value = doc.address || "";
-    document.getElementById('appt-phone').value = doc.phone || "";
+    document.getElementById('appt-phone').value = doc.phone || doc.telefon || "";
     document.getElementById('doctor-ai-results').style.display = 'none';
 };
 
-window.searchDoctorSmart = async () => {
-  const name = document.getElementById('appt-doctor').value;
-  const region = document.getElementById('appt-region').value;
-  const specialty = document.getElementById('appt-specialty').value;
-  const listEl = document.getElementById('doctor-ai-results');
-  
-  if (!region) {
-    listEl.style.display = 'block';
-    listEl.innerHTML = `<div style="font-size:11px; color:#ef4444; background:rgba(239,68,68,0.1); padding:8px; border-radius:6px;">
-      \u26A0\uFE0F ${t('defaultRegionLabel')} 
-    </div>`;
-    return;
-  }
 
-  if (!name && !specialty) return alert(t('doctorName') + ' / ' + t('specialty'));
-  
-  if (!state.grokKey) {
-    listEl.style.display = 'block';
-    listEl.innerHTML = `<div style="font-size:11px; color:#ef4444; background:rgba(239,68,68,0.1); padding:8px; border-radius:6px;">
-      ${t('missingKeyError')}
-    </div>`;
-    return;
-  }
 
-  listEl.style.display = 'block';
-  listEl.innerHTML = `<span style="font-size:11px; color:var(--accent-color);">${t('testingKey')}...</span>`;
-
-  try {
-    const regionText = region ? ` in "${region}"` : '';
-    const nameText = name ? (specialty ? `named "${name}" specializing in "${specialty}"` : `named "${name}"`) : `specializing in "${specialty}"`;
-    
-    // HIGH ACCURACY SEARCH PROMPT
-    const prompt = `You are a medical directory expert. TASK: Find the official and verified contact details for: ${nameText}${regionText}.
-    
-    ACCURACY RULES:
-    1. SEARCH FIRST: Use the web to find the EXACT professional requested.
-    2. VERIFY: Ensure the address and phone number are currently active.
-    3. FALLBACK: If the specific doctor is not found, list up to 3 real alternatives of the same specialty in "${region}".
-    4. DATA QUALITY: No placeholder data. Return only if reasonably certain.
-    5. RESPONSE FORMAT: Return ONLY a valid JSON object: {"doctors": [{"name": "...", "specialty": "...", "address": "...", "phone": "..."}]}.
-    6. Language: ${state.lang === 'de' ? 'German' : 'English'}.`;
-
-    const body = {
-      model: state.grokModel,
-      messages: [{ role: "user", content: prompt }],
-      temperature: 0
-    };
-
-    // ENABLE LIVE WEB SEARCH TOOL
-    if (state.useLiveSearch) {
-      body.tools = [{ type: "web_search" }];
-    } else {
-      body.response_format = { type: "json_object" };
-    }
-
-    const res = await fetch(GROK_BASE_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${state.grokKey}` },
-      body: JSON.stringify(body)
-    });
-    
-    if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.error ? errData.error.message : `API Error ${res.status}`);
-    }
-
-    const d = await res.json();
-    let content = d.choices[0].message.content || "";
-    
-    if (!content && d.choices[0].message.tool_calls) {
-        throw new Error("The model requested a tool call but did not provide a final answer. Please ensure you are using a reasoning model like grok-4.20-reasoning.");
-    }
-
-    try {
-      // Fallback parser: Extract JSON if model included text
-      if (content.includes('```json')) {
-        content = content.split('```json')[1].split('```')[0].trim();
-      } else if (content.includes('{')) {
-        content = content.substring(content.indexOf('{'), content.lastIndexOf('}') + 1);
-      }
-      
-      const result = JSON.parse(content);
-      const results = result.doctors || [];
-
-    if (results.length === 0) {
-      const googleQuery = encodeURIComponent(`${name} ${specialty || ''} ${region}`);
-      listEl.innerHTML = `
-        <div style="font-size:11px; color:#94a3b8; margin-bottom:12px;">${t('doctorNotFoundAi')}</div>
-        <a href="https://www.google.com/search?q=${googleQuery}" target="_blank" class="btn btn-secondary" style="display:flex; align-items:center; justify-content:center; gap:8px; font-size:12px; border-color:var(--accent-color); color:var(--accent-color);">
-          \uD83D\uDD0D ${t('searchGoogle')}
-        </a>
-      `;
-      return;
-    }
-
-    listEl.innerHTML = `
-      <div style="font-size:10px; font-weight:700; margin-bottom:12px; opacity:0.6; display:flex; align-items:center; gap:6px; color:#fde047;">
-        \u26A0\uFE0F ${t('aiAccuracyWarning')}
-      </div>
-      <div style="font-size:10px; font-weight:700; margin-bottom:4px; opacity:0.6;">${t('doctorSelect')}:</div>
-      <div style="display:flex; flex-direction:column; gap:8px;">
-        ${results.map((doc, i) => {
-          const isNearby = doc.address && region && !doc.address.toLowerCase().includes(region.split(',')[0].trim().toLowerCase());
-          
-          return `
-            <div style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:8px;">
-              <div style="display:flex; flex-direction:column; gap:2px;">
-                <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:4px;">
-                  <div style="color:var(--accent-color); font-size:13px; font-weight:700;">${doc.name}</div>
-                  ${isNearby ? `<div style="font-size:8px; background:rgba(253,224,71,0.1); color:#fde047; padding:2px 6px; border-radius:4px; white-space:nowrap; border:1px solid rgba(253,224,71,0.2);">\uD83D\uDCCD nearby</div>` : ''}
-                </div>
-                ${doc.specialty ? `<div style="font-size:10px; color:#94a3b8; font-weight:600; margin-bottom:2px;">\uD83E\uDE7A ${doc.specialty}</div>` : ''}
-                <div style="font-size:10px; opacity:0.7; display:flex; gap:4px; align-items:center;">
-                  <span style="font-size:12px;">\uD83D\uDCCD</span> ${doc.address || '\u2014'}
-                </div>
-                ${doc.phone ? `
-                  <div style="font-size:10px; opacity:0.7; display:flex; gap:4px; align-items:center;">
-                    <span style="font-size:12px;">\uD83D\uDCDE</span> ${doc.phone}
-                  </div>
-                ` : ''}
-              </div>
-              <button type="button" class="btn" style="height:42px; padding:0; font-size:14px; background:var(--accent-color); color:#000; border:none; font-weight:700;" onclick="window._applyDoctorMatch(${i}, ${JSON.stringify(results).replace(/"/g, '&quot;')})">
-                \u2705 \u00DCbernehmen
-              </button>
-            </div>
-          `;
-        }).join('')}
-      </div>
-    `;
-    } catch(parseErr) {
-      throw new Error(`Data format error. Raw message from AI: "${content.substring(0, 500)}..."`);
-    }
-  } catch(e) {
-    listEl.innerHTML = `
-      <div style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.2); border-radius:12px; padding:12px; color:#f87171; font-size:11px;">
-        <div style="font-weight:700; margin-bottom:4px;">Search Error</div>
-        ${e.message}
-        <div style="margin-top:8px; opacity:0.8; font-size:10px;">
-          \uD83D\uDCA1 Tip: Try disabling "Live Web Search" or changing the model to "grok-4.20-reasoning".
-        </div>
-      </div>
-    `;
-  }
-};
 
 window._runMagicImportAI = async (isAuto = false) => {
   let text = document.getElementById('magic-import-text')?.value || "";
@@ -2554,14 +2442,20 @@ window.addEventListener('DOMContentLoaded', async () => {
     await window.navigate('dashboard');
     window._autoUpdateCheck();
     
-    // Load local drugs database
+    // Load local databases
     try {
-      const res = await fetch(`/drugs.json?v=${APP_VERSION}`);
-      if (res.ok) {
-        const data = await res.json();
-        state.localDrugs = data.kategorien.flatMap(k => k.eintraege.map(e => ({ ...e, bereich: k.bereich })));
+      const drugRes = await fetch(`/drugs.json?v=${APP_VERSION}`);
+      if (drugRes.ok) {
+        const drugData = await drugRes.json();
+        state.localDrugs = drugData.kategorien.flatMap(k => k.eintraege.map(e => ({ ...e, bereich: k.bereich })));
       }
-    } catch (e) { console.warn("Failed to load local drugs", e); }
+      
+      const docRes = await fetch(`/doctors.json?v=${APP_VERSION}`);
+      if (docRes.ok) {
+        const docData = await docRes.json();
+        state.localDoctors = docData.aerzte || [];
+      }
+    } catch (e) { console.warn("Failed to load local databases", e); }
   } catch (err) { document.getElementById('app').innerHTML = `<div style="padding:40px; color:white;">Error: ${err.message}</div>`; }
 });
 
