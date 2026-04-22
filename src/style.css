@@ -29,7 +29,7 @@ html, body {
   margin: 0;
   padding: 0;
   overflow: hidden;
-  background-color: var(--bg-color);
+  background-color: #0f1115 !important;
 }
 
 html {
