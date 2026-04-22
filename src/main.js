@@ -36,7 +36,7 @@ window.state = {
   localDrugs: [],
   localDoctors: []
 };
-const APP_VERSION = '4.82.13';
+const APP_VERSION = '4.82.14';
 const state = window.state;
 
 const GROK_BASE_URL = "https://api.x.ai/v1/chat/completions";
@@ -450,7 +450,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.82.13</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.82.14</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -1008,9 +1008,10 @@ function renderPlans() {
       ` : `
         <!-- Appointment Fields -->
         <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:16px; padding:16px; margin-bottom:20px;">
-          <div class="form-group">
+          <div class="form-group" style="position: relative;">
             <label>${t('doctorName')}</label>
-            <input type="text" id="appt-doctor" placeholder="z.B. Dr. Brigitte St\u00F6hr" style="background:rgba(255,255,255,0.05);">
+            <input type="text" id="appt-doctor" placeholder="z.B. Dr. Brigitte Stöhr" autocomplete="off" style="background:rgba(255,255,255,0.05);" oninput="window.searchDoctorLocal(this.value)">
+            <div id="doctor-search-results" style="display:none; position:absolute; top:100%; left:0; right:0; z-index:100; background:rgba(15, 17, 21, 0.95); backdrop-filter:blur(15px); border:1px solid var(--glass-border); border-radius:12px; margin-top:4px; max-height:250px; overflow-y:auto; box-shadow:0 10px 40px rgba(0,0,0,0.6);"></div>
           </div>
           <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:12px;">
             <div class="form-group" style="margin:0;">
@@ -1746,6 +1747,60 @@ window.applyLocalDrug = (drug) => {
   document.getElementById('local-search-results').style.display = 'none';
   const areaSelect = document.getElementById('area-search-select');
   if (areaSelect) areaSelect.value = "";
+};
+
+window.searchDoctorLocal = (query) => {
+  const resultsEl = document.getElementById('doctor-search-results');
+  const region = document.getElementById('appt-region')?.value?.toLowerCase() || "";
+  const specialty = document.getElementById('appt-specialty')?.value || "";
+
+  if (!query || query.length < 2) {
+    resultsEl.style.display = 'none';
+    return;
+  }
+
+  const q = query.toLowerCase();
+  const matches = state.localDoctors.filter(d => {
+    const nameMatch = d.name.toLowerCase().includes(q);
+    const specialtyMatch = !specialty || d.fachrichtung === specialty;
+    const regionMatch = !region || d.ort.toLowerCase().includes(region) || d.adresse.toLowerCase().includes(region);
+    return nameMatch && specialtyMatch && regionMatch;
+  }).slice(0, 15);
+
+  if (matches.length === 0) {
+    resultsEl.innerHTML = `
+      <div style="padding:16px; text-align:center;">
+        <div style="font-size:12px; opacity:0.6; margin-bottom:12px;">Keine lokalen Treffer in dieser Region.</div>
+        <button class="btn" style="background:var(--accent-color); color:#000; border:none; height:36px; font-size:11px;" onclick="window.searchDoctorSmart()">
+           \u2728 Internet-Suche (KI) starten
+        </button>
+      </div>
+    `;
+    resultsEl.style.display = 'block';
+    return;
+  }
+
+  resultsEl.innerHTML = matches.map(m => `
+    <div style="padding:12px 14px; cursor:pointer; border-bottom:1px solid rgba(255,255,255,0.05); transition:background 0.2s;" 
+         onmouseover="this.style.background='rgba(255,255,255,0.08)'" 
+         onmouseout="this.style.background='transparent'"
+         onclick="window.applyLocalDoctor(${JSON.stringify(m).replace(/"/g, '&quot;')})">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+        <div style="font-weight:700; color:var(--accent-color); font-size:13px;">${m.name}</div>
+        <div style="font-size:8px; background:rgba(74,222,128,0.1); color:var(--accent-color); padding:1px 5px; border-radius:4px; border:1px solid rgba(74,222,128,0.2);">${m.kasse ? 'Kasse' : 'Privat'}</div>
+      </div>
+      <div style="font-size:10px; opacity:0.8; margin-top:2px;">${m.fachrichtung}</div>
+      <div style="font-size:9px; opacity:0.5; margin-top:2px;">\uD83D\uDCCD ${m.adresse}</div>
+    </div>
+  `).join('');
+  resultsEl.style.display = 'block';
+};
+
+window.applyLocalDoctor = (doc) => {
+  document.getElementById('appt-doctor').value = doc.name;
+  document.getElementById('appt-location').value = doc.adresse;
+  document.getElementById('appt-phone').value = doc.telefon;
+  document.getElementById('doctor-search-results').style.display = 'none';
 };
 
 window.searchWithGrok = async () => {
