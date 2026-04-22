@@ -998,6 +998,131 @@
                     "klasse": "Nerven & Gehirn"
                 }
             ]
+        },
+        {
+            "bereich": "Allergie & Immunsystem",
+            "eintraege": [
+                {
+                    "name": "Zyrtec",
+                    "wirkstoff": "Cetirizin",
+                    "hersteller": "UCB",
+                    "standard_dosis": "10mg",
+                    "einsatzgebiet": "Heuschnupfen/Nesselsucht",
+                    "klasse": "Allergie"
+                },
+                {
+                    "name": "Claritine",
+                    "wirkstoff": "Loratadin",
+                    "hersteller": "Bayer",
+                    "standard_dosis": "10mg",
+                    "einsatzgebiet": "Allergische Reaktionen",
+                    "klasse": "Allergie"
+                },
+                {
+                    "name": "Allegra",
+                    "wirkstoff": "Fexofenadin",
+                    "hersteller": "Sanofi",
+                    "standard_dosis": "120mg",
+                    "einsatzgebiet": "Heuschnupfen",
+                    "klasse": "Allergie"
+                },
+                {
+                    "name": "Aerius",
+                    "wirkstoff": "Desloratadin",
+                    "hersteller": "Organon",
+                    "standard_dosis": "5mg",
+                    "einsatzgebiet": "Allergie/Juckreiz",
+                    "klasse": "Allergie"
+                },
+                {
+                    "name": "Fenistil",
+                    "wirkstoff": "Dimetinden",
+                    "hersteller": "Haleon",
+                    "standard_dosis": "Tropfen/Gel",
+                    "einsatzgebiet": "Insektenstiche/Allergie",
+                    "klasse": "Allergie"
+                },
+                {
+                    "name": "Livostin",
+                    "wirkstoff": "Levocabastin",
+                    "hersteller": "Johnson & Johnson",
+                    "standard_dosis": "Augentropfen/Nasenspray",
+                    "einsatzgebiet": "Akute Allergie (Auge/Nase)",
+                    "klasse": "Allergie"
+                },
+                {
+                    "name": "Vividrin",
+                    "wirkstoff": "Azelastin",
+                    "hersteller": "Bausch & Lomb",
+                    "standard_dosis": "Kombipackung",
+                    "einsatzgebiet": "Heuschnupfen",
+                    "klasse": "Allergie"
+                },
+                {
+                    "name": "Lorano",
+                    "wirkstoff": "Loratadin",
+                    "hersteller": "Hexal",
+                    "standard_dosis": "10mg",
+                    "einsatzgebiet": "Allergie",
+                    "klasse": "Allergie"
+                },
+                {
+                    "name": "Bilano",
+                    "wirkstoff": "Bilastin",
+                    "hersteller": "Menarini",
+                    "standard_dosis": "20mg",
+                    "einsatzgebiet": "Heuschnupfen/Nesselsucht",
+                    "klasse": "Allergie"
+                },
+                {
+                    "name": "MometaHEXAL",
+                    "wirkstoff": "Mometason",
+                    "hersteller": "Hexal",
+                    "standard_dosis": "Nasenspray",
+                    "einsatzgebiet": "Allergischer Schnupfen",
+                    "klasse": "Allergie"
+                },
+                {
+                    "name": "Pollival",
+                    "wirkstoff": "Azelastin",
+                    "hersteller": "Ursapharm",
+                    "standard_dosis": "Augentropfen",
+                    "einsatzgebiet": "Allergische Bindehautentzündung",
+                    "klasse": "Allergie"
+                },
+                {
+                    "name": "Zaditen",
+                    "wirkstoff": "Ketotifen",
+                    "hersteller": "Thea",
+                    "standard_dosis": "Augentropfen",
+                    "einsatzgebiet": "Allergie am Auge",
+                    "klasse": "Allergie"
+                },
+                {
+                    "name": "Dymista",
+                    "wirkstoff": "Azelastin/Fluticason",
+                    "hersteller": "Mylan",
+                    "standard_dosis": "Nasenspray",
+                    "einsatzgebiet": "Schwere Allergie (Nase)",
+                    "klasse": "Allergie"
+                },
+                {
+                    "name": "Cromo-Stada",
+                    "wirkstoff": "Natriumcromoglicat",
+                    "hersteller": "Stada",
+                    "standard_dosis": "Inhalat",
+                    "einsatzgebiet": "Allergisches Asthma",
+                    "klasse": "Allergie"
+                },
+                {
+                    "name": "Tavegyl",
+                    "wirkstoff": "Clemastin",
+                    "hersteller": "Haleon",
+                    "standard_dosis": "Tabletten",
+                    "einsatzgebiet": "Starker Juckreiz/Allergie",
+                    "klasse": "Allergie"
+                }
+            ]
         }
     ]
 }
