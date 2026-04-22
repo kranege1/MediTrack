@@ -2498,7 +2498,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     
     // Load local drugs database
     try {
-      const res = await fetch('/src/drugs.json');
+      const res = await fetch(`/drugs.json?v=${APP_VERSION}`);
       if (res.ok) {
         const data = await res.json();
         state.localDrugs = data.kategorien.flatMap(k => k.eintraege.map(e => ({ ...e, bereich: k.bereich })));
