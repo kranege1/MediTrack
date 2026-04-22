@@ -1,0 +1,882 @@
+{
+    "land": "Österreich",
+    "kategorien": [
+        {
+            "bereich": "Herz, Kreislauf & Blut",
+            "eintraege": [
+                {
+                    "name": "Thrombo ASS",
+                    "wirkstoff": "ASS",
+                    "hersteller": "G.L. Pharma",
+                    "standard_dosis": "100mg",
+                    "einsatzgebiet": "Blutverdünnung"
+                },
+                {
+                    "name": "Candesartan Lannacher",
+                    "wirkstoff": "Candesartan",
+                    "hersteller": "G.L. Pharma",
+                    "standard_dosis": "8mg - 32mg",
+                    "einsatzgebiet": "Bluthochdruck (Sartan)"
+                },
+                {
+                    "name": "Ezerosu",
+                    "wirkstoff": "Ezetimib / Rosuvastatin",
+                    "hersteller": "G.L. Pharma",
+                    "standard_dosis": "10mg/10mg - 10mg/20mg",
+                    "einsatzgebiet": "Cholesterinsenkung (Kombipräparat)"
+                },
+                {
+                    "name": "Concor",
+                    "wirkstoff": "Bisoprolol",
+                    "hersteller": "Merck",
+                    "standard_dosis": "5mg",
+                    "einsatzgebiet": "Bluthochdruck (Betablocker)"
+                },
+                {
+                    "name": "Amlodipin Lannacher",
+                    "wirkstoff": "Amlodipin",
+                    "hersteller": "G.L. Pharma",
+                    "standard_dosis": "5mg",
+                    "einsatzgebiet": "Bluthochdruck"
+                },
+                {
+                    "name": "Sortis",
+                    "wirkstoff": "Atorvastatin",
+                    "hersteller": "Viatris",
+                    "standard_dosis": "20mg",
+                    "einsatzgebiet": "Cholesterin"
+                },
+                {
+                    "name": "Xarelto",
+                    "wirkstoff": "Rivaroxaban",
+                    "hersteller": "Bayer",
+                    "standard_dosis": "20mg",
+                    "einsatzgebiet": "Antikoagulation"
+                },
+                {
+                    "name": "Enapril",
+                    "wirkstoff": "Enalapril",
+                    "hersteller": "Lannacher",
+                    "standard_dosis": "10mg",
+                    "einsatzgebiet": "ACE-Hemmer (Blutdruck)"
+                },
+                {
+                    "name": "Eliquis",
+                    "wirkstoff": "Apixaban",
+                    "hersteller": "BMS",
+                    "standard_dosis": "5mg",
+                    "einsatzgebiet": "Blutverdünnung"
+                },
+                {
+                    "name": "Crestor",
+                    "wirkstoff": "Rosuvastatin",
+                    "hersteller": "AstraZeneca",
+                    "standard_dosis": "10mg",
+                    "einsatzgebiet": "Cholesterin"
+                },
+                {
+                    "name": "Dilatrend",
+                    "wirkstoff": "Carvedilol",
+                    "hersteller": "Roche",
+                    "standard_dosis": "25mg",
+                    "einsatzgebiet": "Herzinsuffizienz"
+                },
+                {
+                    "name": "Nitrolingual",
+                    "wirkstoff": "Glyceroltrinitrat",
+                    "hersteller": "Pohl-Boskamp",
+                    "standard_dosis": "Spray",
+                    "einsatzgebiet": "Angina Pectoris Anfall"
+                },
+                {
+                    "name": "Lisinopril ratiopharm",
+                    "wirkstoff": "Lisinopril",
+                    "hersteller": "ratiopharm",
+                    "standard_dosis": "10mg",
+                    "einsatzgebiet": "Blutdruck"
+                },
+                {
+                    "name": "Beloc-Zok",
+                    "wirkstoff": "Metoprolol",
+                    "hersteller": "AstraZeneca",
+                    "standard_dosis": "47,5mg",
+                    "einsatzgebiet": "Betablocker"
+                },
+                {
+                    "name": "Aprovel",
+                    "wirkstoff": "Irbesartan",
+                    "hersteller": "Sanofi",
+                    "standard_dosis": "150mg",
+                    "einsatzgebiet": "Bluthochdruck"
+                },
+                {
+                    "name": "Exforge",
+                    "wirkstoff": "Amlodipin/Valsartan",
+                    "hersteller": "Novartis",
+                    "standard_dosis": "5/80mg",
+                    "einsatzgebiet": "Kombipräparat Blutdruck"
+                },
+                {
+                    "name": "Plavix",
+                    "wirkstoff": "Clopidogrel",
+                    "hersteller": "Sanofi",
+                    "standard_dosis": "75mg",
+                    "einsatzgebiet": "Plättchenhemmung"
+                },
+                {
+                    "name": "Ezetrol",
+                    "wirkstoff": "Ezetimib",
+                    "hersteller": "MSD",
+                    "standard_dosis": "10mg",
+                    "einsatzgebiet": "Cholesterinaufnahme-Hemmer"
+                },
+                {
+                    "name": "Lanitop",
+                    "wirkstoff": "Metildigoxin",
+                    "hersteller": "Aristo",
+                    "standard_dosis": "0,1mg",
+                    "einsatzgebiet": "Herzstärkung"
+                },
+                {
+                    "name": "Pradaxa",
+                    "wirkstoff": "Dabigatran",
+                    "hersteller": "Boehringer Ingelheim",
+                    "standard_dosis": "150mg",
+                    "einsatzgebiet": "Gerinnungshemmung"
+                },
+                {
+                    "name": "HCT ratiopharm",
+                    "wirkstoff": "Hydrochlorothiazid",
+                    "hersteller": "ratiopharm",
+                    "standard_dosis": "25mg",
+                    "einsatzgebiet": "Entwässerung/Blutdruck"
+                }
+            ]
+        },
+        {
+            "bereich": "Atemwege & Erkältung",
+            "eintraege": [
+                {
+                    "name": "Nasivin",
+                    "wirkstoff": "Oxymetazolin",
+                    "hersteller": "Wick",
+                    "standard_dosis": "0,05% Spray",
+                    "einsatzgebiet": "Schnupfen"
+                },
+                {
+                    "name": "Mucosolvan",
+                    "wirkstoff": "Ambroxol",
+                    "hersteller": "Sanofi",
+                    "standard_dosis": "30mg Tabletten",
+                    "einsatzgebiet": "Schleimlöser"
+                },
+                {
+                    "name": "Neo-Angin",
+                    "wirkstoff": "Dichlorbenzylalkohol",
+                    "hersteller": "Klosterfrau",
+                    "standard_dosis": "Lutschtabletten",
+                    "einsatzgebiet": "Halsschmerzen"
+                },
+                {
+                    "name": "Sinupret Forte",
+                    "wirkstoff": "Pflanzlich",
+                    "hersteller": "Bionorica",
+                    "standard_dosis": "1 Dragee",
+                    "einsatzgebiet": "Nebenhöhlen"
+                },
+                {
+                    "name": "Wick Medinait",
+                    "wirkstoff": "Kombipräparat",
+                    "hersteller": "Procter & Gamble",
+                    "standard_dosis": "30ml Saft",
+                    "einsatzgebiet": "Grippale Infekte"
+                },
+                {
+                    "name": "Aspirin Complex",
+                    "wirkstoff": "ASS/Pseudoephedrin",
+                    "hersteller": "Bayer",
+                    "standard_dosis": "Granulatbeutel",
+                    "einsatzgebiet": "Erkältung mit Stockschnupfen"
+                },
+                {
+                    "name": "Silomat",
+                    "wirkstoff": "Pentoxyverin",
+                    "hersteller": "Stada",
+                    "standard_dosis": "Saft/Tropfen",
+                    "einsatzgebiet": "Reizhusten"
+                },
+                {
+                    "name": "Bronchipret",
+                    "wirkstoff": "Thymian/Efeu",
+                    "hersteller": "Bionorica",
+                    "standard_dosis": "Saft",
+                    "einsatzgebiet": "Bronchitis"
+                },
+                {
+                    "name": "Coldargan",
+                    "wirkstoff": "Silber-Protein-Verbindung",
+                    "hersteller": "Sigmapharm",
+                    "standard_dosis": "Nasentropfen",
+                    "einsatzgebiet": "Starker Schnupfen/Entzündung"
+                },
+                {
+                    "name": "Tantum Verde",
+                    "wirkstoff": "Benzydamin",
+                    "hersteller": "Angelini",
+                    "standard_dosis": "Spray/Gurgellösung",
+                    "einsatzgebiet": "Entzündungen im Rachen"
+                },
+                {
+                    "name": "Codex",
+                    "wirkstoff": "Codein",
+                    "hersteller": "G.L. Pharma",
+                    "standard_dosis": "Tropfen",
+                    "einsatzgebiet": "Starker Hustenreiz"
+                },
+                {
+                    "name": "Boxagrippal",
+                    "wirkstoff": "Ibuprofen/Pseudoephedrin",
+                    "hersteller": "Azanta",
+                    "standard_dosis": "Tabletten",
+                    "einsatzgebiet": "Erkältungssymptome"
+                },
+                {
+                    "name": "Lemocin",
+                    "wirkstoff": "Tyrothricin",
+                    "hersteller": "Stada",
+                    "standard_dosis": "Lutschtabletten",
+                    "einsatzgebiet": "Halsschmerzen"
+                },
+                {
+                    "name": "Vantobra",
+                    "wirkstoff": "Tobramycin",
+                    "hersteller": "Pari",
+                    "standard_dosis": "Inhalationslösung",
+                    "einsatzgebiet": "Bakterielle Atemwegsinfekte"
+                },
+                {
+                    "name": "Otrivin",
+                    "wirkstoff": "Xylometazolin",
+                    "hersteller": "Haleon",
+                    "standard_dosis": "0,1% Spray",
+                    "einsatzgebiet": "Abschwellend"
+                },
+                {
+                    "name": "Flector EP Pflaster",
+                    "wirkstoff": "Diclofenac",
+                    "hersteller": "IBSA",
+                    "standard_dosis": "Pflaster",
+                    "einsatzgebiet": "Lokale Entzündung"
+                },
+                {
+                    "name": "GeloMyrtol forte",
+                    "wirkstoff": "Destillat ätherischer Öle",
+                    "hersteller": "Pohl-Boskamp",
+                    "standard_dosis": "Kapseln",
+                    "einsatzgebiet": "Schleimlösung"
+                },
+                {
+                    "name": "Grippostad C",
+                    "wirkstoff": "Paracetamol/Vitamin C/Koffein",
+                    "hersteller": "Stada",
+                    "standard_dosis": "Kapseln",
+                    "einsatzgebiet": "Erkältungsbeschwerden"
+                },
+                {
+                    "name": "ACC akut",
+                    "wirkstoff": "Acetylcystein",
+                    "hersteller": "Hexal",
+                    "standard_dosis": "600mg Brausetablette",
+                    "einsatzgebiet": "Hustenlöser"
+                },
+                {
+                    "name": "Luuf",
+                    "wirkstoff": "Ätherische Öle",
+                    "hersteller": "Apomedica",
+                    "standard_dosis": "Balsam",
+                    "einsatzgebiet": "Einreibung bei Husten"
+                }
+            ]
+        },
+        {
+            "bereich": "Schmerz & Bewegungsapparat",
+            "eintraege": [
+                {
+                    "name": "Mexalen",
+                    "wirkstoff": "Paracetamol",
+                    "hersteller": "G.L. Pharma",
+                    "standard_dosis": "500mg",
+                    "einsatzgebiet": "Schmerzen/Fieber"
+                },
+                {
+                    "name": "Ibumetin",
+                    "wirkstoff": "Ibuprofen",
+                    "hersteller": "Takeda",
+                    "standard_dosis": "400mg",
+                    "einsatzgebiet": "Schmerz/Entzündung"
+                },
+                {
+                    "name": "Novalgin",
+                    "wirkstoff": "Metamizol",
+                    "hersteller": "Sanofi",
+                    "standard_dosis": "500mg",
+                    "einsatzgebiet": "Starke Schmerzen"
+                },
+                {
+                    "name": "Parkemed",
+                    "wirkstoff": "Mefenaminsäure",
+                    "hersteller": "Pfizer",
+                    "standard_dosis": "500mg",
+                    "einsatzgebiet": "Schmerzen/Regelschmerzen"
+                },
+                {
+                    "name": "Voltaren Emulgel",
+                    "wirkstoff": "Diclofenac",
+                    "hersteller": "Haleon",
+                    "standard_dosis": "Gel",
+                    "einsatzgebiet": "Gelenkschmerzen"
+                },
+                {
+                    "name": "Deflamat",
+                    "wirkstoff": "Diclofenac",
+                    "hersteller": "G.L. Pharma",
+                    "standard_dosis": "75mg Retard",
+                    "einsatzgebiet": "Rückenschmerzen"
+                },
+                {
+                    "name": "Seractil",
+                    "wirkstoff": "Dexibuprofen",
+                    "hersteller": "Gebro",
+                    "standard_dosis": "400mg",
+                    "einsatzgebiet": "Arthrose/Zahnschmerzen"
+                },
+                {
+                    "name": "Tramal",
+                    "wirkstoff": "Tramadol",
+                    "hersteller": "Grünenthal",
+                    "standard_dosis": "50mg",
+                    "einsatzgebiet": "Starke Schmerzen (Opioid)"
+                },
+                {
+                    "name": "Vimovo",
+                    "wirkstoff": "Naproxen/Esomeprazol",
+                    "hersteller": "AstraZeneca",
+                    "standard_dosis": "500/20mg",
+                    "einsatzgebiet": "Gelenkschmerz mit Magenschutz"
+                },
+                {
+                    "name": "Arcoxia",
+                    "wirkstoff": "Etoricoxib",
+                    "hersteller": "MSD",
+                    "standard_dosis": "60mg",
+                    "einsatzgebiet": "Chronische Entzündung"
+                },
+                {
+                    "name": "Condrosulf",
+                    "wirkstoff": "Chondroitinsulfat",
+                    "hersteller": "IBSA",
+                    "standard_dosis": "800mg",
+                    "einsatzgebiet": "Knorpelschutz"
+                },
+                {
+                    "name": "Mydocalm",
+                    "wirkstoff": "Tolperison",
+                    "hersteller": "Gedeon Richter",
+                    "standard_dosis": "150mg",
+                    "einsatzgebiet": "Muskelentspannung"
+                },
+                {
+                    "name": "Naprobene",
+                    "wirkstoff": "Naproxen",
+                    "hersteller": "ratiopharm",
+                    "standard_dosis": "500mg",
+                    "einsatzgebiet": "Rheumatische Beschwerden"
+                },
+                {
+                    "name": "Oramorph",
+                    "wirkstoff": "Morphin",
+                    "hersteller": "Mundipharma",
+                    "standard_dosis": "Tropfen",
+                    "einsatzgebiet": "Sehr starke Schmerzen"
+                },
+                {
+                    "name": "Dysmenol",
+                    "wirkstoff": "Ibuprofen",
+                    "hersteller": "Haleon",
+                    "standard_dosis": "200-400mg",
+                    "einsatzgebiet": "Regelschmerzen"
+                },
+                {
+                    "name": "Targin",
+                    "wirkstoff": "Oxycodon/Naloxon",
+                    "hersteller": "Mundipharma",
+                    "standard_dosis": "10/5mg",
+                    "einsatzgebiet": "Schwere chronische Schmerzen"
+                },
+                {
+                    "name": "Dolgit",
+                    "wirkstoff": "Ibuprofen",
+                    "hersteller": "Dolorgiet",
+                    "standard_dosis": "Creme",
+                    "einsatzgebiet": "Prellungen"
+                },
+                {
+                    "name": "Sirdalud",
+                    "wirkstoff": "Tizanidin",
+                    "hersteller": "Novartis",
+                    "standard_dosis": "2mg",
+                    "einsatzgebiet": "Muskelspastik/Verspannung"
+                },
+                {
+                    "name": "Moov",
+                    "wirkstoff": "Kombipräparat",
+                    "hersteller": "Diverse",
+                    "standard_dosis": "Creme",
+                    "einsatzgebiet": "Muskelschmerz"
+                },
+                {
+                    "name": "Aspirin",
+                    "wirkstoff": "ASS",
+                    "hersteller": "Bayer",
+                    "standard_dosis": "500mg",
+                    "einsatzgebiet": "Kopfschmerzen"
+                }
+            ]
+        },
+        {
+            "bereich": "Magen, Darm & Stoffwechsel",
+            "eintraege": [
+                {
+                    "name": "Pantoloc",
+                    "wirkstoff": "Pantoprazol",
+                    "hersteller": "Takeda",
+                    "standard_dosis": "20mg",
+                    "einsatzgebiet": "Magenschutz"
+                },
+                {
+                    "name": "Iberogast",
+                    "wirkstoff": "Pflanzlich",
+                    "hersteller": "Bayer",
+                    "standard_dosis": "20 Tropfen",
+                    "einsatzgebiet": "Reizmagen"
+                },
+                {
+                    "name": "Bioflorin",
+                    "wirkstoff": "Enterokokken",
+                    "hersteller": "Sandoz",
+                    "standard_dosis": "Kapseln",
+                    "einsatzgebiet": "Durchfall"
+                },
+                {
+                    "name": "Buscopan",
+                    "wirkstoff": "Butylscopolamin",
+                    "hersteller": "Sanofi",
+                    "standard_dosis": "10mg",
+                    "einsatzgebiet": "Bauchkrämpfe"
+                },
+                {
+                    "name": "Antibiophilus",
+                    "wirkstoff": "Lactobacillus",
+                    "hersteller": "Germania",
+                    "standard_dosis": "Beutel/Kapseln",
+                    "einsatzgebiet": "Darmaufbau"
+                },
+                {
+                    "name": "Rennie",
+                    "wirkstoff": "Calcium/Magnesiumcarbonat",
+                    "hersteller": "Bayer",
+                    "standard_dosis": "Kautablette",
+                    "einsatzgebiet": "Sodbrennen"
+                },
+                {
+                    "name": "Imodium",
+                    "wirkstoff": "Loperamid",
+                    "hersteller": "Kenvue",
+                    "standard_dosis": "2mg",
+                    "einsatzgebiet": "Akuter Durchfall"
+                },
+                {
+                    "name": "Motilium",
+                    "wirkstoff": "Domperidon",
+                    "hersteller": "Janssen",
+                    "standard_dosis": "10mg",
+                    "einsatzgebiet": "Übelkeit"
+                },
+                {
+                    "name": "Dulcolax",
+                    "wirkstoff": "Bisacodyl",
+                    "hersteller": "Sanofi",
+                    "standard_dosis": "5mg Dragee",
+                    "einsatzgebiet": "Verstopfung"
+                },
+                {
+                    "name": "Metformin ratiopharm",
+                    "wirkstoff": "Metformin",
+                    "hersteller": "ratiopharm",
+                    "standard_dosis": "500-1000mg",
+                    "einsatzgebiet": "Diabetes Typ 2"
+                },
+                {
+                    "name": "Gaviscon",
+                    "wirkstoff": "Alginat",
+                    "hersteller": "Reckitt Benckiser",
+                    "standard_dosis": "Liquid",
+                    "einsatzgebiet": "Reflux"
+                },
+                {
+                    "name": "Jardiance",
+                    "wirkstoff": "Empagliflozin",
+                    "hersteller": "Boehringer",
+                    "standard_dosis": "10mg",
+                    "einsatzgebiet": "Blutzuckersenkung"
+                },
+                {
+                    "name": "Ozempic",
+                    "wirkstoff": "Semaglutid",
+                    "hersteller": "Novo Nordisk",
+                    "standard_dosis": "0,5-1mg Pen",
+                    "einsatzgebiet": "Diabetes/Gewichtsmanagement"
+                },
+                {
+                    "name": "Creon",
+                    "wirkstoff": "Pankreatin",
+                    "hersteller": "Abbott",
+                    "standard_dosis": "25.000 Einheiten",
+                    "einsatzgebiet": "Verdauungsschwäche"
+                },
+                {
+                    "name": "Normolyt",
+                    "wirkstoff": "Elektrolyte",
+                    "hersteller": "Gebro",
+                    "standard_dosis": "Beutel",
+                    "einsatzgebiet": "Flüssigkeitsverlust"
+                },
+                {
+                    "name": "Agiolax",
+                    "wirkstoff": "Flohsamen/Senna",
+                    "hersteller": "Madaus",
+                    "standard_dosis": "Granulat",
+                    "einsatzgebiet": "Träger Darm"
+                },
+                {
+                    "name": "Lanzor",
+                    "wirkstoff": "Lansoprazol",
+                    "hersteller": "Sanofi",
+                    "standard_dosis": "30mg",
+                    "einsatzgebiet": "Magengeschwür"
+                },
+                {
+                    "name": "Ulcogant",
+                    "wirkstoff": "Sucralfat",
+                    "hersteller": "Merck",
+                    "standard_dosis": "Beutel/Suspension",
+                    "einsatzgebiet": "Magenschleimhautschutz"
+                },
+                {
+                    "name": "Minifom",
+                    "wirkstoff": "Simeticon",
+                    "hersteller": "Meda",
+                    "standard_dosis": "Kapseln/Tropfen",
+                    "einsatzgebiet": "Blähungen"
+                },
+                {
+                    "name": "Omni-Biotic",
+                    "wirkstoff": "Probiotische Bakterien",
+                    "hersteller": "Allergosan",
+                    "standard_dosis": "Beutel",
+                    "einsatzgebiet": "Darmsanierung"
+                }
+            ]
+        },
+        {
+            "bereich": "Niere, Leber & Urogenital",
+            "eintraege": [
+                {
+                    "name": "Lasix",
+                    "wirkstoff": "Furosemid",
+                    "hersteller": "Sanofi",
+                    "standard_dosis": "40mg",
+                    "einsatzgebiet": "Ödeme/Entwässerung"
+                },
+                {
+                    "name": "Legalon",
+                    "wirkstoff": "Silymarin",
+                    "hersteller": "Viatris",
+                    "standard_dosis": "140mg",
+                    "einsatzgebiet": "Leberregeneration"
+                },
+                {
+                    "name": "Cystinol",
+                    "wirkstoff": "Bärentraubenblätter",
+                    "hersteller": "Schaper & Brümmer",
+                    "standard_dosis": "Tabletten",
+                    "einsatzgebiet": "Blasenentzündung"
+                },
+                {
+                    "name": "Monuril",
+                    "wirkstoff": "Fosfomycin",
+                    "hersteller": "Zambon",
+                    "standard_dosis": "3g Granulat",
+                    "einsatzgebiet": "Harnwegsinfekt"
+                },
+                {
+                    "name": "Rowatinex",
+                    "wirkstoff": "Ätherische Öle",
+                    "hersteller": "Rowa",
+                    "standard_dosis": "Kapseln",
+                    "einsatzgebiet": "Nierensteine"
+                },
+                {
+                    "name": "Tamsulosin Lannacher",
+                    "wirkstoff": "Tamsulosin",
+                    "hersteller": "G.L. Pharma",
+                    "standard_dosis": "0,4mg",
+                    "einsatzgebiet": "Prostata"
+                },
+                {
+                    "name": "Duodart",
+                    "wirkstoff": "Dutasterid/Tamsulosin",
+                    "hersteller": "GSK",
+                    "standard_dosis": "0,5/0,4mg",
+                    "einsatzgebiet": "Prostatavergrößerung"
+                },
+                {
+                    "name": "Spasmo-Urgenin",
+                    "wirkstoff": "Trospiumchlorid",
+                    "hersteller": "Madaus",
+                    "standard_dosis": "20mg",
+                    "einsatzgebiet": "Reizblase"
+                },
+                {
+                    "name": "Aldactone",
+                    "wirkstoff": "Spironolacton",
+                    "hersteller": "Pfizer",
+                    "standard_dosis": "100mg",
+                    "einsatzgebiet": "Leberzirrhose/Herz"
+                },
+                {
+                    "name": "Femicur",
+                    "wirkstoff": "Mönchspfeffer",
+                    "hersteller": "Schaper & Brümmer",
+                    "standard_dosis": "Kapseln",
+                    "einsatzgebiet": "Hormonelle Balance"
+                },
+                {
+                    "name": "Uralyt-U",
+                    "wirkstoff": "Alkali-Zitrate",
+                    "hersteller": "Madaus",
+                    "standard_dosis": "Granulat",
+                    "einsatzgebiet": "Harnsteinauflösung"
+                },
+                {
+                    "name": "Deursil",
+                    "wirkstoff": "Ursodeoxycholsäure",
+                    "hersteller": "Sanofi",
+                    "standard_dosis": "250mg",
+                    "einsatzgebiet": "Gallensteine"
+                },
+                {
+                    "name": "Urivesc",
+                    "wirkstoff": "Trospiumchlorid",
+                    "hersteller": "Madaus",
+                    "standard_dosis": "60mg Retard",
+                    "einsatzgebiet": "Inkontinenz"
+                },
+                {
+                    "name": "Canesten",
+                    "wirkstoff": "Clotrimazol",
+                    "hersteller": "Bayer",
+                    "standard_dosis": "Creme/Vaginalzäpfchen",
+                    "einsatzgebiet": "Pilzinfektion"
+                },
+                {
+                    "name": "Combodart",
+                    "wirkstoff": "Dutasterid/Tamsulosin",
+                    "hersteller": "GSK",
+                    "standard_dosis": "Kapseln",
+                    "einsatzgebiet": "Urologie"
+                },
+                {
+                    "name": "Hepa-Merz",
+                    "wirkstoff": "Ornithin-Aspartat",
+                    "hersteller": "Merz",
+                    "standard_dosis": "Granulat",
+                    "einsatzgebiet": "Entgiftung der Leber"
+                },
+                {
+                    "name": "Oleovit D3",
+                    "wirkstoff": "Cholecalciferol",
+                    "hersteller": "Fresenius",
+                    "standard_dosis": "Tropfen",
+                    "einsatzgebiet": "Nierenbedingter Vitaminmangel"
+                },
+                {
+                    "name": "Solifenacin Lannacher",
+                    "wirkstoff": "Solifenacin",
+                    "hersteller": "G.L. Pharma",
+                    "standard_dosis": "5-10mg",
+                    "einsatzgebiet": "Überaktive Blase"
+                },
+                {
+                    "name": "Sevelamer ratiopharm",
+                    "wirkstoff": "Sevelamer",
+                    "hersteller": "ratiopharm",
+                    "standard_dosis": "800mg",
+                    "einsatzgebiet": "Phosphatbinder bei Nierenleiden"
+                },
+                {
+                    "name": "Vesicare",
+                    "wirkstoff": "Solifenacin",
+                    "hersteller": "Astellas",
+                    "standard_dosis": "5mg",
+                    "einsatzgebiet": "Blasenkontrolle"
+                }
+            ]
+        },
+        {
+            "bereich": "Psyche & Nervensystem",
+            "eintraege": [
+                {
+                    "name": "Trittico",
+                    "wirkstoff": "Trazodon",
+                    "hersteller": "Angelini",
+                    "standard_dosis": "150mg Retard",
+                    "einsatzgebiet": "Depression/Schlaf"
+                },
+                {
+                    "name": "Psychopax",
+                    "wirkstoff": "Diazepam",
+                    "hersteller": "G.L. Pharma",
+                    "standard_dosis": "Tropfen (2-10mg)",
+                    "einsatzgebiet": "Angst/Beruhigung"
+                },
+                {
+                    "name": "Lexotanil",
+                    "wirkstoff": "Bromazepam",
+                    "hersteller": "Roche",
+                    "standard_dosis": "3mg",
+                    "einsatzgebiet": "Angstzustände"
+                },
+                {
+                    "name": "Cipralex",
+                    "wirkstoff": "Escitalopram",
+                    "hersteller": "Lundbeck",
+                    "standard_dosis": "10mg",
+                    "einsatzgebiet": "Antidepressivum"
+                },
+                {
+                    "name": "Seroquel",
+                    "wirkstoff": "Quetiapin",
+                    "hersteller": "AstraZeneca",
+                    "standard_dosis": "25-300mg",
+                    "einsatzgebiet": "Psychosen/Bipolare Störung"
+                },
+                {
+                    "name": "Temesta",
+                    "wirkstoff": "Lorazepam",
+                    "hersteller": "Pfizer",
+                    "standard_dosis": "1-2,5mg",
+                    "einsatzgebiet": "Beruhigungsmittel"
+                },
+                {
+                    "name": "Lasea",
+                    "wirkstoff": "Lavendelöl",
+                    "hersteller": "Schwabe",
+                    "standard_dosis": "80mg Kapsel",
+                    "einsatzgebiet": "Innere Unruhe"
+                },
+                {
+                    "name": "Somnubene",
+                    "wirkstoff": "Flunitrazepam",
+                    "hersteller": "G.L. Pharma",
+                    "standard_dosis": "1mg",
+                    "einsatzgebiet": "Schlafmittel (stark)"
+                },
+                {
+                    "name": "Zoldem",
+                    "wirkstoff": "Zolpidem",
+                    "hersteller": "G.L. Pharma",
+                    "standard_dosis": "10mg",
+                    "einsatzgebiet": "Einschlafhilfe"
+                },
+                {
+                    "name": "Praxiten",
+                    "wirkstoff": "Oxazepam",
+                    "hersteller": "G.L. Pharma",
+                    "standard_dosis": "15mg",
+                    "einsatzgebiet": "Angstlösung"
+                },
+                {
+                    "name": "Laif 900",
+                    "wirkstoff": "Johanniskraut",
+                    "hersteller": "Steigerwald",
+                    "standard_dosis": "900mg",
+                    "einsatzgebiet": "Leichte Depression"
+                },
+                {
+                    "name": "Mirtel",
+                    "wirkstoff": "Mirtazapin",
+                    "hersteller": "G.L. Pharma",
+                    "standard_dosis": "30mg",
+                    "einsatzgebiet": "Depression/Schlaf"
+                },
+                {
+                    "name": "Sertralin Lannacher",
+                    "wirkstoff": "Sertralin",
+                    "hersteller": "Lannacher",
+                    "standard_dosis": "50mg",
+                    "einsatzgebiet": "Antidepressivum"
+                },
+                {
+                    "name": "Venlafaxin ratiopharm",
+                    "wirkstoff": "Venlafaxin",
+                    "hersteller": "ratiopharm",
+                    "standard_dosis": "75mg Retard",
+                    "einsatzgebiet": "Angst/Depression"
+                },
+                {
+                    "name": "Xanor",
+                    "wirkstoff": "Alprazolam",
+                    "hersteller": "Pfizer",
+                    "standard_dosis": "0,5mg",
+                    "einsatzgebiet": "Panikattacken"
+                },
+                {
+                    "name": "Haldol",
+                    "wirkstoff": "Haloperidol",
+                    "hersteller": "Janssen",
+                    "standard_dosis": "Tropfen",
+                    "einsatzgebiet": "Neuroleptikum"
+                },
+                {
+                    "name": "Neuromultivit",
+                    "wirkstoff": "Vitamin B1, B6, B12",
+                    "hersteller": "G.L. Pharma",
+                    "standard_dosis": "1 Tablette",
+                    "einsatzgebiet": "Nervenschmerzen"
+                },
+                {
+                    "name": "Pregabalin Lannacher",
+                    "wirkstoff": "Pregabalin",
+                    "hersteller": "Lannacher",
+                    "standard_dosis": "75-150mg",
+                    "einsatzgebiet": "Neuropathische Schmerzen"
+                },
+                {
+                    "name": "Dominal",
+                    "wirkstoff": "Prothipendyl",
+                    "hersteller": "AWD",
+                    "standard_dosis": "40-80mg",
+                    "einsatzgebiet": "Schlafstörungen/Unruhe"
+                },
+                {
+                    "name": "Ebixa",
+                    "wirkstoff": "Memantin",
+                    "hersteller": "Lundbeck",
+                    "standard_dosis": "10-20mg",
+                    "einsatzgebiet": "Demenz"
+                }
+            ]
+        }
+    ]
+}

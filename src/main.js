@@ -32,9 +32,10 @@ window.state = {
   showAddPlanPanel: false,
   useLiveSearch: localStorage.getItem('use_live_search') === 'true',
   showMagicImport: false,
-  historyMedFilters: []
+  historyMedFilters: [],
+  localDrugs: []
 };
-const APP_VERSION = '4.82.5';
+const APP_VERSION = '4.82.6';
 const state = window.state;
 
 const GROK_BASE_URL = "https://api.x.ai/v1/chat/completions";
@@ -438,7 +439,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.82.5</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.82.6</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -768,6 +769,10 @@ function renderMedications() {
                </button>
             </div>
           </div>
+          <div style="font-size: 11px; color: #94a3b8; margin-bottom: 4px;">
+            ${m.hersteller ? `<strong>${m.hersteller}</strong>` : ''}
+            ${m.einsatzgebiet ? `${m.hersteller ? ' \u2022 ' : ''}${m.einsatzgebiet}` : ''}
+          </div>
           ${m.adverse_events ? `
               <div style="margin-top: 8px;">
                  <button class="btn btn-secondary" style="font-size: 10px; padding: 4px 10px; width: auto; background: rgba(239, 68, 68, 0.1); color: #ef4444; border-color: rgba(239, 68, 68, 0.3); border-radius: 6px;" onclick="window.showAdverseOverlay('${m.id}')">${t('sideEffectsTitle')}</button>
@@ -784,14 +789,17 @@ function renderMedications() {
     <div class="glass-panel" id="add-med-panel" style="display: none;">
       <div class="text-h2" id="add-med-title">${t('addMedication')}</div>
       <input type="hidden" id="med-id">
+      <input type="hidden" id="med-hersteller">
+      <input type="hidden" id="med-einsatzgebiet">
       <div class="form-group" style="position: relative;">
         <label>${t('nameLbl')}</label>
         <div style="display:flex; gap:8px;">
-          <input type="text" id="med-name" placeholder="E.g., Aspirin" autocomplete="off" style="flex:1;">
+          <input type="text" id="med-name" placeholder="E.g., Aspirin" autocomplete="off" style="flex:1;" oninput="window.searchMedicationLocal(this.value)">
           <button class="btn btn-secondary" style="width: auto; padding: 0 15px; background: rgba(99, 102, 241, 0.1); color: var(--accent-color); border: 1px solid rgba(99, 102, 241, 0.3);" onclick="window.searchWithGrok()">
             ${t('searchAi')}
           </button>
         </div>
+        <div id="local-search-results" style="display:none; position:absolute; top:100%; left:0; right:0; z-index:100; background:rgba(15, 17, 21, 0.95); backdrop-filter:blur(10px); border:1px solid var(--glass-border); border-radius:12px; margin-top:4px; max-height:200px; overflow-y:auto; box-shadow:0 10px 25px rgba(0,0,0,0.5);"></div>
         <div id="med-fda-adverse" style="display:none; margin-top: 8px; font-size: 11px; color: #f87171; background: rgba(0,0,0,0.2); border: 1px solid rgba(239, 68, 68, 0.2); padding: 8px; border-radius: 6px; line-height: 1.4;"></div>
       </div>
       <div style="display: flex; gap: 12px;">
@@ -1338,6 +1346,8 @@ window.saveMed = async () => {
   const dose = document.getElementById('med-dose').value;
   const unit = document.getElementById('med-unit').value;
   const format = document.getElementById('med-format').value;
+  const hersteller = document.getElementById('med-hersteller').value;
+  const einsatzgebiet = document.getElementById('med-einsatzgebiet').value;
   
   if (!name || !dose) return alert(t('nameAndDose'));
   
@@ -1350,7 +1360,7 @@ window.saveMed = async () => {
     }
   }
   
-  await API.addMedication({ id: id || undefined, name, dose, unit, format, adverse_events: advEvents });
+  await API.addMedication({ id: id || undefined, name, dose, unit, format, hersteller, einsatzgebiet, adverse_events: advEvents });
   window.closeMedPanel();
   window.navigate('medications');
 };
@@ -1365,6 +1375,8 @@ window.editMed = (id) => {
   document.getElementById('med-dose').value = med.dose;
   document.getElementById('med-unit').value = med.unit;
   document.getElementById('med-format').value = med.format;
+  document.getElementById('med-hersteller').value = med.hersteller || "";
+  document.getElementById('med-einsatzgebiet').value = med.einsatzgebiet || "";
   
   document.getElementById('add-med-title').innerText = t('updateMedication');
   document.getElementById('med-save-btn').innerText = t('saveMedication');
@@ -1394,10 +1406,14 @@ window.closeMedPanel = () => {
   document.getElementById('med-id').value = '';
   document.getElementById('med-name').value = '';
   document.getElementById('med-dose').value = '';
+  document.getElementById('med-hersteller').value = '';
+  document.getElementById('med-einsatzgebiet').value = '';
   document.getElementById('add-med-title').innerText = t('addMedication');
   document.getElementById('add-med-panel').style.display = 'none';
   const advEl = document.getElementById('med-fda-adverse');
   if (advEl) advEl.style.display = 'none';
+  const localResEl = document.getElementById('local-search-results');
+  if (localResEl) localResEl.style.display = 'none';
 };
 
 window._renderAdverseBox = (text, brand, viaIngredient = false) => {
@@ -1634,15 +1650,65 @@ window.deletePlan = async (id) => {
   }
 };
 
+window.searchMedicationLocal = (query) => {
+  const resultsEl = document.getElementById('local-search-results');
+  if (!query || query.length < 2) {
+    resultsEl.style.display = 'none';
+    return;
+  }
+
+  const q = query.toLowerCase();
+  const matches = state.localDrugs.filter(d => 
+    d.name.toLowerCase().includes(q) || 
+    d.wirkstoff.toLowerCase().includes(q) || 
+    (d.einsatzgebiet && d.einsatzgebiet.toLowerCase().includes(q))
+  ).slice(0, 10);
+
+  if (matches.length === 0) {
+    resultsEl.style.display = 'none';
+    return;
+  }
+
+  resultsEl.innerHTML = matches.map(m => `
+    <div style="padding:10px 14px; cursor:pointer; border-bottom:1px solid rgba(255,255,255,0.05); transition:background 0.2s;" 
+         onmouseover="this.style.background='rgba(255,255,255,0.05)'" 
+         onmouseout="this.style.background='transparent'"
+         onclick="window.applyLocalDrug(${JSON.stringify(m).replace(/"/g, '&quot;')})">
+      <div style="font-weight:700; color:var(--accent-color); font-size:13px;">${m.name}</div>
+      <div style="font-size:10px; opacity:0.6; margin-top:2px;">${m.wirkstoff} \u2022 ${m.einsatzgebiet || m.bereich}</div>
+    </div>
+  `).join('');
+  resultsEl.style.display = 'block';
+};
+
+window.applyLocalDrug = (drug) => {
+  document.getElementById('med-name').value = drug.name;
+  document.getElementById('med-dose').value = drug.standard_dosis.split(' ')[0].replace(/[^0-9,-]/g, '') || "";
+  document.getElementById('med-hersteller').value = drug.hersteller || "";
+  document.getElementById('med-einsatzgebiet').value = drug.einsatzgebiet || "";
+  document.getElementById('local-search-results').style.display = 'none';
+};
+
 window.searchWithGrok = async () => {
   const query = document.getElementById('med-name').value;
   if (!query || query.length < 2) return alert(t('nameAndDose'));
+
+  // Try local search first for non-exact but close matches if not already selected
+  const q = query.toLowerCase();
+  const localMatch = state.localDrugs.find(d => d.name.toLowerCase() === q);
+  if (localMatch) {
+    window.applyLocalDrug(localMatch);
+    return;
+  }
 
   if (!state.grokKey) {
     alert(t('missingKeyError'));
     window.navigate('settings');
     return;
   }
+
+  const resultsEl = document.getElementById('local-search-results');
+  resultsEl.style.display = 'none';
 
   const adverseEl = document.getElementById('med-fda-adverse');
   adverseEl.style.display = 'block';
@@ -2429,6 +2495,15 @@ window.addEventListener('DOMContentLoaded', async () => {
     
     await window.navigate('dashboard');
     window._autoUpdateCheck();
+    
+    // Load local drugs database
+    try {
+      const res = await fetch('/src/drugs.json');
+      if (res.ok) {
+        const data = await res.json();
+        state.localDrugs = data.kategorien.flatMap(k => k.eintraege.map(e => ({ ...e, bereich: k.bereich })));
+      }
+    } catch (e) { console.warn("Failed to load local drugs", e); }
   } catch (err) { document.getElementById('app').innerHTML = `<div style="padding:40px; color:white;">Error: ${err.message}</div>`; }
 });
 
