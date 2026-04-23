@@ -36,7 +36,7 @@ window.state = {
   localDrugs: [],
   localDoctors: []
 };
-const APP_VERSION = '4.82.21';
+const APP_VERSION = '4.82.22';
 const state = window.state;
 
 const GROK_BASE_URL = "https://api.x.ai/v1/chat/completions";
@@ -454,7 +454,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.82.21</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.82.22</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -557,13 +557,20 @@ function renderDashboard() {
 
     const duePlans = state.plans.filter(p => window._isPlanDueOnDate(p, targetDate));
 
-    if (duePlans.length > 0) {
+    const dayLogs = state.logs.filter(l => {
+      const d = new Date(l.timestamp);
+      d.setHours(0,0,0,0);
+      return d.getTime() === targetDate.getTime();
+    });
+    const adHocLogs = dayLogs.filter(l => !l.planId);
+
+    if (duePlans.length > 0 || adHocLogs.length > 0) {
       const itemsHtml = duePlans.map(p => {
         const isAppt = p.type === 'appointment';
         const med = !isAppt ? (state.medications.find(m => m.id === p.medicationId) || { name: t('unknown') }) : null;
 
         const targetDateISO = targetDate.toISOString().split('T')[0];
-        const logEntry = todaysLogs.find(l => l.planId === p.id && l.plannedDate === targetDateISO);
+        const logEntry = dayLogs.find(l => l.planId === p.id && l.plannedDate === targetDateISO);
         const isCompleted = !isAppt && logEntry && logEntry.status === 'taken';
         const isSkipped = !isAppt && logEntry && logEntry.status === 'skipped';
 
@@ -606,6 +613,20 @@ function renderDashboard() {
         `;
       }).join('');
 
+      const adHocHtml = adHocLogs.map(l => {
+        const med = state.medications.find(m => m.id === l.medicationId) || { name: l.medName || t('unknown') };
+        const time = new Date(l.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        return `
+          <div class="card" style="border-left: 3px solid var(--accent-color); opacity: 0.8; margin-bottom: 8px; padding: 12px; display:flex; justify-content:space-between; align-items:center; background: rgba(74, 222, 128, 0.05);">
+            <div style="flex:1; min-width:0;">
+              <div class="card-title" style="font-size:14px; margin-bottom:0;">${med.name} (${t('adHoc')})</div>
+              <div class="card-subtitle" style="font-size:11px;">${l.amount_taken} ${med.unit || t('units')} \u2022 ${time}</div>
+            </div>
+            <div style="color:var(--accent-color); font-size:10px; font-weight:700;">${t('completed')}</div>
+          </div>
+        `;
+      }).join('');
+
       forecastHtml += `
         <div style="margin-bottom: 24px;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
@@ -613,6 +634,7 @@ function renderDashboard() {
             ${isToday ? `<button class="btn btn-secondary" style="width:auto; padding:4px 8px; font-size:10px; border-color:var(--accent-color); color:var(--accent-color);" onclick="window.navigate('log')">+ ${t('adHoc')}</button>` : ''}
           </div>
           ${itemsHtml}
+          ${adHocHtml}
         </div>
       `;
     }
