@@ -36,7 +36,7 @@ window.state = {
   localDrugs: [],
   localDoctors: []
 };
-const APP_VERSION = '4.82.18';
+const APP_VERSION = '4.82.19';
 const state = window.state;
 
 const GROK_BASE_URL = "https://api.x.ai/v1/chat/completions";
@@ -450,7 +450,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.82.18</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.82.19</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -584,8 +584,8 @@ function renderDashboard() {
             </div>
             <div style="display:flex; align-items:center; gap:8px;">
               ${!isAppt && isToday && !isCompleted ? `
-                <button class="btn btn-secondary" style="width:auto; padding:10px 14px; font-size:14px; border-color:var(--accent-color); color:var(--accent-color);" onclick="window.confirmIntake('${p.id}', '${targetDateISO}')">\u2713</button>
-                <button class="btn btn-secondary" style="width:auto; padding:10px 14px; font-size:14px; border-color:#f87171; color:#f87171;" onclick="window.skipIntake('${p.id}', '${targetDateISO}')">\u2715</button>
+                <button class="btn btn-secondary" style="width:auto; padding:10px 14px; font-size:14px; border-color:var(--accent-color); color:var(--accent-color);" onclick="window.confirmIntake('${p.id}', '${targetDateISO}')" ontouchstart="window.confirmIntake('${p.id}', '${targetDateISO}')">\u2713</button>
+                <button class="btn btn-secondary" style="width:auto; padding:10px 14px; font-size:14px; border-color:#f87171; color:#f87171;" onclick="window.skipIntake('${p.id}', '${targetDateISO}')" ontouchstart="window.skipIntake('${p.id}', '${targetDateISO}')">\u2715</button>
               ` : (!isAppt && isToday && isCompleted ? `<div style="color:var(--accent-color); font-size:10px; font-weight:700;">${t('completed')}</div>` : '')}
               <button class="btn btn-secondary" style="width:auto; padding:10px 14px; font-size:14px; border-color:rgba(255,255,255,0.15);" onclick="window._exportSingleEvent('${p.id}', '${targetDate.toISOString()}')" title="${t('addToCalendar')}">\uD83D\uDDD3\uFE0F</button>
             </div>
@@ -2547,70 +2547,7 @@ let touchCurrentX = 0;
 let activeSwipeItem = null;
 let isScrolling = false;
 
-document.addEventListener('touchstart', (e) => {
-  // If we tap a button or input, ignore swipe logic
-  if (e.target.closest('button') || e.target.closest('input') || e.target.closest('select')) return;
-
-  const content = e.target.closest('.swipe-content');
-  if (!content) {
-    if (activeSwipeItem) {
-      activeSwipeItem.style.transform = 'translateX(0)';
-      activeSwipeItem = null;
-    }
-    return;
-  }
-
-  if (activeSwipeItem && activeSwipeItem !== content) {
-    activeSwipeItem.style.transform = 'translateX(0)';
-  }
-
-  touchStartX = e.touches[0].clientX;
-  touchStartY = e.touches[0].clientY;
-  activeSwipeItem = content;
-  content.style.transition = 'none';
-  isScrolling = false;
-}, { passive: true });
-
-document.addEventListener('touchmove', (e) => {
-  if (!activeSwipeItem || isScrolling) return;
-
-  touchCurrentX = e.touches[0].clientX;
-  const touchCurrentY = e.touches[0].clientY;
-
-  const diffX = touchCurrentX - touchStartX;
-  const diffY = touchCurrentY - touchStartY;
-
-  // Decide if scrolling or swiping
-  if (!isScrolling && Math.abs(diffY) > Math.abs(diffX) && Math.abs(diffY) > 5) {
-    isScrolling = true;
-    activeSwipeItem.style.transform = 'translateX(0)';
-    return;
-  }
-
-  // Only start swiping if horizontal intent is clear (threshold)
-  if (diffX < -15 && Math.abs(diffX) > Math.abs(diffY)) {
-    // Prevent accidental scroll once swiping starts
-    if (e.cancelable) e.preventDefault();
-    activeSwipeItem.style.transform = `translateX(${diffX}px)`;
-  }
-}, { passive: false });
-
-document.addEventListener('touchend', (e) => {
-  if (!activeSwipeItem) return;
-  activeSwipeItem.style.transition = 'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)';
-  const diff = touchCurrentX - touchStartX;
-
-  if (diff < -65) {
-    activeSwipeItem.style.transform = 'translateX(-80px)';
-  } else {
-    activeSwipeItem.style.transform = 'translateX(0)';
-    activeSwipeItem = null;
-  }
-  touchStartX = 0;
-  touchStartY = 0;
-  touchCurrentX = 0;
-  isScrolling = false;
-});
+// Removed global swipe listeners for stability
 function _updateNavUI() {
   const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
   if (isStandalone) document.body.classList.add('is-pwa');
