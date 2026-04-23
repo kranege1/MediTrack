@@ -108,8 +108,9 @@ const PlanManager: React.FC = () => {
           {planType === 'medication' ? (
             <div className="space-y-4">
               <div>
-                <label className="text-xs font-bold opacity-50 mb-1 block">{t('selectMed')}</label>
+                <label htmlFor="med-select" className="text-xs font-bold opacity-50 mb-1 block">{t('selectMed')}</label>
                 <select 
+                  id="med-select"
                   className="bg-white/5 border border-white/10 rounded-xl p-3 w-full"
                   value={medPlan.medicationId}
                   onChange={(e) => setMedPlan({ ...medPlan, medicationId: e.target.value })}
@@ -120,8 +121,9 @@ const PlanManager: React.FC = () => {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-bold opacity-50 mb-1 block">{t('timeOfDay')}</label>
+                  <label htmlFor="time-select" className="text-xs font-bold opacity-50 mb-1 block">{t('timeOfDay')}</label>
                   <select 
+                    id="time-select"
                     className="bg-white/5 border border-white/10 rounded-xl p-3 w-full"
                     value={medPlan.timeCategory}
                     onChange={(e) => setMedPlan({ ...medPlan, timeCategory: e.target.value })}
@@ -132,8 +134,9 @@ const PlanManager: React.FC = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="text-xs font-bold opacity-50 mb-1 block">{t('dose')}</label>
+                  <label htmlFor="dose-input" className="text-xs font-bold opacity-50 mb-1 block">{t('dose')}</label>
                   <input 
+                    id="dose-input"
                     type="text" 
                     className="bg-white/5 border border-white/10 rounded-xl p-3 w-full"
                     value={medPlan.dose}

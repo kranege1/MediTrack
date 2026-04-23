@@ -25,14 +25,14 @@ const App: React.FC = () => {
     <button
       onClick={() => setNavigate(view)}
       className={cn(
-        "flex flex-col items-center justify-center gap-1 transition-all duration-300 relative",
+        "flex flex-col items-center justify-center gap-1 transition-all duration-300 relative flex-1 py-2 min-w-[60px]",
         currentView === view ? "text-accent scale-110" : "text-white/40 hover:text-white/70"
       )}
     >
       <Icon size={24} strokeWidth={currentView === view ? 2.5 : 2} />
       <span className="text-[10px] font-medium">{label}</span>
       {currentView === view && (
-        <div className="absolute -bottom-2 w-1 h-1 bg-accent rounded-full shadow-[0_0_8px_#4ade80]" />
+        <div className="absolute bottom-1 w-1 h-1 bg-accent rounded-full shadow-[0_0_8px_#4ade80]" />
       )}
     </button>
   );

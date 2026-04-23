@@ -1,4 +1,4 @@
-export const APP_VERSION = '5.0.1';
+export const APP_VERSION = '5.0.2';
 export const GROK_BASE_URL = "https://api.x.ai/v1/chat/completions";
 
 export const i18n = {
@@ -180,7 +180,7 @@ export const i18n = {
     dataNote: 'Ihre Daten sind vollständig privat und lokal gespeichert. Beim Löschen der App gehen alle Daten verloren. Exportieren Sie Ihre Daten regelmäßig!',
     exportData: 'Daten exportieren (Sicherung)', restoreData: 'Daten wiederherstellen', importRestore: 'Importieren / Wiederherstellen',
     nameAndDose: 'Name und Dosis erforderlich', selectAndAmount: 'Bitte Medikament und Menge angeben',
-    enterIngredient: 'Bitte zuerst einen Wirkstoffnamen eingeben.', medAndTime: 'Medication and time required',
+    enterIngredient: 'Bitte zuerst einen Wirkstoffnamen eingeben.', medAndTime: 'Medikament und Uhrzeit erforderlich',
     queryingFDA: 'FDA-Datenbank wird abgefragt...', noBrandTrying: 'Kein Markenname — suche nach Wirkstoff...',
     searchingWiki: 'Wikipedia wird nach Wirkstoffen durchsucht...',
     genericMatch: 'Wirkstoff-Treffer', viaWiki: '📚 Via Wikipedia', doses: 'Dosen',
