@@ -8,7 +8,7 @@ export async function checkUpdateAuto() {
     if (res.ok) {
       const data = await res.json();
       const newVer = data.version;
-      if (newVer && newVer !== APP_VERSION) {
+      if (newVer && _isNewer(newVer, APP_VERSION)) {
         showUpdatePopup(APP_VERSION, newVer);
       }
     }
@@ -28,7 +28,7 @@ export async function checkUpdateManual(event) {
     const data = await res.json();
     const newVer = data.version;
 
-    if (newVer && newVer !== APP_VERSION) {
+    if (newVer && _isNewer(newVer, APP_VERSION)) {
       showUpdatePopup(APP_VERSION, newVer);
     } else {
       alert(t('upToDate'));
@@ -39,6 +39,18 @@ export async function checkUpdateManual(event) {
   } finally {
     if (btn) btn.innerText = originalText;
   }
+}
+
+function _isNewer(newVer, oldVer) {
+  const n = newVer.split('.').map(Number);
+  const o = oldVer.split('.').map(Number);
+  for (let i = 0; i < Math.max(n.length, o.length); i++) {
+    const nVal = n[i] || 0;
+    const oVal = o[i] || 0;
+    if (nVal > oVal) return true;
+    if (nVal < oVal) return false;
+  }
+  return false;
 }
 
 export function showUpdatePopup(oldVer, newVer) {

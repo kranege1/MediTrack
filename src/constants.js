@@ -1,4 +1,4 @@
-export const APP_VERSION = '4.82.26';
+export const APP_VERSION = '4.82.27';
 export const GROK_BASE_URL = "https://api.x.ai/v1/chat/completions";
 
 export const i18n = {
