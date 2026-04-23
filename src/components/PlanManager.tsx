@@ -312,6 +312,7 @@ const PlanManager: React.FC = () => {
                         {isAppt ? (
                           <>
                             <MapPin size={10} /> {plan.location}
+                            <Calendar size={10} className="ml-2" /> {new Date(plan.startDate).toLocaleDateString(lang, { day: '2-digit', month: '2-digit' })}
                             <Clock size={10} className="ml-2" /> {plan.startTime}
                           </>
                         ) : (
