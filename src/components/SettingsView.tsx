@@ -27,13 +27,13 @@ const SettingsView: React.FC = () => {
   }, [grokKey, defaultRegion, grokModel, useLiveSearch]);
 
   const handleSave = () => {
-    const trimmedKey = localKey.trim();
-    const trimmedRegion = localRegion.trim();
+    const trimmedKey = (localKey || '').trim();
+    const trimmedRegion = (localRegion || '').trim();
     
     setGrokKey(trimmedKey);
     setDefaultRegion(trimmedRegion);
-    setGrokModel(localModel);
-    setUseLiveSearch(localLive);
+    setGrokModel(localModel || 'grok-2-1212');
+    setUseLiveSearch(!!localLive);
     
     setLocalKey(trimmedKey);
     setLocalRegion(trimmedRegion);
@@ -187,7 +187,7 @@ const SettingsView: React.FC = () => {
                 value={localModel}
                 onChange={(e) => setLocalModel(e.target.value)}
               >
-                {availableModels.length > 0 ? (
+                {Array.isArray(availableModels) && availableModels.length > 0 ? (
                   availableModels.map(m => <option key={m} value={m}>{m}</option>)
                 ) : (
                   <option value={localModel}>{localModel || "grok-2-1212"}</option>
