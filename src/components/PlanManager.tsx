@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useStore } from '../store/useStore';
 import { useTranslation } from '../hooks/useTranslation';
-import { Pill, UserCircle, Trash2, Plus, Search, MapPin, Clock, Calendar } from 'lucide-react';
+import { Pill, UserCircle, Trash2, Plus, Search, MapPin, Clock, Calendar, Edit2 } from 'lucide-react';
 import { API } from '../db';
 import { cn } from '../utils/ui';
 
@@ -9,6 +9,7 @@ const PlanManager: React.FC = () => {
   const { plans, medications, planType, setData, defaultRegion, localDoctors } = useStore();
   const { t, lang } = useTranslation();
   const [showAddForm, setShowAddForm] = useState(false);
+  const [editingPlan, setEditingPlan] = useState<any>(null);
   
   // Form States
   const [medPlan, setMedPlan] = useState({
@@ -46,10 +47,12 @@ const PlanManager: React.FC = () => {
     } else {
       if (!medPlan.medicationId || !medPlan.dose || !medPlan.startDate) return alert(t('medAndTime'));
       await API.addPlan({
-        ...medPlan
+        ...medPlan,
+        id: editingPlan?.id
       });
     }
     setShowAddForm(false);
+    setEditingPlan(null);
     window.location.reload();
   };
 
@@ -71,6 +74,34 @@ const PlanManager: React.FC = () => {
       d.specialty.toLowerCase().includes(query.toLowerCase())
     ).slice(0, 5);
     setDoctorResults(results);
+  };
+
+  const handleEdit = (plan: any) => {
+    setEditingPlan(plan);
+    if (plan.type === 'appointment') {
+      setData('planType', 'appointment');
+      setApptPlan({
+        doctorName: plan.doctorName,
+        location: plan.location,
+        specialty: plan.specialty,
+        phone: plan.phone || '',
+        note: plan.note || '',
+        date: `${plan.startDate}T${plan.startTime || '00:00'}`
+      });
+    } else {
+      setData('planType', 'medication');
+      setMedPlan({
+        medicationId: plan.medicationId,
+        timeCategory: plan.timeCategory,
+        dose: plan.dose,
+        startDate: plan.startDate,
+        frequency: plan.frequency || 'daily',
+        startWeekday: plan.startWeekday || '1',
+        startDayOfMonth: plan.startDayOfMonth || '1',
+        isOneTime: !!plan.isOneTime
+      });
+    }
+    setShowAddForm(true);
   };
 
   const applyLocalDoctor = (doc: any) => {
@@ -332,9 +363,14 @@ const PlanManager: React.FC = () => {
                     </div>
                   </div>
 
-                  <button onClick={() => handleRemove(plan.id)} className="w-9 h-9 flex items-center justify-center bg-red-500/5 border border-red-500/20 rounded-lg text-red-400/40 hover:text-red-400">
-                    <Trash2 size={14} />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => handleEdit(plan)} className="w-9 h-9 flex items-center justify-center bg-white/5 border border-white/10 rounded-lg text-white/40 hover:text-white">
+                      <Edit2 size={14} />
+                    </button>
+                    <button onClick={() => handleRemove(plan.id)} className="w-9 h-9 flex items-center justify-center bg-red-500/5 border border-red-500/20 rounded-lg text-red-400/40 hover:text-red-400">
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
                 </div>
               );
             })
