@@ -15,10 +15,11 @@ export const state = {
   pendingGrokResults: [],
   historyView: 'list',
   analyticsRange: 7,
-  showAddPlanPanel: false,
-  useLiveSearch: localStorage.getItem('use_live_search') === 'true',
-  showMagicImport: false,
   historyMedFilters: [],
+  showAddMedPanel: false,
+  showAddPlanPanel: false,
+  showMagicImport: false,
+  useLiveSearch: localStorage.getItem('use_live_search') === 'true',
   localDrugs: [],
   localDoctors: []
 };

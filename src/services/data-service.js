@@ -100,6 +100,56 @@ export async function saveMetric() {
   window.navigate('dashboard');
 }
 
+export async function savePlan() {
+  const medicationId = document.getElementById('plan-med').value;
+  const timeCategory = document.getElementById('plan-time').value;
+  const dose = document.getElementById('plan-dose').value;
+  const startDate = document.getElementById('plan-start').value;
+
+  if (!medicationId || !dose || !startDate) return alert(t('medAndTime'));
+
+  await API.addPlan({
+    medicationId,
+    timeCategory,
+    dose,
+    startDate,
+    frequency: 'daily'
+  });
+
+  state.showAddPlanPanel = false;
+  await loadData();
+  render();
+}
+
+export async function removePlan(id) {
+  if (confirm(t('removeScheduleConfirm'))) {
+    await API.deletePlan(id);
+    await loadData();
+    render();
+  }
+}
+
+export function _handleLogMedChange(val) {
+  const container = document.getElementById('log-custom-med-container');
+  if (container) container.style.display = (val === 'custom') ? 'block' : 'none';
+  
+  if (val !== 'custom') {
+    const med = state.medications.find(m => m.id === val);
+    if (med) {
+      document.getElementById('log-amount').value = med.dose;
+    }
+  }
+}
+
+export async function _deleteHistoryLog(id, type) {
+  if (confirm(t('deleteMedConfirm'))) {
+    if (type === 'metric') await API.deleteMetric(id);
+    else await API.deleteLog(id);
+    await loadData();
+    window.render();
+  }
+}
+
 // Expose to window
 window.saveMed = saveMed;
 window.deleteMed = deleteMed;
@@ -108,3 +158,7 @@ window.skipIntake = skipIntake;
 window.saveLog = saveLog;
 window.saveMetric = saveMetric;
 window.loadData = loadData;
+window._handleLogMedChange = _handleLogMedChange;
+window._deleteHistoryLog = _deleteHistoryLog;
+window.savePlan = savePlan;
+window.removePlan = removePlan;
