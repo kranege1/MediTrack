@@ -10,6 +10,7 @@ import PlanManager from './components/PlanManager';
 import SettingsView from './components/SettingsView';
 import HistoryView from './components/HistoryView';
 import ManualLog from './components/ManualLog';
+import { APP_VERSION } from './constants';
 
 const App: React.FC = () => {
   const { currentView, setNavigate, setLang } = useStore();
@@ -46,6 +47,9 @@ const App: React.FC = () => {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">
             Medica<span className="text-accent">Track</span>
+            <span className="ml-2 text-[10px] font-bold text-accent/40 bg-accent/5 px-1.5 py-0.5 rounded border border-accent/10 vertical-top">
+              v{APP_VERSION}
+            </span>
           </h1>
           <p className="text-white/50 text-sm">
             {new Date().toLocaleDateString(lang === 'de' ? 'de-DE' : 'en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
