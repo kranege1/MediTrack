@@ -19,8 +19,13 @@ window.t = t;
 window._isPlanDueOnDate = _isPlanDueOnDate;
 
 window.navigate = (view) => {
-  state.currentView = view;
-  window.render();
+  try {
+    state.currentView = view;
+    window.render();
+  } catch (e) {
+    console.error("Navigation failed", e);
+    alert("Fehler beim Laden der Ansicht: " + e.message);
+  }
 };
 
 window.toggleLang = (lang) => {
@@ -33,36 +38,45 @@ window.render = async () => {
   const appDiv = document.getElementById('app');
   let content = '';
 
-  switch (state.currentView) {
-    case 'dashboard': content = renderDashboard(); break;
-    case 'medications': content = renderMedications(); break;
-    case 'plans': content = renderPlans(); break;
-    case 'log': content = renderLog(); break;
-    case 'history': content = renderHistory(); break;
-    case 'settings': content = renderSettings(); break;
-    default: content = renderDashboard();
-  }
+  try {
+    switch (state.currentView) {
+      case 'dashboard': content = renderDashboard(); break;
+      case 'medications': content = renderMedications(); break;
+      case 'plans': content = renderPlans(); break;
+      case 'log': content = renderLog(); break;
+      case 'history': content = renderHistory(); break;
+      case 'settings': content = renderSettings(); break;
+      default: content = renderDashboard();
+    }
 
-  appDiv.innerHTML = `
-    <div class="header">
-      <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v${APP_VERSION}</span></div>
-        <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
-      </div>
-      <div style="display:flex; gap:12px; align-items:center;">
-        <div style="display:flex; background:rgba(255,255,255,0.05); border-radius:10px; overflow:hidden;">
-          <button onclick="window.toggleLang('en')" style="padding:6px 10px; font-size:10px; background:${state.lang === 'en' ? 'var(--accent-color)' : 'transparent'}; color:${state.lang === 'en' ? '#000' : '#fff'}; border:none;">EN</button>
-          <button onclick="window.toggleLang('de')" style="padding:6px 10px; font-size:10px; background:${state.lang === 'de' ? 'var(--accent-color)' : 'transparent'}; color:${state.lang === 'de' ? '#000' : '#fff'}; border:none;">DE</button>
+    appDiv.innerHTML = `
+      <div class="header">
+        <div>
+          <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v${APP_VERSION}</span></div>
+          <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
         </div>
-        <button class="btn btn-secondary" style="width:36px; height:36px; padding:0; display:flex; align-items:center; justify-content:center; border-radius:10px;" onclick="window.navigate('settings')">⚙️</button>
+        <div style="display:flex; gap:12px; align-items:center;">
+          <div style="display:flex; background:rgba(255,255,255,0.05); border-radius:10px; overflow:hidden;">
+            <button onclick="window.toggleLang('en')" style="padding:6px 10px; font-size:10px; background:${state.lang === 'en' ? 'var(--accent-color)' : 'transparent'}; color:${state.lang === 'en' ? '#000' : '#fff'}; border:none;">EN</button>
+            <button onclick="window.toggleLang('de')" style="padding:6px 10px; font-size:10px; background:${state.lang === 'de' ? 'var(--accent-color)' : 'transparent'}; color:${state.lang === 'de' ? '#000' : '#fff'}; border:none;">DE</button>
+          </div>
+          <button class="btn btn-secondary" style="width:36px; height:36px; padding:0; display:flex; align-items:center; justify-content:center; border-radius:10px;" onclick="window.navigate('settings')">⚙️</button>
+        </div>
       </div>
-    </div>
-    <div class="main-content">
-      ${content}
-      ${_renderInstallPrompt()}
-    </div>
-  `;
-  _updateNavUI();
+      <div class="main-content">
+        ${content}
+        ${_renderInstallPrompt()}
+      </div>
+    `;
+    _updateNavUI();
+  } catch (e) {
+    console.error("Render failed", e);
+    appDiv.innerHTML = `<div class="glass-panel" style="color:#ef4444; text-align:center; padding:40px;">
+      <h2>⚠️ Render Error</h2>
+      <p>${e.message}</p>
+      <button class="btn" onclick="window._forceReload()">App neu laden</button>
+    </div>`;
+  }
 };
 
 function _updateNavUI() {

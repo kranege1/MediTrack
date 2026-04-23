@@ -11,10 +11,22 @@ export async function loadData() {
   // Load local databases
   try {
     const medRes = await fetch('/drugs.json');
-    if (medRes.ok) state.localDrugs = await medRes.json();
+    if (medRes.ok) {
+      const data = await medRes.json();
+      // Flatten structured categories into a single array
+      state.localDrugs = (data.kategorien || []).flatMap(cat => 
+        (cat.eintraege || []).map(entry => ({ ...entry, einsatzgebiet: cat.bereich }))
+      );
+    }
     
     const docRes = await fetch('/doctors.json');
-    if (docRes.ok) state.doctors = await docRes.json();
+    if (docRes.ok) {
+      const data = await docRes.json();
+      // Flatten structured specialties into a single array
+      state.doctors = (data.aerzte || []).flatMap(cat => 
+        (cat.daten || []).map(doc => ({ ...doc, specialty: cat.kategorie }))
+      );
+    }
   } catch(e) { console.warn("Failed to load local DBs", e); }
 }
 
@@ -212,7 +224,7 @@ window.searchMedicationLocal = (query) => {
     listEl.innerHTML = results.map(m => `
       <div style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.05); cursor:pointer;" onclick="window.applyLocalDrug(${JSON.stringify(m).replace(/"/g, '&quot;')})">
         <div style="font-weight:700; color:var(--accent-color);">${m.name}</div>
-        <div style="font-size:10px; opacity:0.6;">${m.generic_name}</div>
+        <div style="font-size:10px; opacity:0.6;">${m.wirkstoff || m.generic_name}</div>
       </div>
     `).join('');
   } else {
@@ -226,7 +238,7 @@ window.applyLocalDrug = (drug) => {
   document.getElementById('med-unit').value = drug.unit || "mg";
   document.getElementById('med-format').value = drug.format || "Pill";
   document.getElementById('med-hersteller').value = drug.hersteller || "";
-  document.getElementById('med-einsatzgebiet').value = drug.einsatzgebiet || drug.generic_name || "";
+  document.getElementById('med-einsatzgebiet').value = drug.einsatzgebiet || drug.wirkstoff || "";
   document.getElementById('med-local-results').style.display = 'none';
 };
 
@@ -246,7 +258,7 @@ window.searchDoctorLocal = (query) => {
     listEl.innerHTML = results.map(d => `
       <div style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.05); cursor:pointer;" onclick="window.applyLocalDoctor(${JSON.stringify(d).replace(/"/g, '&quot;')})">
         <div style="font-weight:700; color:var(--accent-color);">${d.name}</div>
-        <div style="font-size:10px; opacity:0.6;">${d.specialty} • ${d.address}</div>
+        <div style="font-size:10px; opacity:0.6;">${d.specialty} • ${d.address || d.ort}</div>
       </div>
     `).join('');
   } else {
@@ -257,8 +269,8 @@ window.searchDoctorLocal = (query) => {
 window.applyLocalDoctor = (doc) => {
   document.getElementById('appt-doctor').value = doc.name;
   document.getElementById('appt-specialty').value = doc.specialty;
-  document.getElementById('appt-region').value = doc.address;
-  document.getElementById('appt-phone').value = doc.phone || "";
+  document.getElementById('appt-region').value = doc.address || doc.ort;
+  document.getElementById('appt-phone').value = doc.phone || doc.telefon || "";
   document.getElementById('doctor-local-results').style.display = 'none';
 };
 

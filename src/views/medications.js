@@ -37,7 +37,7 @@ export function renderMedications() {
     </div>
   `).join('');
 
-  const medClasses = [...new Set(state.localDrugs.map(d => d.einsatzgebiet).filter(Boolean))].sort();
+  const medClasses = Array.isArray(state.localDrugs) ? [...new Set(state.localDrugs.map(d => d.einsatzgebiet).filter(Boolean))].sort() : [];
 
   return `
     <div class="glass-panel" id="add-med-panel" style="display: ${showPanel ? 'block' : 'none'};">
@@ -136,7 +136,7 @@ window.editMed = (id) => {
 
 window.searchByClass = (klasse) => {
   const listEl = document.getElementById('med-local-results');
-  if (!klasse) {
+  if (!klasse || !Array.isArray(state.localDrugs)) {
     listEl.style.display = 'none';
     return;
   }
@@ -147,7 +147,7 @@ window.searchByClass = (klasse) => {
     ${results.map(m => `
       <div style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.05); cursor:pointer;" onclick="window.applyLocalDrug(${JSON.stringify(m).replace(/"/g, '&quot;')})">
         <div style="font-weight:700; color:var(--accent-color);">${m.name}</div>
-        <div style="font-size:10px; opacity:0.6;">${m.generic_name}</div>
+        <div style="font-size:10px; opacity:0.6;">${m.wirkstoff || m.generic_name}</div>
       </div>
     `).join('')}
   `;
