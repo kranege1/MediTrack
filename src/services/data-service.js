@@ -15,12 +15,15 @@ export async function saveMed() {
   const dose = document.getElementById('med-dose').value;
   const unit = document.getElementById('med-unit').value;
   const format = document.getElementById('med-format').value;
+  const hersteller = document.getElementById('med-hersteller').value;
+  const einsatzgebiet = document.getElementById('med-einsatzgebiet').value;
   
   if (!name || !dose) return alert(t('nameAndDose'));
   
-  const med = { id: id || undefined, name, dose, unit, format };
+  const med = { id: id || undefined, name, dose, unit, format, hersteller, einsatzgebiet };
   await API.addMedication(med);
   state.editingMedId = null;
+  state.showAddMedPanel = false;
   await loadData();
   render();
 }
