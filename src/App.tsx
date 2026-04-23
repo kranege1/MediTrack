@@ -39,7 +39,10 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-bg-dark flex flex-col pb-24 md:pb-0 md:pl-20">
       {/* Header */}
-      <header className="p-6 flex justify-between items-start sticky top-0 z-20 backdrop-blur-xl bg-bg-dark/50">
+      <header 
+        className="p-6 flex justify-between items-start sticky top-0 z-20 backdrop-blur-xl bg-bg-dark/50"
+        style={{ paddingTop: 'calc(env(safe-area-inset-top) + 1.5rem)' }}
+      >
         <div>
           <h1 className="text-2xl font-bold tracking-tight">
             Medica<span className="text-accent">Track</span>
