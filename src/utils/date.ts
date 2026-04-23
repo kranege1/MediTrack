@@ -16,7 +16,8 @@ export function isPlanDueOnDate(plan: any, date: Date) {
   if (freq === 'daily') return true;
 
   if (freq === 'weekly') {
-    return target.getDay() === (parseInt(plan.startWeekday) || 1);
+    const wd = plan.startWeekday !== undefined ? parseInt(plan.startWeekday) : 1;
+    return target.getDay() === wd;
   }
 
   if (freq === 'monthly') {

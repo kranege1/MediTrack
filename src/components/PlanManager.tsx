@@ -15,7 +15,11 @@ const PlanManager: React.FC = () => {
     medicationId: '',
     timeCategory: 'morning',
     dose: '',
-    startDate: new Date().toISOString().slice(0, 10)
+    startDate: new Date().toISOString().slice(0, 10),
+    frequency: 'daily',
+    startWeekday: '1',
+    startDayOfMonth: '1',
+    isOneTime: false
   });
 
   const [apptPlan, setApptPlan] = useState({
@@ -42,8 +46,7 @@ const PlanManager: React.FC = () => {
     } else {
       if (!medPlan.medicationId || !medPlan.dose || !medPlan.startDate) return alert(t('medAndTime'));
       await API.addPlan({
-        ...medPlan,
-        frequency: 'daily'
+        ...medPlan
       });
     }
     setShowAddForm(false);
@@ -139,15 +142,66 @@ const PlanManager: React.FC = () => {
                   />
                 </div>
               </div>
-              <div>
-                <label className="text-xs font-bold opacity-50 mb-1 block">{t('anchorDate')}</label>
-                <input 
-                  type="date" 
-                  className="bg-white/5 border border-white/10 rounded-xl p-3 w-full"
-                  value={medPlan.startDate}
-                  onChange={(e) => setMedPlan({ ...medPlan, startDate: e.target.value })}
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-bold opacity-50 mb-1 block">{t('anchorDate')}</label>
+                  <input 
+                    type="date" 
+                    className="bg-white/5 border border-white/10 rounded-xl p-3 w-full"
+                    value={medPlan.startDate}
+                    onChange={(e) => setMedPlan({ ...medPlan, startDate: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold opacity-50 mb-1 block">{t('frequency')}</label>
+                  <select 
+                    className="bg-white/5 border border-white/10 rounded-xl p-3 w-full"
+                    value={medPlan.isOneTime ? 'once' : medPlan.frequency}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val === 'once') setMedPlan({ ...medPlan, isOneTime: true, frequency: 'daily' });
+                      else setMedPlan({ ...medPlan, isOneTime: false, frequency: val });
+                    }}
+                  >
+                    <option value="once">{t('oneTime')}</option>
+                    <option value="daily">{t('daily')}</option>
+                    <option value="weekly">{t('weekly')}</option>
+                    <option value="monthly">{t('monthly')}</option>
+                  </select>
+                </div>
               </div>
+
+              {medPlan.frequency === 'weekly' && !medPlan.isOneTime && (
+                <div className="animate-in fade-in duration-300">
+                  <label className="text-xs font-bold opacity-50 mb-1 block">{t('startWeekday')}</label>
+                  <select 
+                    className="bg-white/5 border border-white/10 rounded-xl p-3 w-full"
+                    value={medPlan.startWeekday}
+                    onChange={(e) => setMedPlan({ ...medPlan, startWeekday: e.target.value })}
+                  >
+                    <option value="1">{t('monday')}</option>
+                    <option value="2">{t('tuesday')}</option>
+                    <option value="3">{t('wednesday')}</option>
+                    <option value="4">{t('thursday')}</option>
+                    <option value="5">{t('friday')}</option>
+                    <option value="6">{t('saturday')}</option>
+                    <option value="0">{t('sunday')}</option>
+                  </select>
+                </div>
+              )}
+
+              {medPlan.frequency === 'monthly' && !medPlan.isOneTime && (
+                <div className="animate-in fade-in duration-300">
+                  <label className="text-xs font-bold opacity-50 mb-1 block">{t('startDayOfMonth')}</label>
+                  <input 
+                    type="number" 
+                    min="1" max="31"
+                    className="bg-white/5 border border-white/10 rounded-xl p-3 w-full"
+                    value={medPlan.startDayOfMonth}
+                    onChange={(e) => setMedPlan({ ...medPlan, startDayOfMonth: e.target.value })}
+                  />
+                </div>
+              )}
             </div>
           ) : (
             <div className="space-y-4">
@@ -262,6 +316,12 @@ const PlanManager: React.FC = () => {
                             <Clock size={10} /> {t(plan.timeCategory || 'morning')}
                             <div className="w-1 h-1 bg-white/20 rounded-full" />
                             {plan.dose} {med?.unit || t('units')}
+                            {!plan.isOneTime && plan.frequency !== 'daily' && (
+                              <>
+                                <div className="w-1 h-1 bg-white/20 rounded-full" />
+                                <span className="text-accent/60 uppercase">{t(plan.frequency)}</span>
+                              </>
+                            )}
                           </>
                         )}
                       </div>
