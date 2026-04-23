@@ -4,6 +4,7 @@ import { APP_VERSION } from './constants.js';
 import { state } from './state.js';
 import { t, _uuid, _isPlanDueOnDate } from './utils.js';
 import { loadData } from './services/data-service.js';
+import { checkUpdateAuto } from './services/update-service.js';
 import './services/ai-service.js';
 import { renderDashboard } from './views/dashboard.js';
 import { renderMedications } from './views/medications.js';
@@ -93,6 +94,9 @@ window.addEventListener('DOMContentLoaded', async () => {
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
   await loadData();
   window.render();
+
+  // Auto-check for updates after 2 seconds
+  setTimeout(checkUpdateAuto, 2000);
 });
 
 // Re-expose API for console
