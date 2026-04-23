@@ -1,4 +1,4 @@
-const CACHE_NAME = 'medic-v4.82.27';
+const CACHE_NAME = 'medic-v4.82.28';
 const urlsToCache = [
   '/',
   '/index.html',

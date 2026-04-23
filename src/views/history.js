@@ -74,13 +74,73 @@ export function renderHistory() {
   }).join('');
 
   return `
-    <div class="glass-panel">
-      <div class="text-h2">${t('history')}</div>
-      <div class="card-list">
-        ${listHtml || `<div class="empty-state">${t('noLogsToday')}</div>`}
+    <div style="display:flex; gap:12px; margin-bottom:20px;">
+      <button class="btn ${state.historyView === 'list' ? '' : 'btn-secondary'}" style="flex:1;" onclick="window._setHistorySubView('list')">${t('list')}</button>
+      <button class="btn ${state.historyView === 'charts' ? '' : 'btn-secondary'}" style="flex:1;" onclick="window._setHistorySubView('charts')">${t('charts')}</button>
+    </div>
+
+    ${state.historyView === 'charts' ? renderAnalytics() : `
+      <div class="glass-panel">
+        <div class="text-h2">${t('history')}</div>
+        <div class="card-list">
+          ${listHtml || `<div class="empty-state">${t('noLogsToday')}</div>`}
+        </div>
       </div>
+    `}
+  `;
+}
+
+function renderAnalytics() {
+  setTimeout(initCharts, 100);
+  return `
+    <div class="glass-panel">
+      <div class="text-h2">${t('adherence')}</div>
+      <div id="adherence-chart" style="min-height: 250px;"></div>
+    </div>
+    <div class="glass-panel" style="margin-top:20px;">
+      <div class="text-h2">${t('trends')} (Weight)</div>
+      <div id="weight-chart" style="min-height: 250px;"></div>
     </div>
   `;
+}
+
+function initCharts() {
+  if (!window.ApexCharts) return;
+  
+  // Adherence
+  const last7Days = [...Array(7)].map((_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() - (6 - i));
+    return d.toISOString().split('T')[0];
+  });
+
+  const adherenceData = last7Days.map(date => {
+    const logs = state.logs.filter(l => new Date(l.timestamp).toISOString().split('T')[0] === date);
+    return logs.length;
+  });
+
+  new ApexCharts(document.querySelector("#adherence-chart"), {
+    chart: { type: 'bar', height: 200, toolbar: { show: false }, background: 'transparent' },
+    theme: { mode: 'dark' },
+    series: [{ name: 'Intakes', data: adherenceData }],
+    xaxis: { categories: last7Days.map(d => d.split('-')[2]), axisBorder: { show: false } },
+    colors: ['#4ade80'],
+    plotOptions: { bar: { borderRadius: 4 } },
+    grid: { borderColor: 'rgba(255,255,255,0.05)' }
+  }).render();
+
+  // Weight Trend
+  const weightLogs = state.metrics.filter(m => m.type === 'weight').sort((a,b) => a.timestamp - b.timestamp);
+  new ApexCharts(document.querySelector("#weight-chart"), {
+    chart: { type: 'area', height: 200, toolbar: { show: false }, background: 'transparent' },
+    theme: { mode: 'dark' },
+    series: [{ name: 'Weight', data: weightLogs.map(w => w.value) }],
+    xaxis: { categories: weightLogs.map(w => new Date(w.timestamp).toLocaleDateString()), axisBorder: { show: false } },
+    colors: ['#6366f1'],
+    stroke: { curve: 'smooth', width: 2 },
+    fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.4, opacityTo: 0 } },
+    grid: { borderColor: 'rgba(255,255,255,0.05)' }
+  }).render();
 }
 
 function _generateFullHistoryStream() {
@@ -90,3 +150,8 @@ function _generateFullHistoryStream() {
   ];
   return all.sort((a, b) => b.timestamp - a.timestamp);
 }
+
+window._setHistorySubView = (val) => {
+  state.historyView = val;
+  window.render();
+};

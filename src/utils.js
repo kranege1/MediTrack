@@ -95,3 +95,43 @@ export function _downloadFile(filename, content, type = 'text/plain') {
 // Expose to window for inline HTML handlers
 window.t = t;
 window._isPlanDueOnDate = _isPlanDueOnDate;
+
+window._exportSingleEvent = (planId, dateStr) => {
+  const p = state.plans.find(x => x.id === planId);
+  if (!p) return;
+  const med = state.medications.find(m => m.id === p.medicationId) || { name: t('unknown') };
+  const d = new Date(dateStr);
+  
+  const event = {
+    title: p.type === 'appointment' ? p.doctorName : med.name,
+    start: d,
+    location: p.location || '',
+    description: p.note || `${p.dose} ${med.unit || ''}`
+  };
+  
+  const ics = _generateICS([event]);
+  _downloadFile('reminder.ics', ics, 'text/calendar');
+};
+
+window._exportWeeklyEvents = () => {
+  const events = [];
+  const now = new Date();
+  for (let i = 0; i < 7; i++) {
+    const d = new Date();
+    d.setDate(now.getDate() + i);
+    d.setHours(0,0,0,0);
+    
+    state.plans.filter(p => _isPlanDueOnDate(p, d)).forEach(p => {
+      const med = state.medications.find(m => m.id === p.medicationId) || { name: '?' };
+      events.push({
+        title: p.type === 'appointment' ? p.doctorName : med.name,
+        start: new Date(d.getTime() + 8 * 3600000), // Default to 8 AM
+        location: p.location || '',
+        description: p.note || `${p.dose} ${med.unit || ''}`
+      });
+    });
+  }
+  if (!events.length) return alert(t('noUpcoming'));
+  const ics = _generateICS(events);
+  _downloadFile('schedule.ics', ics, 'text/calendar');
+};

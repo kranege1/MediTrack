@@ -162,6 +162,93 @@ export async function runAISearchOnly() {
 }
 
 // Expose to window for legacy support
+export async function magicImport() {
+  const text = document.getElementById('magic-import-text').value;
+  if (!text) return;
+  if (!state.grokKey) return alert(t('missingKeyError'));
+
+  const statusEl = document.getElementById('magic-import-status');
+  statusEl.innerHTML = `<div style="color:var(--accent-color); font-size:12px;">${t('importing')}</div>`;
+
+  try {
+    const prompt = `Extract medical contact or medication info from: "${text}". 
+    Return JSON: {"type": "doctor|medication", "data": {...}}.
+    If doctor: {"name": "...", "specialty": "...", "address": "...", "phone": "...", "note": "..."}.
+    If medication: {"name": "...", "dose": "...", "unit": "...", "format": "...", "hersteller": "...", "einsatzgebiet": "..."}.
+    ONLY JSON.`;
+
+    const res = await fetch(GROK_BASE_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${state.grokKey}` },
+      body: JSON.stringify({
+        model: state.grokModel,
+        messages: [{ role: "user", content: prompt }],
+        response_format: { type: "json_object" }
+      })
+    });
+    const d = await res.json();
+    const result = JSON.parse(d.choices[0].message.content);
+
+    if (result.type === 'doctor') {
+      document.getElementById('appt-doctor').value = result.data.name || '';
+      document.getElementById('appt-specialty').value = result.data.specialty || '';
+      document.getElementById('appt-region').value = result.data.address || '';
+      document.getElementById('appt-phone').value = result.data.phone || '';
+      document.getElementById('appt-note').value = result.data.note || '';
+    } else if (result.type === 'medication') {
+      document.getElementById('med-name').value = result.data.name || '';
+      document.getElementById('med-dose').value = result.data.dose || '';
+      document.getElementById('med-unit').value = result.data.unit || 'mg';
+      document.getElementById('med-format').value = result.data.format || 'Pill';
+      document.getElementById('med-hersteller').value = result.data.hersteller || '';
+      document.getElementById('med-einsatzgebiet').value = result.data.einsatzgebiet || '';
+    }
+    statusEl.innerHTML = '';
+  } catch (e) {
+    statusEl.innerHTML = `<div style="color:#ef4444; font-size:11px;">${t('aiError')}</div>`;
+  }
+}
+
+export async function fetchGrokModels() {
+  if (!state.grokKey) return;
+  const btn = document.getElementById('refresh-models-btn');
+  if (btn) btn.innerText = "...";
+  try {
+    const res = await fetch("https://api.x.ai/v1/models", {
+      headers: { "Authorization": `Bearer ${state.grokKey}` }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      state.availableModels = data.models.map(m => m.id);
+      window.render();
+    }
+  } catch (e) { console.warn("Models fetch failed", e); }
+  finally { if (btn) btn.innerText = "🔄"; }
+}
+
 window.searchWithGrok = searchWithGrok;
 window.translateAdverse = translateAdverse;
 window._runAISearchOnly = runAISearchOnly;
+window.magicImport = magicImport;
+window.fetchGrokModels = fetchGrokModels;
+
+window._applyDoctorSmart = (idx, list) => {
+  const doc = list[idx];
+  document.getElementById('appt-doctor').value = doc.name;
+  document.getElementById('appt-region').value = doc.address;
+  document.getElementById('appt-phone').value = doc.phone;
+  document.getElementById('appt-specialty').value = doc.specialty;
+  document.getElementById('doctor-ai-results').style.display = 'none';
+};
+
+window.applyGrokMatch = (idx) => {
+  const m = state.pendingGrokResults[idx];
+  document.getElementById('med-name').value = m.name;
+  document.getElementById('med-dose').value = m.default_dose || "";
+  document.getElementById('med-unit').value = m.unit || "mg";
+  document.getElementById('med-format').value = m.format || "Pill";
+  document.getElementById('med-hersteller').value = m.hersteller || "";
+  document.getElementById('med-einsatzgebiet').value = m.einsatzgebiet || m.generic_name || "";
+  state.pendingAdverseEvents = m.adverse_events || "";
+  document.getElementById('med-fda-adverse').innerHTML = `<div style="color:var(--accent-color); font-size:11px;">✓ ${m.name} ${t('loggedSuccess')}</div>`;
+};

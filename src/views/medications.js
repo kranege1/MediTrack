@@ -33,20 +33,32 @@ export function renderMedications() {
         </div>
       </div>
       ${m.einsatzgebiet ? `<div style="font-size:10px; opacity:0.5; margin-top:10px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.05); font-style:italic; display:flex; align-items:center; gap:4px;">📋 ${m.einsatzgebiet}</div>` : ''}
+      <button class="btn btn-secondary" style="font-size: 10px; padding: 4px 10px; width: auto; background: rgba(239, 68, 68, 0.05); color: #f87171; border-color: rgba(239, 68, 68, 0.2); border-radius: 6px; margin-top:8px;" onclick="window.showAdverseOverlay('${m.id}')">${t('sideEffectsTitle')}</button>
     </div>
   `).join('');
+
+  const medClasses = [...new Set(state.localDrugs.map(d => d.einsatzgebiet).filter(Boolean))].sort();
 
   return `
     <div class="glass-panel" id="add-med-panel" style="display: ${showPanel ? 'block' : 'none'};">
       <div class="text-h2" id="add-med-title">${state.editingMedId ? t('updateMedication') : t('addMedication')}</div>
       <input type="hidden" id="med-id" value="${state.editingMedId || ''}">
       
-      <div class="form-group">
+      <div class="form-group" style="position:relative;">
         <label>${t('nameLbl')}</label>
         <div style="display:flex; gap:8px;">
-          <input type="text" id="med-name" value="${editingMed ? editingMed.name : ''}" placeholder="E.g., Aspirin" style="flex:1;">
+          <input type="text" id="med-name" value="${editingMed ? editingMed.name : ''}" placeholder="E.g., Aspirin" style="flex:1;" oninput="window.searchMedicationLocal(this.value)">
           <button class="btn btn-secondary" style="width:auto; padding:0 12px; font-size:12px; background:var(--accent-color); color:#000; border:none;" onclick="window.searchWithGrok()">✨ KI</button>
         </div>
+        <div id="med-local-results" class="glass-panel" style="display:none; position:absolute; top:70px; left:0; right:0; z-index:100; padding:0; border:1px solid rgba(255,255,255,0.1); max-height:200px; overflow-y:auto;"></div>
+      </div>
+
+      <div class="form-group">
+        <label>${t('quickSelectArea')}</label>
+        <select onchange="window.searchByClass(this.value)">
+           <option value="">${t('chooseArea')}</option>
+           ${medClasses.map(c => `<option value="${c}">${c}</option>`).join('')}
+        </select>
       </div>
 
       <div id="med-fda-adverse" style="margin-bottom:16px; display:none;"></div>
@@ -120,4 +132,23 @@ window.editMed = (id) => {
   state.editingMedId = id; 
   state.showAddMedPanel = false;
   window.render(); 
+};
+
+window.searchByClass = (klasse) => {
+  const listEl = document.getElementById('med-local-results');
+  if (!klasse) {
+    listEl.style.display = 'none';
+    return;
+  }
+  const results = state.localDrugs.filter(d => d.einsatzgebiet === klasse);
+  listEl.style.display = 'block';
+  listEl.innerHTML = `
+    <div style="padding:10px; font-size:10px; opacity:0.5; text-transform:uppercase;">${klasse}</div>
+    ${results.map(m => `
+      <div style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.05); cursor:pointer;" onclick="window.applyLocalDrug(${JSON.stringify(m).replace(/"/g, '&quot;')})">
+        <div style="font-weight:700; color:var(--accent-color);">${m.name}</div>
+        <div style="font-size:10px; opacity:0.6;">${m.generic_name}</div>
+      </div>
+    `).join('')}
+  `;
 };

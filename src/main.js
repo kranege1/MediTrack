@@ -23,6 +23,12 @@ window.navigate = (view) => {
   window.render();
 };
 
+window.toggleLang = (lang) => {
+  state.lang = lang;
+  localStorage.setItem('medilang', lang);
+  window.render();
+};
+
 window.render = async () => {
   const appDiv = document.getElementById('app');
   let content = '';
@@ -43,8 +49,12 @@ window.render = async () => {
         <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v${APP_VERSION}</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
-      <div style="display:flex; gap:8px; align-items:center;">
-        <button class="btn btn-secondary" style="width:auto; padding:8px 12px; font-size:12px;" onclick="window.navigate('settings')">⚙️</button>
+      <div style="display:flex; gap:12px; align-items:center;">
+        <div style="display:flex; background:rgba(255,255,255,0.05); border-radius:10px; overflow:hidden;">
+          <button onclick="window.toggleLang('en')" style="padding:6px 10px; font-size:10px; background:${state.lang === 'en' ? 'var(--accent-color)' : 'transparent'}; color:${state.lang === 'en' ? '#000' : '#fff'}; border:none;">EN</button>
+          <button onclick="window.toggleLang('de')" style="padding:6px 10px; font-size:10px; background:${state.lang === 'de' ? 'var(--accent-color)' : 'transparent'}; color:${state.lang === 'de' ? '#000' : '#fff'}; border:none;">DE</button>
+        </div>
+        <button class="btn btn-secondary" style="width:36px; height:36px; padding:0; display:flex; align-items:center; justify-content:center; border-radius:10px;" onclick="window.navigate('settings')">⚙️</button>
       </div>
     </div>
     <div class="main-content">

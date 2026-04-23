@@ -34,30 +34,15 @@ export function renderPlans() {
   }).join('');
 
   return `
+    <div style="display:flex; gap:12px; margin-bottom:20px;">
+       <button class="btn ${state.planType === 'medication' ? '' : 'btn-secondary'}" style="flex:1;" onclick="window._setPlanType('medication')">${t('medication')}</button>
+       <button class="btn ${state.planType === 'appointment' ? '' : 'btn-secondary'}" style="flex:1;" onclick="window._setPlanType('appointment')">${t('appointment')}</button>
+    </div>
+
     <div class="glass-panel" id="add-plan-panel" style="display: ${state.showAddPlanPanel ? 'block' : 'none'};">
-      <div class="text-h2">${t('createSchedule')}</div>
-      <div class="form-group">
-        <label>${t('selectMed')}</label>
-        <select id="plan-med">
-           ${medOptions}
-        </select>
-      </div>
-      <div class="form-group">
-        <label>${t('timeOfDay')}</label>
-        <select id="plan-time">
-           <option value="morning">${t('morning')}</option>
-           <option value="noon">${t('noon')}</option>
-           <option value="evening">${t('evening')}</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>${t('dose')}</label>
-        <input type="text" id="plan-dose" placeholder="E.g., 1">
-      </div>
-      <div class="form-group">
-        <label>${t('anchorDate')}</label>
-        <input type="date" id="plan-start" value="${now}">
-      </div>
+      <div class="text-h2">${state.planType === 'appointment' ? t('appointment') : t('createSchedule')}</div>
+      
+      ${state.planType === 'appointment' ? renderAppointmentForm() : renderMedicationPlanForm(medOptions, now)}
       
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:20px;">
         <button class="btn" onclick="window.savePlan()" ontouchstart="window.savePlan()">${t('savePlan')}</button>
@@ -79,7 +64,74 @@ export function renderPlans() {
   `;
 }
 
+function renderMedicationPlanForm(medOptions, now) {
+  return `
+    <div class="form-group">
+      <label>${t('selectMed')}</label>
+      <select id="plan-med">
+         ${medOptions}
+      </select>
+    </div>
+    <div class="form-group">
+      <label>${t('timeOfDay')}</label>
+      <select id="plan-time">
+         <option value="morning">${t('morning')}</option>
+         <option value="noon">${t('noon')}</option>
+         <option value="evening">${t('evening')}</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>${t('dose')}</label>
+      <input type="text" id="plan-dose" placeholder="E.g., 1">
+    </div>
+    <div class="form-group">
+      <label>${t('anchorDate')}</label>
+      <input type="date" id="plan-start" value="${now}">
+    </div>
+  `;
+}
+
+function renderAppointmentForm() {
+  return `
+    <div class="form-group" style="position:relative;">
+      <label>${t('doctorName')}</label>
+      <div style="display:flex; gap:8px;">
+        <input type="text" id="appt-doctor" placeholder="Dr. Smith" style="flex:1;" oninput="window.searchDoctorLocal(this.value)">
+        <button class="btn btn-secondary" style="width:auto; padding:0 10px;" onclick="window._runAISearchOnly()">✨ AI</button>
+      </div>
+      <div id="doctor-local-results" class="glass-panel" style="display:none; position:absolute; top:70px; left:0; right:0; z-index:100; padding:0;"></div>
+      <div id="doctor-ai-results" style="display:none; margin-top:10px;"></div>
+    </div>
+
+    <div class="form-group">
+      <label>${t('specialty')}</label>
+      <select id="appt-specialty">
+        <option value="">${t('anySpecialty')}</option>
+        ${t('specialties').map(s => `<option value="${s}">${s}</option>`).join('')}
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>${t('location')}</label>
+      <div style="display:flex; gap:8px;">
+        <input type="text" id="appt-region" placeholder="City" style="flex:1;" value="${state.defaultRegion}">
+        <button class="btn btn-secondary" style="width:40px; padding:0;" onclick="window._geolocate('appt-region')">📍</button>
+      </div>
+    </div>
+    
+    <div class="form-group">
+      <label>${t('logDateTime')}</label>
+      <input type="datetime-local" id="appt-date" value="${new Date().toISOString().slice(0, 16)}">
+    </div>
+  `;
+}
+
 window._setShowAddPlanPanel = (val) => {
   state.showAddPlanPanel = val;
+  window.render();
+};
+
+window._setPlanType = (type) => {
+  state.planType = type;
   window.render();
 };

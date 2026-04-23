@@ -21,7 +21,8 @@ export const state = {
   showMagicImport: false,
   useLiveSearch: localStorage.getItem('use_live_search') === 'true',
   localDrugs: [],
-  localDoctors: []
+  localDoctors: [],
+  planType: 'medication'
 };
 
 // Expose to window for legacy inline handlers (to be refactored eventually)
