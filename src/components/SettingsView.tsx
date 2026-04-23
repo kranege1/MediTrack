@@ -16,13 +16,30 @@ const SettingsView: React.FC = () => {
   const [keyStatus, setKeyStatus] = useState<'idle' | 'checking' | 'valid' | 'invalid'>('idle');
   const [isLocating, setIsLocating] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isSaved, setIsSaved] = useState(false);
+
+  // Sync local state if store changes (e.g. after import)
+  useEffect(() => {
+    setLocalKey(grokKey);
+    setLocalRegion(defaultRegion);
+    setLocalModel(grokModel);
+    setLocalLive(useLiveSearch);
+  }, [grokKey, defaultRegion, grokModel, useLiveSearch]);
 
   const handleSave = () => {
-    setGrokKey(localKey);
-    setDefaultRegion(localRegion);
+    const trimmedKey = localKey.trim();
+    const trimmedRegion = localRegion.trim();
+    
+    setGrokKey(trimmedKey);
+    setDefaultRegion(trimmedRegion);
     setGrokModel(localModel);
     setUseLiveSearch(localLive);
-    alert(t('settingsSavedLabel'));
+    
+    setLocalKey(trimmedKey);
+    setLocalRegion(trimmedRegion);
+    
+    setIsSaved(true);
+    setTimeout(() => setIsSaved(false), 2000);
   };
 
   const validateKey = async (key: string) => {
@@ -196,8 +213,11 @@ const SettingsView: React.FC = () => {
             </div>
           </label>
 
-          <button onClick={handleSave} className="btn">
-            <Check size={18} /> {t('saveSettingsBtn')}
+          <button 
+            onClick={handleSave} 
+            className={cn("btn flex items-center justify-center gap-2 transition-all", isSaved ? "bg-accent text-black scale-105" : "")}
+          >
+            {isSaved ? <><Check size={18} /> {t('settingsSavedLabel')}</> : <><Check size={18} /> {t('saveSettingsBtn')}</>}
           </button>
         </div>
       </div>
