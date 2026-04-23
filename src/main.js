@@ -36,7 +36,7 @@ window.state = {
   localDrugs: [],
   localDoctors: []
 };
-const APP_VERSION = '4.82.19';
+const APP_VERSION = '4.82.20';
 const state = window.state;
 
 const GROK_BASE_URL = "https://api.x.ai/v1/chat/completions";
@@ -61,6 +61,7 @@ const i18n = {
     addMedFirst: 'Add a medication first.',
     logIntake: 'Log Intake', addMedFirst2: 'Please add a medication first.',
     amountTaken: 'Amount Taken', quantity: 'Quantity', recordIntake: 'Save Intake',
+    logDateTime: 'Date & Time',
     logMetric: 'Record Body Metric', metricType: 'Metric Type', bodyWeight: 'Body Weight (kg)',
     bloodPressure: 'Blood Pressure (mmHg)', valueLbl: 'Value', saveMetric: 'Save Metric',
     dataManagement: 'Data Management',
@@ -207,6 +208,7 @@ const i18n = {
     addMedFirst: 'Zuerst ein Medikament hinzuf\u00FCgen.',
     logIntake: 'Einnahme erfassen', addMedFirst2: 'Bitte zuerst ein Medikament hinzuf\u00FCgen.',
     amountTaken: 'Eingenommene Menge', quantity: 'Menge', recordIntake: 'Einnahme speichern',
+    logDateTime: 'Datum & Uhrzeit',
     logMetric: 'K\u00F6rpermesswert erfassen', metricType: 'Messtyp', bodyWeight: 'K\u00F6rpergewicht (kg)',
     bloodPressure: 'Blutdruck (mmHg)', valueLbl: 'Wert', saveMetric: 'Messwert speichern',
     dataManagement: 'Datenverwaltung',
@@ -450,7 +452,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.82.19</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.82.20</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -1158,6 +1160,10 @@ function renderLog() {
           <label>${t('amountTaken')}</label>
           <input type="number" id="log-amount" placeholder="${t('quantity')}">
         </div>
+        <div class="form-group">
+          <label>${t('logDateTime')}</label>
+          <input type="datetime-local" id="log-date" value="${new Date().toISOString().slice(0, 16)}">
+        </div>
         <button class="btn" onclick="window.saveLog()">${t('recordIntake')}</button>
       `}
     </div>
@@ -1169,11 +1175,17 @@ function renderLog() {
         <select id="metric-type">
            <option value="weight">${t('bodyWeight')}</option>
            <option value="bp">${t('bloodPressure')}</option>
+           <option value="pulse">${t('pulse')}</option>
+           <option value="glucose">${t('glucose')}</option>
         </select>
       </div>
       <div class="form-group">
         <label>${t('valueLbl')}</label>
         <input type="text" id="metric-value" placeholder="e.g., 75.5 or 120/80">
+      </div>
+      <div class="form-group">
+        <label>${t('logDateTime')}</label>
+        <input type="datetime-local" id="metric-date" value="${new Date().toISOString().slice(0, 16)}">
       </div>
       <button class="btn" onclick="window.saveMetric()">${t('saveMetric')}</button>
     </div>
@@ -1622,10 +1634,12 @@ window.deleteMed = async (id) => {
 window.saveLog = async () => {
   const medicationId = document.getElementById('log-med').value;
   const amount = document.getElementById('log-amount').value;
+  const dateVal = document.getElementById('log-date').value;
 
   if (!medicationId || !amount) return alert(t('selectAndAmount'));
 
-  await API.addLog({ medicationId, amount_taken: amount });
+  const timestamp = dateVal ? new Date(dateVal).getTime() : Date.now();
+  await API.addLog({ medicationId, amount_taken: amount, timestamp });
   window.navigate('dashboard');
 };
 window.savePlan = async () => {
@@ -2239,8 +2253,11 @@ window._setShowAddPlanPanel = (val) => { state.showAddPlanPanel = val; render();
 window.saveMetric = async () => {
   const type = document.getElementById('metric-type').value;
   const value = document.getElementById('metric-value').value;
+  const dateVal = document.getElementById('metric-date').value;
   if (!value) return alert(t('valueRequired'));
-  await API.addMetric({ type, value });
+  
+  const timestamp = dateVal ? new Date(dateVal).getTime() : Date.now();
+  await API.addMetric({ type, value, timestamp });
   window.navigate('dashboard');
 };
 
