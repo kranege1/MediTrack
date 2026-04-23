@@ -98,13 +98,11 @@ const Dashboard: React.FC = () => {
                   const isCompleted = logEntry?.status === 'taken';
                   const isSkipped = logEntry?.status === 'skipped';
 
-                  if (isSkipped) return null;
-
                   return (
                     <div 
                       key={plan.id}
-                      className={`glass-panel flex items-center justify-between gap-4 p-4 transition-all ${isCompleted ? 'opacity-50 grayscale' : ''}`}
-                      style={{ borderLeft: `4px solid ${isCompleted ? '#4ade80' : isAppt ? '#8b5cf6' : idx === 0 ? '#ef4444' : 'rgba(255,255,255,0.1)'}` }}
+                      className={`glass-panel flex items-center justify-between gap-4 p-4 transition-all ${isCompleted || isSkipped ? 'opacity-50 grayscale' : ''}`}
+                      style={{ borderLeft: `4px solid ${isCompleted ? '#4ade80' : isSkipped ? '#ef4444' : isAppt ? '#8b5cf6' : idx === 0 ? '#ef4444' : 'rgba(255,255,255,0.1)'}` }}
                     >
                       <div className="flex-1 min-width-0">
                         <div className="font-bold text-sm truncate">
@@ -138,6 +136,11 @@ const Dashboard: React.FC = () => {
                         {isCompleted && (
                           <div className="bg-accent/20 text-accent text-[10px] font-bold px-2 py-1 rounded-lg">
                             {t('completed')}
+                          </div>
+                        )}
+                        {isSkipped && (
+                          <div className="bg-red-500/20 text-red-400 text-[10px] font-bold px-2 py-1 rounded-lg">
+                            {t('skipped')}
                           </div>
                         )}
                         <button className="w-8 h-8 flex items-center justify-center bg-white/5 text-white/30 border border-white/10 rounded-lg">

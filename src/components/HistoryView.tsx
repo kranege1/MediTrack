@@ -15,6 +15,81 @@ const HistoryView: React.FC = () => {
     ...metrics.map(m => ({ ...m, type: 'metric', metricType: m.type }))
   ].sort((a, b) => b.timestamp - a.timestamp);
 
+  useEffect(() => {
+    if (subView !== 'charts' || typeof (window as any).ApexCharts === 'undefined') return;
+
+    // Weight Chart
+    const weightData = metrics
+      .filter(m => m.type === 'bodyWeight')
+      .sort((a, b) => a.timestamp - b.timestamp)
+      .slice(-10);
+
+    const weightOptions = {
+      series: [{
+        name: t('weight'),
+        data: weightData.map(m => m.value)
+      }],
+      chart: {
+        type: 'area',
+        height: 240,
+        toolbar: { show: false },
+        zoom: { enabled: false },
+        background: 'transparent'
+      },
+      colors: ['#4ade80'],
+      fill: {
+        type: 'gradient',
+        gradient: { shadeIntensity: 1, opacityFrom: 0.3, opacityTo: 0 }
+      },
+      dataLabels: { enabled: false },
+      stroke: { curve: 'smooth', width: 3 },
+      theme: { mode: 'dark' },
+      xaxis: {
+        categories: weightData.map(m => new Date(m.timestamp).toLocaleDateString(lang, { day: '2-digit', month: '2-digit' })),
+        labels: { style: { colors: '#64748b' } }
+      },
+      yaxis: { labels: { style: { colors: '#64748b' } } },
+      grid: { borderColor: 'rgba(255,255,255,0.05)' }
+    };
+
+    const wChart = new (window as any).ApexCharts(document.querySelector("#weight-chart"), weightOptions);
+    wChart.render();
+
+    // Adherence Chart (Last 7 Days)
+    const adherenceOptions = {
+      series: [75], // Placeholder for actual adherence calculation
+      chart: {
+        height: 240,
+        type: 'radialBar',
+      },
+      plotOptions: {
+        radialBar: {
+          hollow: { size: '70%' },
+          dataLabels: {
+            name: { show: false },
+            value: {
+              offsetY: 10,
+              color: '#4ade80',
+              fontSize: '30px',
+              fontWeight: 'bold',
+              show: true,
+            }
+          }
+        }
+      },
+      colors: ['#4ade80'],
+      labels: [t('adherence')],
+    };
+
+    const aChart = new (window as any).ApexCharts(document.querySelector("#adherence-chart"), adherenceOptions);
+    aChart.render();
+
+    return () => {
+      wChart.destroy();
+      aChart.destroy();
+    };
+  }, [subView, metrics, t, lang]);
+
   const handleDelete = async (id: string, type: string) => {
     if (confirm(t('deleteMedConfirm'))) {
       if (type === 'metric') await API.deleteMetric(id);
