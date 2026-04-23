@@ -36,7 +36,7 @@ window.state = {
   localDrugs: [],
   localDoctors: []
 };
-const APP_VERSION = '4.82.20';
+const APP_VERSION = '4.82.21';
 const state = window.state;
 
 const GROK_BASE_URL = "https://api.x.ai/v1/chat/completions";
@@ -62,6 +62,7 @@ const i18n = {
     logIntake: 'Log Intake', addMedFirst2: 'Please add a medication first.',
     amountTaken: 'Amount Taken', quantity: 'Quantity', recordIntake: 'Save Intake',
     logDateTime: 'Date & Time',
+    otherMed: 'Other (Manual Entry)',
     logMetric: 'Record Body Metric', metricType: 'Metric Type', bodyWeight: 'Body Weight (kg)',
     bloodPressure: 'Blood Pressure (mmHg)', valueLbl: 'Value', saveMetric: 'Save Metric',
     dataManagement: 'Data Management',
@@ -209,6 +210,7 @@ const i18n = {
     logIntake: 'Einnahme erfassen', addMedFirst2: 'Bitte zuerst ein Medikament hinzuf\u00FCgen.',
     amountTaken: 'Eingenommene Menge', quantity: 'Menge', recordIntake: 'Einnahme speichern',
     logDateTime: 'Datum & Uhrzeit',
+    otherMed: 'Anderes (Manuell)',
     logMetric: 'K\u00F6rpermesswert erfassen', metricType: 'Messtyp', bodyWeight: 'K\u00F6rpergewicht (kg)',
     bloodPressure: 'Blutdruck (mmHg)', valueLbl: 'Wert', saveMetric: 'Messwert speichern',
     dataManagement: 'Datenverwaltung',
@@ -452,7 +454,7 @@ function render() {
   appDiv.innerHTML = `
     <div class="header">
       <div>
-        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.82.20</span></div>
+        <div class="text-h1">MedicaTrack <span style="font-size: 14px; color: var(--accent-color); vertical-align: top;">v4.82.21</span></div>
         <div class="text-body">${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</div>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
@@ -617,7 +619,7 @@ function renderDashboard() {
   }
 
   const logsHtml = todaysLogs.length ? todaysLogs.map(l => {
-    const med = state.medications.find(m => m.id === l.medicationId) || { name: t('unknown') };
+    const med = state.medications.find(m => m.id === l.medicationId) || { name: l.medName || t('unknown') };
     return `<div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:12px; opacity:0.7;">
               <span>${med.name} (${l.amount_taken})</span>
               <span>${new Date(l.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
@@ -1151,10 +1153,15 @@ function renderLog() {
       ${state.medications.length === 0 ? `<div class="empty-state">${t('addMedFirst2')}</div>` : `
         <div class="form-group">
           <label>${t('selectMed')}</label>
-          <select id="log-med" onchange="document.getElementById('log-amount').value = this.options[this.selectedIndex].getAttribute('data-dose')">
+          <select id="log-med" onchange="window._handleLogMedChange(this.value)">
              <option value="" disabled selected>${t('chooseOption')}</option>
              ${medOptions}
+             <option value="custom">${t('otherMed')}</option>
           </select>
+        </div>
+        <div id="log-custom-med-container" style="display:none;" class="form-group">
+          <label>${t('nameLbl')}</label>
+          <input type="text" id="log-custom-name" placeholder="z.B. Ibuprofen">
         </div>
         <div class="form-group">
           <label>${t('amountTaken')}</label>
@@ -1273,7 +1280,7 @@ function _renderLogList() {
   }
 
   const logCards = stream.map(l => {
-    const med = state.medications.find(m => m.id === l.medicationId) || { name: t('unknown') };
+    const med = state.medications.find(m => m.id === l.medicationId) || { name: l.medName || t('unknown') };
     const time = new Date(l.timestamp).toLocaleString([], { dateStyle: 'short', timeStyle: l.type === 'log' ? 'short' : undefined });
     const isRed = l.status === 'skipped' || l.status === 'missed';
 
@@ -1639,7 +1646,15 @@ window.saveLog = async () => {
   if (!medicationId || !amount) return alert(t('selectAndAmount'));
 
   const timestamp = dateVal ? new Date(dateVal).getTime() : Date.now();
-  await API.addLog({ medicationId, amount_taken: amount, timestamp });
+  const logData = { medicationId, amount_taken: amount, timestamp };
+
+  if (medicationId === 'custom') {
+    const customName = document.getElementById('log-custom-name').value.trim();
+    if (!customName) return alert(t('nameAndDose'));
+    logData.medName = customName;
+  }
+
+  await API.addLog(logData);
   window.navigate('dashboard');
 };
 window.savePlan = async () => {
@@ -2249,6 +2264,18 @@ window._applyDoctorMatch = (i, results) => {
 
 window._setPlanType = (type) => { state.planType = type; render(); };
 window._setShowAddPlanPanel = (val) => { state.showAddPlanPanel = val; render(); };
+
+window._handleLogMedChange = (val) => {
+  const customContainer = document.getElementById('log-custom-med-container');
+  if (customContainer) {
+    customContainer.style.display = (val === 'custom') ? 'block' : 'none';
+  }
+  if (val !== 'custom' && val !== '') {
+    const select = document.getElementById('log-med');
+    const dose = select.options[select.selectedIndex].getAttribute('data-dose');
+    document.getElementById('log-amount').value = dose;
+  }
+};
 
 window.saveMetric = async () => {
   const type = document.getElementById('metric-type').value;
