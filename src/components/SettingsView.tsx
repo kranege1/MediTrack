@@ -47,6 +47,10 @@ const SettingsView: React.FC = () => {
   };
 
   useEffect(() => {
+    if (grokKey) validateKey(grokKey);
+  }, []);
+
+  useEffect(() => {
     const timer = setTimeout(() => {
       if (localKey && localKey !== grokKey) validateKey(localKey);
     }, 1000);
@@ -59,8 +63,10 @@ const SettingsView: React.FC = () => {
       try {
         const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`);
         const data = await res.json();
-        const city = data.address.city || data.address.town || data.address.village || "";
-        setLocalRegion(city);
+        const { postcode, city, town, village, country } = data.address;
+        const place = city || town || village || "";
+        const fullLocation = `${postcode || ""} ${place}, ${country || ""}`.trim().replace(/^, /, "");
+        setLocalRegion(fullLocation);
       } catch (e) {
         alert(t('locErr'));
       } finally {
@@ -159,23 +165,18 @@ const SettingsView: React.FC = () => {
           <div className="form-group">
             <label className="text-xs font-bold opacity-50 mb-1 block">{t('modelIdLabel')}</label>
             <div className="flex gap-2">
-              {availableModels.length > 0 ? (
-                <select 
-                  className="bg-white/5 border border-white/10 rounded-xl p-3 flex-1"
-                  value={localModel}
-                  onChange={(e) => setLocalModel(e.target.value)}
-                >
-                  {availableModels.map(m => <option key={m} value={m}>{m}</option>)}
-                  <option value="custom">{t('customModel')}</option>
-                </select>
-              ) : (
-                <input 
-                  type="text" 
-                  className="bg-white/5 border border-white/10 rounded-xl p-3 flex-1"
-                  value={localModel}
-                  onChange={(e) => setLocalModel(e.target.value)}
-                />
-              )}
+              <select 
+                className="bg-white/5 border border-white/10 rounded-xl p-3 flex-1"
+                value={localModel}
+                onChange={(e) => setLocalModel(e.target.value)}
+              >
+                {availableModels.length > 0 ? (
+                  availableModels.map(m => <option key={m} value={m}>{m}</option>)
+                ) : (
+                  <option value={localModel}>{localModel || "grok-2-1212"}</option>
+                )}
+                <option value="custom">{t('customModel')}</option>
+              </select>
               <button onClick={() => validateKey(localKey)} className="bg-white/5 border border-white/10 p-3 rounded-xl hover:bg-white/10 transition-colors">
                 <RefreshCw size={18} />
               </button>
