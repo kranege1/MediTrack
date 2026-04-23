@@ -7,25 +7,32 @@ export function renderMedications() {
   const showPanel = state.showAddMedPanel || state.editingMedId;
   const editingMed = state.editingMedId ? state.medications.find(m => m.id === state.editingMedId) : null;
 
+  const editIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`;
+  const deleteIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>`;
+
   let listHtml = state.medications.map(m => `
-    <div class="card" style="padding:16px;">
-      <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-        <div style="display:flex; gap:12px; align-items:center;">
-          <div style="font-size:24px; background:rgba(255,255,255,0.05); width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center;">
+    <div class="card" style="padding:16px; position:relative;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">
+        <div style="display:flex; gap:14px; align-items:center;">
+          <div style="font-size:26px; background:rgba(255,255,255,0.03); width:48px; height:48px; border-radius:14px; display:flex; align-items:center; justify-content:center; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
             ${formatIcons[m.format] || '💊'}
           </div>
-          <div>
-            <div class="card-title">${m.name}</div>
-            <div class="card-subtitle">${m.dose} ${m.unit} • ${t(m.format.toLowerCase() + 'Format') || m.format}</div>
-            ${m.hersteller ? `<div style="font-size:10px; opacity:0.5; margin-top:4px;">🏭 ${m.hersteller}</div>` : ''}
+          <div style="min-width:0;">
+            <div class="card-title" style="font-size:16px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${m.name}</div>
+            <div class="card-subtitle" style="font-size:12px; margin-top:2px;">${m.dose} ${m.unit} • ${t(m.format.toLowerCase() + 'Format') || m.format}</div>
+            ${m.hersteller ? `<div style="font-size:10px; opacity:0.4; margin-top:4px; display:flex; align-items:center; gap:4px;">🏭 ${m.hersteller}</div>` : ''}
           </div>
         </div>
-        <div style="display:flex; gap:8px;">
-          <button class="btn btn-secondary" style="width:auto; padding:8px 12px; font-size:12px;" onclick="window.editMed('${m.id}')" ontouchstart="window.editMed('${m.id}')">${t('editBtn')}</button>
-          <button class="btn btn-secondary" style="width:auto; padding:8px 12px; font-size:12px; border-color:#f87171; color:#f87171;" onclick="window.deleteMed('${m.id}')" ontouchstart="window.deleteMed('${m.id}')">${t('delete')}</button>
+        <div style="display:flex; gap:6px;">
+          <button class="btn btn-secondary" style="width:36px; height:36px; padding:0; display:flex; align-items:center; justify-content:center; border-radius:10px; background:rgba(255,255,255,0.05);" onclick="window.editMed('${m.id}')" ontouchstart="window.editMed('${m.id}')" title="${t('editBtn')}">
+            ${editIcon}
+          </button>
+          <button class="btn btn-secondary" style="width:36px; height:36px; padding:0; display:flex; align-items:center; justify-content:center; border-radius:10px; border-color:rgba(248,113,113,0.3); color:#f87171; background:rgba(248,113,113,0.05);" onclick="window.deleteMed('${m.id}')" ontouchstart="window.deleteMed('${m.id}')" title="${t('delete')}">
+            ${deleteIcon}
+          </button>
         </div>
       </div>
-      ${m.einsatzgebiet ? `<div style="font-size:10px; opacity:0.6; margin-top:8px; font-style:italic;">📋 ${m.einsatzgebiet}</div>` : ''}
+      ${m.einsatzgebiet ? `<div style="font-size:10px; opacity:0.5; margin-top:10px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.05); font-style:italic; display:flex; align-items:center; gap:4px;">📋 ${m.einsatzgebiet}</div>` : ''}
     </div>
   `).join('');
 
@@ -38,7 +45,7 @@ export function renderMedications() {
         <label>${t('nameLbl')}</label>
         <div style="display:flex; gap:8px;">
           <input type="text" id="med-name" value="${editingMed ? editingMed.name : ''}" placeholder="E.g., Aspirin" style="flex:1;">
-          <button class="btn btn-secondary" style="width:auto; padding:0 12px; font-size:12px;" onclick="window.searchWithGrok()">✨ KI</button>
+          <button class="btn btn-secondary" style="width:auto; padding:0 12px; font-size:12px; background:var(--accent-color); color:#000; border:none;" onclick="window.searchWithGrok()">✨ KI</button>
         </div>
       </div>
 
@@ -79,14 +86,18 @@ export function renderMedications() {
         <input type="text" id="med-einsatzgebiet" value="${editingMed?.einsatzgebiet || ''}" placeholder="Blutdruck, Schmerz...">
       </div>
 
-      <button class="btn" onclick="window.saveMed()" ontouchstart="window.saveMed()">${t('saveMedication')}</button>
-      <button class="btn btn-secondary" style="margin-top:12px;" onclick="window.closeMedPanel()" ontouchstart="window.closeMedPanel()">${t('cancel')}</button>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:20px;">
+        <button class="btn" onclick="window.saveMed()" ontouchstart="window.saveMed()">${t('saveMedication')}</button>
+        <button class="btn btn-secondary" onclick="window.closeMedPanel()" ontouchstart="window.closeMedPanel()">${t('cancel')}</button>
+      </div>
     </div>
 
     <div class="glass-panel">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <div class="text-h2" style="margin: 0;">${t('yourMedications')}</div>
-        <button class="btn" style="width: auto; padding: 8px 16px; font-size: 14px;" onclick="window.openAddMedPanel()" ontouchstart="window.openAddMedPanel()">${t('addBtn')}</button>
+        <button class="btn" style="width: auto; padding: 10px 18px; font-size: 14px; background:var(--accent-color); color:#000; border:none; box-shadow: 0 4px 15px rgba(74,222,128,0.3);" onclick="window.openAddMedPanel()" ontouchstart="window.openAddMedPanel()">
+          + ${t('medication')}
+        </button>
       </div>
       <div class="card-list">
         ${listHtml || `<div class="empty-state">${t('noMedsFound')}</div>`}

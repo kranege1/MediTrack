@@ -5,6 +5,8 @@ export const i18n = {
   en: {
     settings: 'Settings', home: 'Home', meds: 'Medications', logAction: 'Log Intake', plans: 'Plans',
     dueToday: 'Due Today', noPlans: 'No plans found. Create one!',
+    noUpcoming: "No upcoming plans",
+    recentActivity: "Recent Activity",
     loggedActivity: 'Today\'s Activity', noLogsToday: 'No intake logged today.',
     recentMetrics: 'Recent Metrics', noMetrics: 'No metrics recorded yet.',
     scheduled: 'Scheduled', completed: '✅ Completed', skipped: '❌ Skipped', skip: 'Skip', dueTodayBadge: '• Due Today', taken: 'taken', weight: 'Weight',
@@ -153,6 +155,8 @@ export const i18n = {
     settings: 'Einstellungen',
     home: 'Start', meds: 'Medikamente', logAction: 'Einnahme', plans: 'Pläne',
     dueToday: 'Heute fällig', noPlans: 'Keine Pläne vorhanden. Erstelle einen Plan!',
+    noUpcoming: "Keine anstehenden Termine",
+    recentActivity: "Kürzliche Aktivitäten",
     loggedActivity: 'Heutige Aktivität', noLogsToday: 'Noch keine Einnahme heute.',
     recentMetrics: 'Letzte Messwerte', noMetrics: 'Noch keine Messwerte eingetragen.',
     scheduled: 'Geplant', completed: '✅ Eingenommen', skipped: '❌ Übersprungen', skip: 'Überspringen', dueTodayBadge: '• Heute fällig', taken: 'eingenommen', weight: 'Gewicht',
