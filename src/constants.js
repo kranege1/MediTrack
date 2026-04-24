@@ -1,4 +1,4 @@
-export const APP_VERSION = '5.2.5';
+export const APP_VERSION = '5.3.0';
 export const GROK_BASE_URL = "https://api.x.ai/v1/chat/completions";
 
 export const i18n = {
@@ -145,6 +145,14 @@ export const i18n = {
     newVersion: 'New Version',
     updateNow: 'Update Now',
     upToDate: 'App is up to date',
+    diagTitle: 'System Diagnosis',
+    diagKeyOk: 'API Key is functional',
+    diagModelsFound: '{n} models found',
+    diagSearchOk: 'Web Search is working',
+    diagSearchErr: 'Web Search failed/not supported',
+    diagModelRec: 'Recommendation: {m}',
+    diagSpeed: 'Latency: {n}ms',
+    diagTesting: 'Running diagnostics...',
     extendedInfo: 'Extended Info',
     hersteller: 'Manufacturer',
     einsatzgebiet: 'Area of Use',
@@ -300,7 +308,15 @@ export const i18n = {
     currentVersion: 'Aktuelle Version',
     newVersion: 'Neue Version',
     updateNow: 'Jetzt aktualisieren',
-    upToDate: 'App ist auf dem neuesten Stand'
+    upToDate: 'App ist auf dem neuesten Stand',
+    diagTitle: 'System-Diagnose',
+    diagKeyOk: 'API-Key ist funktionsfähig',
+    diagModelsFound: '{n} Modelle gefunden',
+    diagSearchOk: 'Websuche funktioniert',
+    diagSearchErr: 'Websuche fehlgeschlagen/nicht unterstützt',
+    diagModelRec: 'Empfehlung: {m}',
+    diagSpeed: 'Latenz: {n}ms',
+    diagTesting: 'Diagnose läuft...',
   }
 };
 

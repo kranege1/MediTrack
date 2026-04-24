@@ -1,10 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import { useTranslation } from '../hooks/useTranslation';
-import { APP_VERSION } from '../constants';
+import { APP_VERSION, GROK_BASE_URL } from '../constants';
 import { API } from '../db';
 import { cn } from '../utils/ui';
-import { RefreshCw, Download, Upload, Trash2, ShieldAlert, Check, MapPin, AlertCircle } from 'lucide-react';
+import { RefreshCw, Download, Upload, Trash2, ShieldAlert, Check, MapPin, AlertCircle, Activity, Search, Server } from 'lucide-react';
+
+interface DiagResult {
+  keyOk: boolean;
+  modelsCount: number;
+  searchOk: boolean;
+  latency: number;
+  recomModel: string;
+}
 
 const SettingsView: React.FC = () => {
   const { grokKey, defaultRegion, grokModel, availableModels, useLiveSearch, setGrokKey, setDefaultRegion, setGrokModel, setUseLiveSearch, setAvailableModels } = useStore();
@@ -18,6 +26,8 @@ const SettingsView: React.FC = () => {
   const [isLocating, setIsLocating] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isSaved, setIsSaved] = useState(false);
+  const [diag, setDiag] = useState<DiagResult | null>(null);
+  const [isDiaging, setIsDiaging] = useState(false);
 
   // Sync local state if store changes (e.g. after import)
   useEffect(() => {
@@ -26,6 +36,51 @@ const SettingsView: React.FC = () => {
     setLocalModel(grokModel);
     setLocalLive(useLiveSearch);
   }, [grokKey, defaultRegion, grokModel, useLiveSearch]);
+
+  const runDiagnostics = async (key: string, model: string, live: boolean) => {
+    setIsDiaging(true);
+    const start = Date.now();
+    const result: DiagResult = { keyOk: false, modelsCount: 0, searchOk: false, latency: 0, recomModel: '' };
+    
+    try {
+      // 1. Key & Models test
+      const resModels = await fetch('https://api.x.ai/v1/models', {
+        headers: { "Authorization": `Bearer ${key}` }
+      });
+      if (resModels.ok) {
+        result.keyOk = true;
+        const data = await resModels.json();
+        result.modelsCount = data.models?.length || 0;
+        const ids = data.models.map((m: any) => m.id);
+        setAvailableModels(ids);
+        result.recomModel = ids.includes('grok-2-1212') ? 'grok-2-1212' : (ids.includes('grok-beta') ? 'grok-beta' : ids[0]);
+      }
+
+      // 2. Web Search Test (if enabled)
+      if (live && result.keyOk) {
+        const resSearch = await fetch(GROK_BASE_URL, {
+          method: 'POST',
+          headers: { 
+            "Authorization": `Bearer ${key}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            model: model,
+            messages: [{ role: 'user', content: 'What time is it now? Answer only with "OK".' }],
+            web_search: true // Hypothetical parameter for testing
+          })
+        });
+        result.searchOk = resSearch.ok;
+      }
+      
+      result.latency = Date.now() - start;
+      setDiag(result);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsDiaging(false);
+    }
+  };
 
   const handleSave = () => {
     const trimmedKey = (localKey || '').trim();
@@ -40,6 +95,7 @@ const SettingsView: React.FC = () => {
     setLocalRegion(trimmedRegion);
     
     setIsSaved(true);
+    runDiagnostics(trimmedKey, localModel, localLive);
     setTimeout(() => setIsSaved(false), 2000);
   };
 
@@ -222,6 +278,44 @@ const SettingsView: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {(isDiaging || diag) && (
+        <div className="glass-panel border-accent/20 bg-accent/5 animate-in slide-in-from-top duration-500">
+          <div className="flex items-center gap-2 mb-4">
+            <Activity size={18} className="text-accent" />
+            <h3 className="text-sm font-bold">{t('diagTitle')}</h3>
+            {isDiaging && <RefreshCw size={14} className="animate-spin opacity-40 ml-auto" />}
+          </div>
+          
+          <div className="space-y-3">
+            <div className="flex items-center gap-3 text-xs">
+              <Server size={14} className={diag?.keyOk ? "text-accent" : "text-white/20"} />
+              <span className={diag?.keyOk ? "" : "opacity-40"}>{t('diagKeyOk')}</span>
+              {diag?.keyOk && <Check size={12} className="text-accent ml-auto" />}
+            </div>
+            
+            <div className="flex items-center gap-3 text-xs">
+              <Activity size={14} className="text-accent" />
+              <span>{t('diagModelsFound').replace('{n}', String(diag?.modelsCount || 0))}</span>
+            </div>
+
+            {localLive && (
+              <div className="flex items-center gap-3 text-xs">
+                <Search size={14} className={diag?.searchOk ? "text-accent" : "text-red-400"} />
+                <span className={diag?.searchOk ? "" : "text-red-400"}>{diag?.searchOk ? t('diagSearchOk') : t('diagSearchErr')}</span>
+                {diag?.searchOk && <Check size={12} className="text-accent ml-auto" />}
+              </div>
+            )}
+
+            {diag && (
+              <div className="pt-2 border-t border-white/5 mt-2 space-y-1">
+                <div className="text-[10px] opacity-40">{t('diagSpeed').replace('{n}', String(diag.latency))}</div>
+                <div className="text-[10px] text-accent/60 italic">{t('diagModelRec').replace('{m}', diag.recomModel)}</div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       <div className="glass-panel space-y-6">
         <h2 className="text-lg font-bold">{t('dataManagement')}</h2>
