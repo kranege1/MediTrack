@@ -157,7 +157,7 @@ const MedicationList: React.FC = () => {
                 </div>
               )}
               {localResults.length > 0 && (
-                <div className="absolute top-full left-0 right-0 z-50 bg-bg-dark border border-white/10 rounded-xl mt-1 overflow-hidden shadow-2xl">
+                <div className="absolute top-full left-0 right-0 z-50 bg-bg-dark border border-white/10 rounded-xl mt-1 overflow-y-auto max-h-60 shadow-2xl">
                   {localResults.map(res => (
                     <button 
                       key={res.name}
@@ -234,7 +234,13 @@ const MedicationList: React.FC = () => {
             </div>
 
             <div className="flex gap-4 pt-2">
-              <button onClick={handleSave} className="btn flex-1">{t('saveMedication')}</button>
+              <button 
+                onClick={handleSave} 
+                disabled={!formData.name || !formData.dose}
+                className="btn flex-1 disabled:opacity-30 disabled:grayscale transition-all"
+              >
+                {t('saveMedication')}
+              </button>
               <button onClick={() => { setShowAddForm(false); setEditingMed(null); }} className="btn btn-secondary flex-1">{t('cancel')}</button>
             </div>
           </div>

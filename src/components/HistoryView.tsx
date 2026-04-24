@@ -188,7 +188,11 @@ const HistoryView: React.FC = () => {
                 <TrendingUp size={16} className="text-accent" />
                 <h2 className="text-sm font-bold uppercase tracking-widest opacity-50">{t('weight')}</h2>
               </div>
-              <div id="weight-chart" className="w-full" />
+              <div id="weight-chart" className="w-full">
+                {metrics.filter(m => m.type === 'bodyWeight').length === 0 && (
+                  <div className="h-[180px] flex items-center justify-center text-[10px] opacity-20 italic">No weight data logged</div>
+                )}
+              </div>
             </div>
 
             <div className="glass-panel">
@@ -196,7 +200,11 @@ const HistoryView: React.FC = () => {
                 <Heart size={16} className="text-red-400" />
                 <h2 className="text-sm font-bold uppercase tracking-widest opacity-50">Pulse (BPM)</h2>
               </div>
-              <div id="pulse-chart" className="w-full" />
+              <div id="pulse-chart" className="w-full">
+                {metrics.filter(m => m.type === 'heartRate').length === 0 && (
+                  <div className="h-[180px] flex items-center justify-center text-[10px] opacity-20 italic">No pulse data logged</div>
+                )}
+              </div>
             </div>
           </div>
         </div>

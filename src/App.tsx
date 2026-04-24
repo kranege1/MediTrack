@@ -11,6 +11,7 @@ import SettingsView from './components/SettingsView';
 import HistoryView from './components/HistoryView';
 import ManualLog from './components/ManualLog';
 import { APP_VERSION } from './constants';
+import ErrorBoundary from './components/ErrorBoundary';
 
 const App: React.FC = () => {
   const { currentView, setNavigate, setLang } = useStore();
@@ -70,18 +71,26 @@ const App: React.FC = () => {
 
       {/* Main Content */}
       <main className="flex-1 p-4 max-w-4xl mx-auto w-full">
-        <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-          {currentView === 'dashboard' && <Dashboard />}
-          {currentView === 'medications' && <MedicationList />}
-          {currentView === 'plans' && <PlanManager />}
-          {currentView === 'history' && <HistoryView />}
-          {currentView === 'settings' && <SettingsView />}
-          {currentView === 'log' && <ManualLog />}
-        </div>
+        <ErrorBoundary>
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+            {currentView === 'dashboard' && <Dashboard />}
+            {currentView === 'medications' && <MedicationList />}
+            {currentView === 'plans' && <PlanManager />}
+            {currentView === 'history' && <HistoryView />}
+            {currentView === 'settings' && <SettingsView />}
+            {currentView === 'log' && <ManualLog />}
+          </div>
+        </ErrorBoundary>
       </main>
 
       {/* Navigation - Bottom Bar for Mobile, Side Bar for Desktop */}
-      <nav className="fixed bottom-0 left-0 right-0 h-20 bg-black/40 backdrop-blur-2xl border-t border-white/5 flex items-center justify-around px-4 z-50 md:top-0 md:left-0 md:h-full md:w-20 md:flex-col md:justify-center md:gap-12 md:border-r md:border-t-0">
+      <nav 
+        className="fixed bottom-0 left-0 right-0 bg-black/40 backdrop-blur-2xl border-t border-white/5 flex items-center justify-around px-4 z-50 md:top-0 md:left-0 md:h-full md:w-20 md:flex-col md:justify-center md:gap-12 md:border-r md:border-t-0"
+        style={{ 
+          height: 'calc(env(safe-area-inset-bottom) + 5rem)',
+          paddingBottom: 'env(safe-area-inset-bottom)'
+        }}
+      >
         <NavItem view="dashboard" icon={LayoutDashboard} label={t('home')} />
         <NavItem view="medications" icon={Pill} label={t('meds')} />
         <NavItem view="plans" icon={Calendar} label={t('plans')} />
