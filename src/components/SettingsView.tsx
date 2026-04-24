@@ -50,8 +50,9 @@ const SettingsView: React.FC = () => {
       if (resModels.ok) {
         result.keyOk = true;
         const data = await resModels.json();
-        result.modelsCount = data.models?.length || 0;
-        const ids = data.models.map((m: any) => m.id);
+        const modelsArray = data.data || data.models || [];
+        result.modelsCount = modelsArray.length;
+        const ids = modelsArray.map((m: any) => m.id);
         setAvailableModels(ids);
         result.recomModel = ids.includes('grok-2-1212') ? 'grok-2-1212' : (ids.includes('grok-beta') ? 'grok-beta' : (ids[0] || 'grok-2-1212'));
       }
@@ -112,7 +113,8 @@ const SettingsView: React.FC = () => {
       if (res.ok) {
         setKeyStatus('valid');
         const data = await res.json();
-        const models = data.models.map((m: any) => m.id);
+        const modelsArray = data.data || data.models || [];
+        const models = modelsArray.map((m: any) => m.id);
         setAvailableModels(models);
         if (!localModel || !models.includes(localModel)) setLocalModel(models[0]);
       } else {
