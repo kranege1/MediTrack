@@ -53,31 +53,34 @@ const SettingsView: React.FC = () => {
         result.modelsCount = data.models?.length || 0;
         const ids = data.models.map((m: any) => m.id);
         setAvailableModels(ids);
-        result.recomModel = ids.includes('grok-2-1212') ? 'grok-2-1212' : (ids.includes('grok-beta') ? 'grok-beta' : ids[0]);
+        result.recomModel = ids.includes('grok-2-1212') ? 'grok-2-1212' : (ids.includes('grok-beta') ? 'grok-beta' : (ids[0] || 'grok-2-1212'));
       }
 
       // 2. Web Search Test (if enabled)
       if (live && result.keyOk) {
-        const resSearch = await fetch(GROK_BASE_URL, {
-          method: 'POST',
-          headers: { 
-            "Authorization": `Bearer ${key}`,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            model: model,
-            messages: [{ role: 'user', content: 'What time is it now? Answer only with "OK".' }],
-            web_search: true // Hypothetical parameter for testing
-          })
-        });
-        result.searchOk = resSearch.ok;
+        try {
+          const resSearch = await fetch(GROK_BASE_URL, {
+            method: 'POST',
+            headers: { 
+              "Authorization": `Bearer ${key}`,
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              model: model,
+              messages: [{ role: 'user', content: 'OK' }],
+              web_search: true
+            })
+          });
+          result.searchOk = resSearch.ok;
+        } catch (se) {
+          result.searchOk = false;
+        }
       }
-      
-      result.latency = Date.now() - start;
-      setDiag(result);
     } catch (e) {
       console.error(e);
     } finally {
+      result.latency = Date.now() - start;
+      setDiag(result);
       setIsDiaging(false);
     }
   };
@@ -324,7 +327,7 @@ const SettingsView: React.FC = () => {
       )}
 
       {isDiaging && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
           <div className="flex flex-col items-center gap-4">
             <RefreshCw size={40} className="animate-spin text-accent" />
             <div className="text-sm font-bold tracking-widest uppercase opacity-60">{t('diagTesting')}</div>
