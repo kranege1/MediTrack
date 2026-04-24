@@ -3,7 +3,7 @@ import { useStore } from '../store/useStore';
 import { useTranslation } from '../hooks/useTranslation';
 import { APP_VERSION } from '../constants';
 import { API } from '../db';
-import { RefreshCw, Download, Upload, Trash2, ShieldAlert, Check, MapPin, XCircle, Loader2 } from 'lucide-react';
+import { RefreshCw, Download, Upload, Trash2, ShieldAlert, Check, MapPin, AlertCircle, ToggleLeft, ToggleRight } from 'lucide-react';
 
 const SettingsView: React.FC = () => {
   const { grokKey, defaultRegion, grokModel, availableModels, useLiveSearch, setGrokKey, setDefaultRegion, setGrokModel, setUseLiveSearch, setAvailableModels } = useStore();
@@ -152,9 +152,9 @@ const SettingsView: React.FC = () => {
                 placeholder="xai-..."
               />
               <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                {keyStatus === 'checking' && <Loader2 size={18} className="animate-spin text-white/40" />}
+                {keyStatus === 'checking' && <RefreshCw size={18} className="animate-spin text-white/40" />}
                 {keyStatus === 'valid' && <Check size={18} className="text-accent" />}
-                {keyStatus === 'invalid' && <XCircle size={18} className="text-red-400" />}
+                {keyStatus === 'invalid' && <AlertCircle size={18} className="text-red-400" />}
               </div>
             </div>
           </div>
