@@ -298,9 +298,15 @@ const SettingsView: React.FC = () => {
               </div>
               
               <div className="flex items-center gap-3 text-sm">
-                <Activity size={16} className="text-accent" />
-                <span>{t('diagModelsFound').replace('{n}', String(diag?.modelsCount || 0))}</span>
+                <Activity size={16} className={diag?.modelsCount === 0 ? "text-red-400" : "text-accent"} />
+                <span className={diag?.modelsCount === 0 ? "text-red-400 font-bold" : ""}>{t('diagModelsFound').replace('{n}', String(diag?.modelsCount || 0))}</span>
               </div>
+              
+              {diag?.keyOk && diag?.modelsCount === 0 && (
+                <div className="p-3 bg-red-400/10 border border-red-400/20 rounded-xl text-[10px] text-red-300 animate-pulse">
+                  {t('diagNoModelsTip')}
+                </div>
+              )}
 
               {localLive && (
                 <div className="flex items-center gap-3 text-sm">
