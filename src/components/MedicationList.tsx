@@ -285,12 +285,18 @@ const MedicationList: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <button onClick={() => handleEdit(med)} className="w-9 h-9 flex items-center justify-center bg-white/5 border border-white/10 rounded-lg text-white/40 hover:text-white">
-                      <Edit2 size={14} />
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button 
+                      onClick={() => handleEdit(med)} 
+                      className="w-10 h-10 flex items-center justify-center bg-white/5 border border-white/10 rounded-xl text-white/40 hover:text-white hover:bg-white/10 transition-all"
+                    >
+                      <Edit2 size={16} />
                     </button>
-                    <button onClick={() => handleDelete(med.id)} className="w-9 h-9 flex items-center justify-center bg-red-500/5 border border-red-500/20 rounded-lg text-red-400/40 hover:text-red-400">
-                      <Trash2 size={14} />
+                    <button 
+                      onClick={() => handleDelete(med.id)} 
+                      className="w-10 h-10 flex items-center justify-center bg-red-500/5 border border-red-500/10 rounded-xl text-red-400/40 hover:text-red-400 hover:bg-red-500/10 transition-all"
+                    >
+                      <Trash2 size={16} />
                     </button>
                   </div>
                 </div>
