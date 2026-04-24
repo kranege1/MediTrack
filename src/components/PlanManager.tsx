@@ -4,12 +4,15 @@ import { useTranslation } from '../hooks/useTranslation';
 import { Pill, UserCircle, Trash2, Plus, Search, MapPin, Clock, Calendar, Edit2 } from 'lucide-react';
 import { API } from '../db';
 import { cn } from '../utils/ui';
+import { useAI } from '../hooks/useAI';
 
 const PlanManager: React.FC = () => {
-  const { plans, medications, planType, setData, defaultRegion, localDoctors } = useStore();
+  const { plans, medications, planType, setData, defaultRegion, localDoctors, useLiveSearch } = useStore();
   const { t, lang } = useTranslation();
+  const { searchDoctor } = useAI();
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingPlan, setEditingPlan] = useState<any>(null);
+  const [isSearching, setIsSearching] = useState(false);
   
   // Form States
   const [medPlan, setMedPlan] = useState({
@@ -25,6 +28,7 @@ const PlanManager: React.FC = () => {
 
   const [apptPlan, setApptPlan] = useState({
     doctorName: '',
+    street: '',
     location: defaultRegion || '',
     specialty: '',
     phone: '',
@@ -76,12 +80,26 @@ const PlanManager: React.FC = () => {
     setDoctorResults(results);
   };
 
+  const handleAISearch = async () => {
+    if (!apptPlan.doctorName && !apptPlan.specialty) return alert(t('nameAndDose'));
+    setIsSearching(true);
+    try {
+      const results = await searchDoctor(apptPlan.doctorName, apptPlan.specialty, apptPlan.location, useLiveSearch);
+      setDoctorResults(results);
+    } catch (e) {
+      alert(t('searchError') || 'Search failed');
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
   const handleEdit = (plan: any) => {
     setEditingPlan(plan);
     if (plan.type === 'appointment') {
       setData('planType', 'appointment');
       setApptPlan({
         doctorName: plan.doctorName,
+        street: plan.street || '',
         location: plan.location,
         specialty: plan.specialty,
         phone: plan.phone || '',
@@ -109,7 +127,8 @@ const PlanManager: React.FC = () => {
       ...apptPlan,
       doctorName: doc.name,
       specialty: doc.specialty,
-      location: doc.address || doc.ort,
+      street: doc.address || "",
+      location: doc.location || doc.ort || apptPlan.location,
       phone: doc.phone || doc.telefon || ""
     });
     setDoctorResults([]);
@@ -249,7 +268,13 @@ const PlanManager: React.FC = () => {
                     onChange={(e) => handleDoctorSearch(e.target.value)}
                     placeholder="Dr. Smith"
                   />
-                  <button className="bg-accent text-black p-3 rounded-xl"><Search size={16} /></button>
+                  <button 
+                    onClick={handleAISearch}
+                    disabled={isSearching}
+                    className="bg-accent text-black p-3 rounded-xl disabled:opacity-50"
+                  >
+                    {isSearching ? <RefreshCw size={16} className="animate-spin" /> : <Search size={16} />}
+                  </button>
                 </div>
                 {doctorResults.length > 0 && (
                   <div className="absolute top-full left-0 right-0 z-50 bg-bg-dark border border-white/10 rounded-xl mt-1 overflow-hidden shadow-2xl">
@@ -288,17 +313,29 @@ const PlanManager: React.FC = () => {
                   />
                 </div>
               </div>
-              <div>
-                <label className="text-xs font-bold opacity-50 mb-1 block">{t('location')}</label>
-                <div className="flex gap-2">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-bold opacity-50 mb-1 block">{t('streetLbl')}</label>
                   <input 
                     type="text" 
-                    className="bg-white/5 border border-white/10 rounded-xl p-3 w-full"
-                    value={apptPlan.location}
-                    onChange={(e) => setApptPlan({ ...apptPlan, location: e.target.value })}
-                    placeholder="City"
+                    className="bg-white/5 border border-white/10 rounded-xl p-3 w-full text-xs"
+                    value={apptPlan.street}
+                    onChange={(e) => setApptPlan({ ...apptPlan, street: e.target.value })}
+                    placeholder="Main St. 1"
                   />
-                  <button className="bg-white/5 border border-white/10 p-3 rounded-xl"><MapPin size={16} /></button>
+                </div>
+                <div>
+                  <label className="text-xs font-bold opacity-50 mb-1 block">{t('location')}</label>
+                  <div className="flex gap-2">
+                    <input 
+                      type="text" 
+                      className="bg-white/5 border border-white/10 rounded-xl p-3 w-full text-xs"
+                      value={apptPlan.location}
+                      onChange={(e) => setApptPlan({ ...apptPlan, location: e.target.value })}
+                      placeholder="City"
+                    />
+                    <button className="bg-white/5 border border-white/10 p-3 rounded-xl"><MapPin size={16} /></button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -342,7 +379,7 @@ const PlanManager: React.FC = () => {
                       <div className="text-[10px] opacity-50 flex items-center gap-2">
                         {isAppt ? (
                           <>
-                            <MapPin size={10} /> {plan.location}
+                            <MapPin size={10} /> {plan.street ? `${plan.street}, ` : ''}{plan.location}
                             <Calendar size={10} className="ml-2" /> {new Date(plan.startDate).toLocaleDateString(lang, { day: '2-digit', month: '2-digit' })}
                             <Clock size={10} className="ml-2" /> {plan.startTime}
                           </>
