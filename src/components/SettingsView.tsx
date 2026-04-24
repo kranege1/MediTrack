@@ -4,7 +4,7 @@ import { useTranslation } from '../hooks/useTranslation';
 import { APP_VERSION, GROK_BASE_URL } from '../constants';
 import { API } from '../db';
 import { cn } from '../utils/ui';
-import { RefreshCw, Download, Upload, Trash2, ShieldAlert, Check, MapPin, AlertCircle, Activity, Search, Server } from 'lucide-react';
+import { RefreshCw, Download, Upload, Trash2, ShieldAlert, Check, MapPin, AlertCircle, Activity, Search, Server, X } from 'lucide-react';
 
 interface DiagResult {
   keyOk: boolean;
@@ -279,40 +279,55 @@ const SettingsView: React.FC = () => {
         </div>
       </div>
 
-      {(isDiaging || diag) && (
-        <div className="glass-panel border-accent/20 bg-accent/5 animate-in slide-in-from-top duration-500">
-          <div className="flex items-center gap-2 mb-4">
-            <Activity size={18} className="text-accent" />
-            <h3 className="text-sm font-bold">{t('diagTitle')}</h3>
-            {isDiaging && <RefreshCw size={14} className="animate-spin opacity-40 ml-auto" />}
-          </div>
-          
-          <div className="space-y-3">
-            <div className="flex items-center gap-3 text-xs">
-              <Server size={14} className={diag?.keyOk ? "text-accent" : "text-white/20"} />
-              <span className={diag?.keyOk ? "" : "opacity-40"}>{t('diagKeyOk')}</span>
-              {diag?.keyOk && <Check size={12} className="text-accent ml-auto" />}
+      {diag && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="glass-panel w-full max-w-sm border-accent/20 bg-black/80 shadow-2xl animate-in zoom-in-95 duration-300">
+            <div className="flex items-center gap-2 mb-6">
+              <Activity size={20} className="text-accent" />
+              <h3 className="text-lg font-bold">{t('diagTitle')}</h3>
             </div>
             
-            <div className="flex items-center gap-3 text-xs">
-              <Activity size={14} className="text-accent" />
-              <span>{t('diagModelsFound').replace('{n}', String(diag?.modelsCount || 0))}</span>
+            <div className="space-y-4 mb-8">
+              <div className="flex items-center gap-3 text-sm">
+                <Server size={16} className={diag?.keyOk ? "text-accent" : "text-red-400"} />
+                <span className={diag?.keyOk ? "" : "text-red-400"}>{t('diagKeyOk')}</span>
+                {diag?.keyOk && <Check size={14} className="text-accent ml-auto" />}
+              </div>
+              
+              <div className="flex items-center gap-3 text-sm">
+                <Activity size={16} className="text-accent" />
+                <span>{t('diagModelsFound').replace('{n}', String(diag?.modelsCount || 0))}</span>
+              </div>
+
+              {localLive && (
+                <div className="flex items-center gap-3 text-sm">
+                  <Search size={16} className={diag?.searchOk ? "text-accent" : "text-red-400"} />
+                  <span className={diag?.searchOk ? "" : "text-red-400"}>{diag?.searchOk ? t('diagSearchOk') : t('diagSearchErr')}</span>
+                  {diag?.searchOk && <Check size={14} className="text-accent ml-auto" />}
+                </div>
+              )}
+
+              <div className="pt-4 border-t border-white/5 mt-4 space-y-1">
+                <div className="text-xs opacity-40">{t('diagSpeed').replace('{n}', String(diag.latency))}</div>
+                <div className="text-xs text-accent/60 italic">{t('diagModelRec').replace('{m}', diag.recomModel)}</div>
+              </div>
             </div>
 
-            {localLive && (
-              <div className="flex items-center gap-3 text-xs">
-                <Search size={14} className={diag?.searchOk ? "text-accent" : "text-red-400"} />
-                <span className={diag?.searchOk ? "" : "text-red-400"}>{diag?.searchOk ? t('diagSearchOk') : t('diagSearchErr')}</span>
-                {diag?.searchOk && <Check size={12} className="text-accent ml-auto" />}
-              </div>
-            )}
+            <button 
+              onClick={() => setDiag(null)}
+              className="btn w-full py-4 text-base"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
 
-            {diag && (
-              <div className="pt-2 border-t border-white/5 mt-2 space-y-1">
-                <div className="text-[10px] opacity-40">{t('diagSpeed').replace('{n}', String(diag.latency))}</div>
-                <div className="text-[10px] text-accent/60 italic">{t('diagModelRec').replace('{m}', diag.recomModel)}</div>
-              </div>
-            )}
+      {isDiaging && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs">
+          <div className="flex flex-col items-center gap-4">
+            <RefreshCw size={40} className="animate-spin text-accent" />
+            <div className="text-sm font-bold tracking-widest uppercase opacity-60">{t('diagTesting')}</div>
           </div>
         </div>
       )}
