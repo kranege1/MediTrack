@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useStore } from '../store/useStore';
 import { useTranslation } from '../hooks/useTranslation';
-import { Pill, UserCircle, Trash2, Plus, Search, MapPin, Clock, Calendar, Edit2 } from 'lucide-react';
+import { Pill, UserCircle, Trash2, Plus, Search, MapPin, Clock, Calendar, Edit2, RefreshCw } from 'lucide-react';
 import { API } from '../db';
 import { cn } from '../utils/ui';
 import { useAI } from '../hooks/useAI';
