@@ -1,4 +1,4 @@
-export const APP_VERSION = '5.3.7';
+export const APP_VERSION = '5.3.8';
 export const GROK_BASE_URL = "https://api.x.ai/v1/chat/completions";
 
 export const i18n = {
@@ -120,16 +120,12 @@ export const i18n = {
     doctorSearch: '✨ Find Doctor Online',
     regionPlaceholder: 'City or Postal Code',
     specialty: 'Specialty (Urology, GP, ...)',
-    anySpecialty: 'Any Specialty',
+    anySpecialty: '-- Any Specialty --',
     doctorSelect: 'Select Doctor',
     defaultRegionLabel: 'Default City / Region for AI Search',
     locating: 'Locating...',
     locErr: 'Location failed',
-    specialties: [
-      'General Practitioner', 'Internist', 'Cardiologist', 'Dentist', 'Urologist',
-      'Gynecologist', 'Orthopedist', 'Dermatologist', 'Ophthalmologist', 'ENT',
-      'Pediatrician', 'Neurologist', 'Psychiatrist'
-    ],
+    specialties: ['General Practitioner', 'Dentist', 'Cardiologist', 'Dermatologist', 'Orthopedist', 'Pediatrician', 'Neurologist', 'Psychiatrist', 'Ophthalmologist', 'ENT Specialist', 'Gynecologist', 'Urologist', 'Radiologist'],
     searchGoogle: 'Search on Google',
     aiAccuracyWarning: '⚠️ AI data can be hallucinated or outdated. Always verify before visiting!',
     liveSearchLabel: 'Enable Live AI Web Search',
@@ -160,7 +156,8 @@ export const i18n = {
     hersteller: 'Manufacturer',
     einsatzgebiet: 'Area of Use',
     quickSelectArea: 'Search by Class:',
-    chooseArea: '-- Choose Class --'
+    chooseArea: '-- Choose Class --',
+    searchError: 'Search failed. Please check your key or region.'
   },
   de: {
     settings: 'Einstellungen',
@@ -281,7 +278,7 @@ export const i18n = {
     doctorSearch: '✨ Arzt im Internet suchen',
     regionPlaceholder: 'Ort oder Postleitzahl',
     specialty: 'Fachrichtung',
-    anySpecialty: 'Keine Einschränkung (Alle)',
+    anySpecialty: '-- Fachrichtung wählen --',
     doctorSelect: 'Arzt wählen',
     magicImportFallback: 'Manuell einfügen (Text/Link)',
     defaultRegionLabel: 'Standard Stadt / Region für KI-Suche',
@@ -292,11 +289,7 @@ export const i18n = {
     einsatzgebiet: 'Einsatzgebiet',
     quickSelectArea: 'Nach Klasse suchen:',
     chooseArea: '-- Klasse wählen --',
-    specialties: [
-      'Allgemeinmediziner', 'Internist', 'Kardiologe', 'Zahnarzt', 'Urologe',
-      'Gynäkologe', 'Orthopäde', 'Hautarzt', 'Augenarzt', 'HNO-Arzt',
-      'Kinderarzt', 'Neurologe', 'Psychiater'
-    ],
+    specialties: ['Hausarzt', 'Zahnarzt', 'Kardiologe', 'Dermatologe', 'Orthopäde', 'Kinderarzt', 'Neurologe', 'Psychiater', 'Augenarzt', 'HNO-Arzt', 'Frauenarzt', 'Urologe', 'Radiologe'],
     searchGoogle: 'Auf Google suchen',
     aiAccuracyWarning: '⚠️ KI-Daten können erfunden oder veraltet sein. Bitte vor dem Besuch immer prüfen!',
     liveSearchLabel: 'Live KI-Websuche aktivieren',

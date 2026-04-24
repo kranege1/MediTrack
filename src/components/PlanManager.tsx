@@ -271,9 +271,11 @@ const PlanManager: React.FC = () => {
                   <button 
                     onClick={handleAISearch}
                     disabled={isSearching}
-                    className="bg-accent text-black p-3 rounded-xl disabled:opacity-50"
+                    title={t('doctorSearch')}
+                    className="bg-accent text-black p-3 rounded-xl disabled:opacity-50 flex items-center gap-2 hover:brightness-110 transition-all"
                   >
                     {isSearching ? <RefreshCw size={16} className="animate-spin" /> : <Search size={16} />}
+                    <span className="text-[10px] font-bold uppercase hidden sm:inline">{t('search')}</span>
                   </button>
                 </div>
                 {doctorResults.length > 0 && (
