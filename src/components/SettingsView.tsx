@@ -4,7 +4,7 @@ import { useTranslation } from '../hooks/useTranslation';
 import { APP_VERSION, GROK_BASE_URL } from '../constants';
 import { API } from '../db';
 import { cn } from '../utils/ui';
-import { RefreshCw, Download, Upload, Trash2, ShieldAlert, Check, MapPin, AlertCircle, Activity, Search, Server, X } from 'lucide-react';
+import { RefreshCw, Download, Upload, Trash2, ShieldAlert, Check, MapPin, AlertCircle, Activity, Search, Server, X, ExternalLink } from 'lucide-react';
 
 interface DiagResult {
   keyOk: boolean;
@@ -322,12 +322,22 @@ const SettingsView: React.FC = () => {
               </div>
             </div>
 
-            <button 
-              onClick={() => setDiag(null)}
-              className="btn w-full py-4 text-base"
-            >
-              OK
-            </button>
+            <div className="flex flex-col gap-2">
+              <button 
+                onClick={() => setDiag(null)}
+                className="btn w-full py-4 text-base"
+              >
+                OK
+              </button>
+              <a 
+                href="https://console.x.ai" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="btn btn-secondary w-full py-3 text-xs flex items-center justify-center gap-2 border-white/5 bg-white/5"
+              >
+                <ExternalLink size={14} /> {t('diagConsoleBtn')}
+              </a>
+            </div>
           </div>
         </div>
       )}

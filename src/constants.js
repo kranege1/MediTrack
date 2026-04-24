@@ -1,4 +1,4 @@
-export const APP_VERSION = '5.3.3';
+export const APP_VERSION = '5.3.4';
 export const GROK_BASE_URL = "https://api.x.ai/v1/chat/completions";
 
 export const i18n = {
@@ -154,6 +154,7 @@ export const i18n = {
     diagSpeed: 'Latency: {n}ms',
     diagTesting: 'Running diagnostics...',
     diagNoModelsTip: 'Tip: Check your x.ai billing/credits.',
+    diagConsoleBtn: 'Open xAI Console',
     extendedInfo: 'Extended Info',
     hersteller: 'Manufacturer',
     einsatzgebiet: 'Area of Use',
@@ -319,6 +320,7 @@ export const i18n = {
     diagSpeed: 'Latenz: {n}ms',
     diagTesting: 'Diagnose läuft...',
     diagNoModelsTip: 'Tipp: Prüfe dein x.ai Guthaben/Abrechnung.',
+    diagConsoleBtn: 'xAI Konsole öffnen',
   }
 };
 
