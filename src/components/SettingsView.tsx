@@ -3,7 +3,8 @@ import { useStore } from '../store/useStore';
 import { useTranslation } from '../hooks/useTranslation';
 import { APP_VERSION } from '../constants';
 import { API } from '../db';
-import { RefreshCw, Download, Upload, Trash2, ShieldAlert, Check, MapPin, AlertCircle, ToggleLeft, ToggleRight } from 'lucide-react';
+import { cn } from '../utils/ui';
+import { RefreshCw, Download, Upload, Trash2, ShieldAlert, Check, MapPin, AlertCircle } from 'lucide-react';
 
 const SettingsView: React.FC = () => {
   const { grokKey, defaultRegion, grokModel, availableModels, useLiveSearch, setGrokKey, setDefaultRegion, setGrokModel, setUseLiveSearch, setAvailableModels } = useStore();
