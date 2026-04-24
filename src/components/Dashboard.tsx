@@ -4,6 +4,7 @@ import { useTranslation } from '../hooks/useTranslation';
 import { isPlanDueOnDate } from '../utils/date';
 import { Check, X, Calendar, Plus, Clock } from 'lucide-react';
 import { API } from '../db';
+import { generateICS } from '../utils/calendar';
 
 const Dashboard: React.FC = () => {
   const { plans, logs, medications, setNavigate } = useStore();
@@ -35,6 +36,16 @@ const Dashboard: React.FC = () => {
       amount_taken: 0,
     });
     window.location.reload();
+  };
+  
+  const handleCalendarExport = (plan: any, dateISO: string) => {
+    const isAppt = plan.type === 'appointment';
+    const med = !isAppt ? medications.find(m => m.id === plan.medicationId) : null;
+    
+    const title = isAppt ? `${t('appointment')}: ${plan.doctorName}` : `${t('logAction')}: ${med?.name || t('unknown')}`;
+    const time = isAppt ? plan.startTime : (plan.timeCategory === 'morning' ? '08:00' : plan.timeCategory === 'noon' ? '12:00' : '18:00');
+    
+    generateICS(title, dateISO, time, plan.location || '', plan.note || '');
   };
 
   const today = new Date();
@@ -143,7 +154,10 @@ const Dashboard: React.FC = () => {
                             {t('skipped')}
                           </div>
                         )}
-                        <button className="w-8 h-8 flex items-center justify-center bg-white/5 text-white/30 border border-white/10 rounded-lg">
+                        <button 
+                          onClick={() => handleCalendarExport(plan, day.iso)}
+                          className="w-8 h-8 flex items-center justify-center bg-white/5 text-white/30 border border-white/10 rounded-lg hover:text-accent hover:border-accent/50 transition-colors"
+                        >
                           <Calendar size={14} />
                         </button>
                       </div>
